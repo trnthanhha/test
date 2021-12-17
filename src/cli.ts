@@ -8,4 +8,4 @@ import { AppModule } from 'src/app/app.module';
     });
     app.select(CommandModule).get(CommandService).exec();
 })();
-// test pip 12345
+// test pip 123456
