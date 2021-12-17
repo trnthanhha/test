@@ -8,3 +8,4 @@ import { AppModule } from 'src/app/app.module';
     });
     app.select(CommandModule).get(CommandService).exec();
 })();
+// test pip
