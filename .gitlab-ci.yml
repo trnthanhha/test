@@ -1,6 +1,5 @@
 deploy:
   script:
-    - make docker-stop
     - make docker-start
   stage: deploy
   rules:
