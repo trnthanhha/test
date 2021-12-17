@@ -43,15 +43,12 @@ code-sniff:
 	@echo "Checking the standard code..."
 	@docker-compose exec -T php ./app/vendor/bin/phpcs -v --standard=PSR2 app/src
 
-composer-up:
-	@docker run --rm -v $(shell pwd)/web/app:/app composer update
-
 docker-start: init
 	docker-compose up -d
 
 docker-stop:
 	@docker-compose down -v || true
-	@docker rmi $$(docker images 'hnht_app' -q) || true
+	@docker rmi $$(docker images 'ack' -q) || true
 	@make clean
 
 gen-certs:
@@ -59,14 +56,6 @@ gen-certs:
 
 logs:
 	@docker-compose logs -f
-
-mysql-dump:
-	@mkdir -p $(MYSQL_DUMPS_DIR)
-	@docker exec $(shell docker-compose ps -q mysqldb) mysqldump --all-databases -u"$(MYSQL_ROOT_USER)" -p"$(MYSQL_ROOT_PASSWORD)" > $(MYSQL_DUMPS_DIR)/db.sql 2>/dev/null
-	@make resetOwner
-
-mysql-restore:
-	@docker exec -i $(shell docker-compose ps -q mysqldb) mysql -u"$(MYSQL_ROOT_USER)" -p"$(MYSQL_ROOT_PASSWORD)" < $(MYSQL_DUMPS_DIR)/db.sql 2>/dev/null
 
 phpmd:
 	@docker-compose exec -T php \
