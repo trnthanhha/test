@@ -14,6 +14,8 @@ services:
       - zookeeper
       - kafka
   mongodb:
+    mem_limit: 500m
+    mem_reservation: 128M
     image: mongo:latest
     restart: unless-stopped
     container_name: mongodb
@@ -73,4 +75,3 @@ networks:
   app-network:
     name: app-network
     driver: bridge
-    

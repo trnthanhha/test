@@ -50,6 +50,12 @@ export class UserEntity {
     password: string;
 
     @Prop({
+        required: false,
+        default: null
+    })
+    avatar: string;
+
+    @Prop({
         required: true,
         default: true
     })

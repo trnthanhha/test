@@ -27,6 +27,7 @@ import { ENUM_STATUS_CODE_ERROR } from 'src/error/error.constant';
 import { IErrors } from 'src/error/error.interface';
 import { ENUM_USER_STATUS_CODE_ERROR } from './user.constant';
 import { UserListValidation } from './validation/user.list.validation';
+import { UserUpdatePasswordValidation } from './validation/user.update-password.validation';
 
 @Controller('/user')
 export class UserController {
@@ -139,7 +140,7 @@ export class UserController {
     }
 
     @Response('user.create')
-    @AuthJwtGuard(ENUM_PERMISSIONS.USER_READ, ENUM_PERMISSIONS.USER_CREATE)
+    // @AuthJwtGuard(ENUM_PERMISSIONS.USER_READ, ENUM_PERMISSIONS.USER_CREATE)
     @Post('/create')
     async create(
         @Body(RequestValidationPipe)
@@ -220,13 +221,13 @@ export class UserController {
     }
 
     @Response('user.update')
-    @AuthJwtGuard(ENUM_PERMISSIONS.USER_READ, ENUM_PERMISSIONS.USER_UPDATE)
+    // @AuthJwtGuard(ENUM_PERMISSIONS.USER_READ, ENUM_PERMISSIONS.USER_UPDATE)
     @Put('/update/:_id')
     async update(
         @Param('_id') _id: string,
         @Body(RequestValidationPipe)
         data: UserUpdateValidation
-    ): Promise<IResponse> {
+    )  {
         const check: UserDocument = await this.userService.findOneById<UserDocument>(
             _id
         );
@@ -241,7 +242,7 @@ export class UserController {
                 message: 'user.error.notFound'
             });
         }
-
+        
         try {
             await this.userService.updateOneById(_id, data);
 
@@ -249,6 +250,55 @@ export class UserController {
                 _id
             };
         } catch (err: any) {
+            this.debuggerService.error('update try catch', {
+                class: 'UserController',
+                function: 'update',
+                error: {
+                    ...err
+                }
+            });
+            throw new InternalServerErrorException({
+                statusCode: ENUM_STATUS_CODE_ERROR.UNKNOWN_ERROR,
+                message: 'http.server.internalServerError'
+            });
+        }
+    }
+
+    @Response('user.update')
+    @Put('/update-password/:_id')
+    async updatePassword(
+        @Param('_id') _id: string,
+        @Body(RequestValidationPipe)
+        data: UserUpdatePasswordValidation
+    )  {
+        const check: UserDocument = await this.userService.findOneById<UserDocument>(
+            _id
+        );
+        if (!check) {
+            this.debuggerService.error('user Error', {
+                class: 'UserController',
+                function: 'delete'
+            });
+
+            throw new NotFoundException({
+                statusCode: ENUM_USER_STATUS_CODE_ERROR.USER_NOT_FOUND_ERROR,
+                message: 'user.error.notFound'
+            });
+        }
+        
+        try {
+            await this.userService.updatePasswordOneById(_id, data);
+
+            return {
+                _id
+            };
+        } catch (err: any) {
+            if(err.response.statusCode == 5400){
+                throw new InternalServerErrorException({
+                    statusCode: ENUM_STATUS_CODE_ERROR.UNKNOWN_ERROR,
+                    message: err.response.message
+                });
+            }
             this.debuggerService.error('update try catch', {
                 class: 'UserController',
                 function: 'update',

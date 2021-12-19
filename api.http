@@ -1,0 +1,30 @@
+### CREATE USER
+POST http://localhost:3000/api/user/create
+Content-Type: application/json
+
+{
+    "email": "nhp21321@gmail.com",
+    "lastName": "phu",
+    "firstName": "Nguyen",
+    "role": "61beb73b97439812080c7faa",
+    "password": "123456",
+    "phone": "09876543211"
+}
+### UPDATE USER
+PUT http://localhost:3000/api/user/update/61bf610828259b3e8c7b1be4
+Content-Type: application/json
+
+{
+    "lastName": "phu",
+    "firstName": "Nguyen tesst",
+    "phone": "0396202024"
+}
+### UPDATE PASSWORD
+PUT http://localhost:3000/api/user/update-password/61bf610828259b3e8c7b1be4
+Content-Type: application/json
+
+{
+    "password": "123456",
+    "passwordNew": "123456789"
+}
+ 

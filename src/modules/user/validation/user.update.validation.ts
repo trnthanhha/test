@@ -1,4 +1,4 @@
-import { IsString, IsNotEmpty, MaxLength } from 'class-validator';
+import { IsString, IsNotEmpty, MaxLength, Matches } from 'class-validator';
 
 export class UserUpdateValidation {
     @IsString()
@@ -10,4 +10,10 @@ export class UserUpdateValidation {
     @IsNotEmpty()
     @MaxLength(30)
     readonly lastName: string;
+
+    
+    @IsString()
+    @IsNotEmpty()
+    readonly phone: string;
+
 }
