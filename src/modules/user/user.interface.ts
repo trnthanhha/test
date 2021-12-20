@@ -17,4 +17,10 @@ export interface IUserCreate {
     role: string;
 }
 
-export type IUserUpdate = Pick<IUserCreate, 'firstName' | 'lastName'>;
+export interface IUserUpdatePassword {
+    passwordNew: string;
+    password: string;
+}
+
+export type IUserUpdate = Pick<IUserCreate, 'firstName' | 'lastName' | 'phone'>;
+
