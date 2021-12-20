@@ -17,7 +17,8 @@ export class AuthDefaultGuard implements CanActivate {
     async canActivate(context: ExecutionContext): Promise<boolean> {
         const { user } = context.switchToHttp().getRequest();
 
-        if (!user.isActive || !user.role.isActive) {
+        // if (!user.isActive || !user.role.isActive) { //node isActive ???
+        if (!user.isActive) {
             this.debuggerService.error('UserGuard Inactive', {
                 class: 'AuthDefaultGuard',
                 function: 'canActivate'

@@ -5,9 +5,8 @@ export default {
     delete: 'Delete User Success.',
     create: 'Create User Success.',
     update: 'Update User Success.',
-    sendMail: 'Send Mail Success, Please Check Email.',
+    checkExit: 'User exist.',
     error: {
-        emailExist: 'Email user used',
         phoneExist: 'Mobile Number user used',
         createError: 'Create Error',
         notFound: 'User not found.',
