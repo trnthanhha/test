@@ -4,7 +4,7 @@ services:
     build: .
     container_name: ack
     ports:
-      - 3000:3000
+      - 3009:3000
     networks:
       - app-network
     volumes:

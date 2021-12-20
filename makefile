@@ -51,7 +51,7 @@ docker-start: init
 
 docker-stop:
 	@docker-compose down -v || true
-	@docker rmi $$(docker images 'hnht_app' -q) || true
+	@docker rmi $$(docker images 'prod_hnht_app' -q) || true
 	@make clean
 
 gen-certs:
