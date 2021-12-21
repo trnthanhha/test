@@ -17,6 +17,12 @@ import { ENUM_REQUEST_STATUS_CODE_ERROR } from '../request.constant';
 import { PermissionListValidation } from 'src/modules/permission/validation/permission.list.validation';
 import { RoleListValidation } from 'src/modules/role/validation/role.list.validation';
 import { UserListValidation } from 'src/modules/user/validation/user.list.validation';
+import { ChangePasswordValidation, ForgetPasswordValidation } from 'src/modules/forgetPassword/validation/forgetPassword.validate';
+import { AppointmentCreateValidation } from 'src/modules/appointment/validation/appointment.create.validate';
+import { AppointmentUpdateValidation } from 'src/modules/appointment/validation/appointment.update.validate';
+import { PatientCreateValidation } from 'src/modules/patient/validation/patient.create.validation';
+import { PatientCheckExitValidation } from 'src/modules/patient/validation/patient.checkExit.validation';
+import { ExamRecordCreateValidation } from 'src/modules/examRecord/validation/examRecord.create';
 
 export class RequestValidationPipe implements PipeTransform {
     constructor(
@@ -72,7 +78,14 @@ export class RequestValidationPipe implements PipeTransform {
             AuthLoginValidation,
             PermissionListValidation,
             RoleListValidation,
-            UserListValidation
+            UserListValidation,
+            ForgetPasswordValidation,
+            ChangePasswordValidation,
+            AppointmentCreateValidation,
+            AppointmentUpdateValidation,
+            PatientCreateValidation,
+            PatientCheckExitValidation,
+            ExamRecordCreateValidation
         ];
         return types.includes(metatype);
     }

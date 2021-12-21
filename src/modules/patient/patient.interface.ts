@@ -1,19 +1,28 @@
 import { PatientEntity } from './patient.schema';
 import { Document } from 'mongoose';
-import { PermissionDocument } from 'src/modules/permission/permission.interface';
 
 export type PatientDocument = PatientEntity & Document;
 
-export interface IPatientDocument extends Omit<PatientDocument, 'permissions'> {
-    permissions: PermissionDocument[];
-}
-
-export interface IPatientFullDocument extends Omit<PatientEntity, 'permissions'> {
-    name: string;
-    permissions: string[];
-}
+export type IPatientDocument = PatientDocument
 
 export interface IPatientCreate {
     name: string;
-    permissions: string[];
+    numberProfile?: string;
+    preferredHand?: string;
+    nation?: string;
+    birthday?: Date;
+    gender?: boolean;
+    address: string;
+    phone: string;
+    email: string;
+    job: string;
+    education?: string;
+    nationality?: string;
+    relative_patient?: string;
+    relative_name?: string;
+    relative_phone?: string;
+}
+
+export interface IPatientCheckExit {
+    phone: string;
 }

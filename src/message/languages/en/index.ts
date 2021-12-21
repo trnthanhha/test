@@ -7,6 +7,9 @@ import response from './response';
 import role from './role';
 import helper from './helper';
 import kafka from './kafka';
+import appointment from './appointment';
+import patient from './patient';
+import examRecord from './examRecord';
 
 export default {
     role,
@@ -17,5 +20,8 @@ export default {
     app,
     response,
     helper,
-    kafka
+    kafka,
+    appointment,
+    patient,
+    examRecord
 };

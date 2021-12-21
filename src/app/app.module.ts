@@ -20,6 +20,11 @@ import { HelperModule } from 'src/helper/helper.module';
 import { RoleModule } from 'src/modules/role/role.module';
 import { PermissionModule } from 'src/modules/permission/permission.module';
 import { ExamplaceModule } from 'src/modules/examplace/examplace.module';
+import { ForgetPasswordModule } from 'src/modules/forgetPassword/forgetPassword.module';
+import { SendMailModule } from 'src/modules/sendMail/sendMail.module';
+import { AppointmentModule } from 'src/modules/appointment/appointment.module';
+import { SendSMSModule } from 'src/modules/sendSMS/sendSMS.module';
+import { ExamRecordModule } from 'src/modules/examRecord/examRecord.module';
 // import { KafkaProducerModule } from 'src/kafka/producer/kafka.producer.module';
 // import { KafkaConsumerModule } from 'src/kafka/consumer/consumer.module';
 // import { KafkaAdminModule } from 'src/kafka/admin/kafka.admin.module';
@@ -52,6 +57,8 @@ import { ExamplaceModule } from 'src/modules/examplace/examplace.module';
         PaginationModule,
         HelperModule,
         SeedsModule,
+        SendMailModule,
+        SendSMSModule,
         // KafkaAdminModule,
         // KafkaProducerModule,
         // KafkaConsumerModule,
@@ -63,6 +70,9 @@ import { ExamplaceModule } from 'src/modules/examplace/examplace.module';
         PatientModule,
         DoctorModule,
         ExamplaceModule,
+        ForgetPasswordModule,
+        AppointmentModule,
+        ExamRecordModule
     ]
 })
 export class AppModule {}
