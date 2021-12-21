@@ -1,4 +1,5 @@
 import { Injectable } from '@nestjs/common';
+import { ENUM_SENDMAIL_CONSTANT } from './sendMail.constant';
 import { sendMailServiceStrategy } from './sendMailServiceStrategy.abtract';
 import { ISendMail } from './senMail.interface';
 
@@ -13,7 +14,7 @@ export class SendMailChangePassword extends sendMailServiceStrategy {
             from: process.env.EMAIL_USER as string,
             to: toEmail,
             subject: 'Change Password',
-            html: `<h1><a href="${process.env.URL_CALLBACK_FORGET_PASSWORD}?${token}">Click to change password</a></h1>`
+            html: `<h1><a href="${process.env.URL_CALLBACK_FORGET_PASSWORD}?${token}">${ENUM_SENDMAIL_CONSTANT.CHANGE_PASSWORD}</a></h1>`
         };
         
         await this.transporter

@@ -7,7 +7,8 @@ import {
     NotFoundException,
     BadRequestException,
     UnauthorizedException,
-    ForbiddenException
+    ForbiddenException,
+    InternalServerErrorException
 } from '@nestjs/common';
 import { AuthService } from 'src/modules/auth/auth.service';
 import { UserService } from 'src/modules/user/user.service';
@@ -29,6 +30,11 @@ import {
 } from './auth.constant';
 import { ENUM_USER_STATUS_CODE_ERROR } from 'src/modules/user/user.constant';
 import { ENUM_ROLE_STATUS_CODE_ERROR } from 'src/modules/role/role.constant';
+import { DoctorCreateValidation } from '../doctor/validation/doctor.create.validation';
+import { IErrors } from 'src/error/error.interface';
+import { DoctorService } from '../doctor/doctor.service';
+import { ENUM_STATUS_CODE_ERROR } from 'src/error/error.constant';
+import { ENUM_DOCTOR_STATUS_CODE_ERROR } from '../doctor/doctor.constant';
 
 @Controller('/auth')
 export class AuthController {
@@ -36,6 +42,7 @@ export class AuthController {
         @Debugger() private readonly debuggerService: DebuggerService,
         private readonly authService: AuthService,
         private readonly userService: UserService,
+        private readonly doctorService: DoctorService,
         private readonly loggerService: LoggerService
     ) {}
 
@@ -179,5 +186,36 @@ export class AuthController {
             accessToken,
             refreshToken
         };
+    }
+
+    @Response('auth.register')
+    @Post('/register')
+    async register(
+        @Body(RequestValidationPipe) data: DoctorCreateValidation
+    ): Promise<IResponse> {
+        const errors: IErrors[] = await this.doctorService.checkExist(
+            data.email
+        );
+
+        if (errors.length > 0) {
+            throw new BadRequestException({
+                statusCode: ENUM_DOCTOR_STATUS_CODE_ERROR.DOCTOR_EXIST_ERROR,
+                message: 'doctor.error.createError',
+                errors
+            });
+        }
+
+        try {
+            const create = await this.doctorService.create(data);
+
+            return {
+                _id: create._id
+            };
+        } catch (err: any) {
+            throw new InternalServerErrorException({
+                statusCode: ENUM_STATUS_CODE_ERROR.UNKNOWN_ERROR,
+                message: 'http.server.internalServerError'
+            });
+        }
     }
 }

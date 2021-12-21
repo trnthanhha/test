@@ -1,5 +1,4 @@
 import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose';
-import { Types } from 'mongoose';
 
 @Schema({ timestamps: true, versionKey: false })
 export class DoctorEntity {
@@ -8,62 +7,42 @@ export class DoctorEntity {
         index: true,
         trim: true
     })
-    firstName: string;
+    email: string;
+
+    @Prop({
+        required: true,
+        trim: true
+    })
+    password: string;
 
     @Prop({
         required: true,
         index: true,
-        trim: true
     })
-    lastName: string;
-
-    @Prop({
-        required: false
-    })
-    birthday: Date;
+    name: string;
 
     @Prop({
         required: true
     })
-    gender: boolean;
-
-    @Prop({
-        required: false
-    })
-    address: string;
-
-    @Prop({
-        required: false
-    })
-    cmt: string;
+    type_base: string; // loại hình cơ sở sau -> ObjId
 
     @Prop({
         required: true
     })
-    phone: number;
-
-    @Prop({
-        required: false
-    })
-    email: string;
+    exam_place: string; // đơn vị công tác sau -> ObjId
 
     @Prop({
         required: true
     })
-    job_title: string;
-
-    @Prop({
-        required: false
-    })
-    avatar: string;
-
-    @Prop({
-        required: false
-    })
-    education: string;
+    education: string; // học hàm học vị sau -> ObjId
 
     @Prop({
         required: true
+    })
+    department: string; // khoa phòng sau -> ObjId
+
+    @Prop({
+        default: true // set tạm
     })
     isActive: boolean;
 }
