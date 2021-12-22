@@ -197,7 +197,6 @@ export class UserService {
                 }
             );
         }else{
-            
             throw new NotFoundException({
                 statusCode: ENUM_USER_STATUS_CODE_ERROR.USER_NOT_FOUND_ERROR,
                 message: 'Password current incorrect'
