@@ -4,7 +4,7 @@ export default {
     profile: 'Profile Success',
     delete: 'Delete User Success.',
     create: 'Create User Success.',
-    update: 'Update User Success.',
+    update: 'Update Patient Success.',
     updatePatient: 'Update Patient Success.',
     checkExit: 'User exist.',
     error: {

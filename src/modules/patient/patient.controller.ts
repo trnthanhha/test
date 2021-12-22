@@ -104,7 +104,7 @@ export class PatientController {
         const errors: IErrors[] = await this.patientService.checkExistById(
             _id
         );
-
+        Logger.log(JSON.stringify(errors));
         if(errors.length > 0){
             throw new BadRequestException({
                 statusCode: ENUM_PATIENT_STATUS_CODE_ERROR.PATIENT_NOT_FOUND_ERROR,
@@ -114,7 +114,7 @@ export class PatientController {
         }
 
         try {
-            const result = await this.patientService.updatePatientById(_id, data);
+            await this.patientService.updatePatientById(_id, data);
             return {
                 _id
             };

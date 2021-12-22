@@ -11,6 +11,7 @@ import {
     PatientDocument
 } from './patient.interface';
 import { PatientEntity } from './patient.schema';
+import { PatientUpdateValidation } from './validation/patient.update.validation';
 
 @Injectable()
 export class PatientService {
@@ -56,7 +57,9 @@ export class PatientService {
         return create.save();
     }
 
-    async updatePatientById(_id: string, data: IPatientUpdate): Promise<IPatientUpdate> {
+    async updatePatientById(_id: string, data: PatientUpdateValidation): Promise<IPatientUpdate> {
+        const patient = await this.findPatientById(_id);
+        data.phone = patient.phone;
         return this.patientModel.updateOne(
             {
                 _id: new Types.ObjectId(_id)
