@@ -13,9 +13,7 @@ services:
       - mongodb
       - zookeeper
       - kafka
-  mongodb:
-    mem_limit: 500m
-    mem_reservation: 128M
+  mongodb: 
     image: mongo:latest
     restart: unless-stopped
     container_name: mongodb
