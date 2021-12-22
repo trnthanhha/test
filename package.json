@@ -15,7 +15,7 @@
     "start": "nest start",
     "start:dev": "nest start --watch",
     "start:debug": "nest start --debug --watch",
-    "start:prod": "nest build && SET NODE_ENV=production node dist/main",
+    "start:prod": "node dist/main",
     "lint": "eslint --ext .ts src",
     "test": "jest --config test/jest.json",
     "test:watch": "jest --config test/jest.json --watch",
