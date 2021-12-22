@@ -72,7 +72,7 @@ import { ExamRecordModule } from 'src/modules/examRecord/examRecord.module';
         ExamplaceModule,
         ForgetPasswordModule,
         AppointmentModule,
-        ExamRecordModule
+        ExamRecordModule,
     ]
 })
 export class AppModule {}
