@@ -28,11 +28,16 @@ Content-Type: application/json
     "passwordNew": "123456789"
 }
 
+<<<<<<< HEAD
 #### CREATE PATIENT
+=======
+################################ +++++++++++++++++++++++++++++ ################################
+>>>>>>> 0b4047f1798c24f9fbe85bcdd80eee12cbf42f4d
 POST http://localhost:3000/api/patient/create
 Content-Type: application/json
 
 {
+<<<<<<< HEAD
     "name": "Nguyen Huu Phu",
     "address": "Ha Noi",
     "phone": "0987654321",
@@ -46,5 +51,12 @@ Content-Type: application/json
 
 {
     "phone": "0987654321",
+=======
+    "email": "nhp2132@gmail.com",
+    "name": "Nguyen Huu Phu",
+    "address": "Bình Định",
+    "phone": "0369202024",
+    "job": "IT"
+>>>>>>> 0b4047f1798c24f9fbe85bcdd80eee12cbf42f4d
 }
  
