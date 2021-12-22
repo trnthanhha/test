@@ -35,6 +35,7 @@ import { IErrors } from 'src/error/error.interface';
 import { DoctorService } from '../doctor/doctor.service';
 import { ENUM_STATUS_CODE_ERROR } from 'src/error/error.constant';
 import { ENUM_DOCTOR_STATUS_CODE_ERROR } from '../doctor/doctor.constant';
+import { IDoctorDocument } from '../doctor/doctor.interface';
 
 @Controller('/auth')
 export class AuthController {
@@ -61,16 +62,60 @@ export class AuthController {
         );
 
         if (!user) {
-            this.debuggerService.error('Authorized error user not found', {
-                class: 'AuthController',
-                function: 'login'
-            });
+            const doctor: IDoctorDocument = await this.doctorService.findOne<IDoctorDocument>(
+                {
+                    email: data.email
+                },
+            );
 
-            throw new NotFoundException({
-                statusCode:
-                    ENUM_AUTH_STATUS_CODE_ERROR.AUTH_USER_NOT_FOUND_ERROR,
-                message: 'auth.error.userNotFound'
-            });
+            if (!doctor) {
+                throw new NotFoundException({
+                    statusCode:
+                        ENUM_AUTH_STATUS_CODE_ERROR.AUTH_USER_NOT_FOUND_ERROR,
+                    message: 'auth.error.userNotFound'
+                });
+            } else if (!doctor.isActive) {
+                throw new UnauthorizedException({
+                    statusCode: ENUM_USER_STATUS_CODE_ERROR.USER_IS_INACTIVE,
+                    message: 'http.clientError.unauthorized'
+                });
+            }
+
+            const validate: boolean = await this.authService.validateUser(
+                data.password,
+                doctor.password
+            );
+    
+            if (!validate) {
+                throw new BadRequestException({
+                    statusCode:
+                        ENUM_AUTH_STATUS_CODE_ERROR.AUTH_PASSWORD_NOT_MATCH_ERROR,
+                    message: 'auth.error.passwordNotMatch'
+                });
+            }
+    
+            const accessToken: string = await this.authService.createAccessToken(
+                doctor,
+                rememberMe
+            );
+    
+            const refreshToken: string = await this.authService.createRefreshToken(
+                doctor,
+                rememberMe
+            );
+    
+            await this.loggerService.info(
+                ENUM_LOGGER_ACTION.LOGIN,
+                `${doctor._id} do login`,
+                doctor._id,
+                ['login', 'withEmail']
+            );
+    
+            return {
+                accessToken,
+                refreshToken
+            };
+            
         } else if (!user.isActive) {
             this.debuggerService.error('Auth Block', {
                 class: 'AuthController',

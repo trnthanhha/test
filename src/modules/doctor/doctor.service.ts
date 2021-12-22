@@ -18,6 +18,13 @@ export class DoctorService {
         @Message() private readonly messageService: MessageService
     ) {}
 
+    async findOne<T>(
+        find?: Record<string, any>,
+    ): Promise<T> {
+        const doctor = this.doctorModel.findOne(find);
+        return doctor.lean();
+    }
+
     async checkExist(email: string): Promise<IErrors[]> {
         const existEmail: DoctorDocument = await this.doctorModel
             .findOne({
