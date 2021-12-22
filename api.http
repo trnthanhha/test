@@ -27,4 +27,16 @@ Content-Type: application/json
     "password": "123456789",
     "passwordNew": "123456789"
 }
+
+################################ +++++++++++++++++++++++++++++ ################################
+POST http://localhost:3000/api/patient/create
+Content-Type: application/json
+
+{
+    "email": "nhp2132@gmail.com",
+    "name": "Nguyen Huu Phu",
+    "address": "Bình Định",
+    "phone": "0369202024",
+    "job": "IT"
+}
  
