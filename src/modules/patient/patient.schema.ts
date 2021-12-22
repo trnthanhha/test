@@ -10,7 +10,7 @@ export class PatientEntity {
     name: string;
 
     @Prop({
-        required: false
+        required: false,
     })
     numberProfile: string;
 

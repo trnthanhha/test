@@ -40,6 +40,10 @@ export class PatientService {
         return create.save();
     }
 
+    async updatePatientById(_id: string, data){
+
+    }
+
     async findPatient(data: IPatientCheckExit): Promise<PatientDocument> {
         return await this.patientModel.findOne(data).lean();
     }

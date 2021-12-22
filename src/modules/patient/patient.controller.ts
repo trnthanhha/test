@@ -7,6 +7,7 @@ import {
     HttpCode,
     HttpStatus,
     InternalServerErrorException,
+    Logger,
     NotFoundException,
     Param,
     Post,
@@ -80,6 +81,7 @@ export class PatientController {
                 _id: create._id
             };
         } catch (err: any) {
+            Logger.log("err:",err)
             throw new InternalServerErrorException({
                 statusCode: ENUM_STATUS_CODE_ERROR.UNKNOWN_ERROR,
                 message: 'http.serverError.internalServerError'
