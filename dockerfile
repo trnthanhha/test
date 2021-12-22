@@ -13,6 +13,6 @@ COPY . .
 RUN yarn run prebuild && yarn run build
 RUN ls -la .
 
-EXPOSE 3000
+EXPOSE 3009
 
 CMD [ "yarn", "run", "start:prod" ]
