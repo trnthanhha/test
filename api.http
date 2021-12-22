@@ -1,23 +1,23 @@
 ### CREATE USER
-POST https://parkinson-dev-api.medstore.com.vn/api/user/create
+POST http://localhost:3000/api/user/create
 Content-Type: application/json
 
 {
-    "email": "nhp21321@gmail.com",
+    "email": "nhp213212@gmail.com",
     "lastName": "phu",
     "firstName": "Nguyen",
     "role": "61beb73b97439812080c7faa",
     "password": "123456",
-    "phone": "09876543211"
+    "phone": "098765432112"
 }
 ### UPDATE USER
-PUT http://localhost:3000/api/user/update/61bf610828259b3e8c7b1be4
+PUT http://localhost:3000/api/user/update/61c35eb73a0ba4374cafcc8c
 Content-Type: application/json
 
 {
     "lastName": "phu",
     "firstName": "Nguyen tesst",
-    "phone": "0396202024"
+    "phone": "0865452090"
 }
 ### UPDATE PASSWORD
 PUT http://localhost:3000/api/user/update-password/61bf610828259b3e8c7b1be4
@@ -28,20 +28,14 @@ Content-Type: application/json
     "passwordNew": "123456789"
 }
 
-<<<<<<< HEAD
 #### CREATE PATIENT
-=======
-################################ +++++++++++++++++++++++++++++ ################################
->>>>>>> 0b4047f1798c24f9fbe85bcdd80eee12cbf42f4d
 POST http://localhost:3000/api/patient/create
 Content-Type: application/json
 
 {
-<<<<<<< HEAD
     "name": "Nguyen Huu Phu",
     "address": "Ha Noi",
     "phone": "0987654321",
-    "email": "nhp2132@gmail.com",
     "message": "test message",
     "job": "doctor"
 }
@@ -50,13 +44,9 @@ PUT http://localhost:3000/api/patient/update/61c2b5f79f4d3a31f81bb095
 Content-Type: application/json
 
 {
-    "phone": "0987654321",
-=======
-    "email": "nhp2132@gmail.com",
-    "name": "Nguyen Huu Phu",
-    "address": "Bình Định",
-    "phone": "0369202024",
-    "job": "IT"
->>>>>>> 0b4047f1798c24f9fbe85bcdd80eee12cbf42f4d
+    "phone": "036920204",
+    "email": "",
+    "education": "Bac",
+    "nationality": "VN"
 }
  
