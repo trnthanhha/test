@@ -1,5 +1,5 @@
 ### CREATE USER
-POST http://localhost:3000/api/user/create
+POST https://parkinson-dev-api.medstore.com.vn/api/user/create
 Content-Type: application/json
 
 {
@@ -26,5 +26,25 @@ Content-Type: application/json
 {
     "password": "123456789",
     "passwordNew": "123456789"
+}
+
+#### CREATE PATIENT
+POST http://localhost:3000/api/patient/create
+Content-Type: application/json
+
+{
+    "name": "Nguyen Huu Phu",
+    "address": "Ha Noi",
+    "phone": "0987654321",
+    "email": "nhp2132@gmail.com",
+    "message": "test message",
+    "job": "doctor"
+}
+#### UPDATE PATIENT
+PUT http://localhost:3000/api/patient/update/61c2b5f79f4d3a31f81bb095
+Content-Type: application/json
+
+{
+    "phone": "0987654321",
 }
  

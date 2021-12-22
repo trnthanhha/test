@@ -11,6 +11,7 @@ import {
     NotFoundException,
     Param,
     Post,
+    Put,
     Query
 } from '@nestjs/common';
 import { PatientService } from './patient.service';
@@ -28,6 +29,9 @@ import { AuthJwtGuard } from '../auth/auth.decorator';
 import { ENUM_STATUS_CODE_ERROR } from 'src/error/error.constant';
 import { ENUM_PATIENT_STATUS_CODE_ERROR } from './patient.constant';
 import { PatientCheckExitValidation } from './validation/patient.checkExit.validation';
+import { IPatientUpdate } from './patient.interface';
+import { PatientUpdateValidation } from './validation/patient.update.validation';
+import { error } from 'console';
 
 @Controller('/patient')
 export class PatientController {
@@ -82,6 +86,39 @@ export class PatientController {
             };
         } catch (err: any) {
             Logger.log("err:",err)
+            throw new InternalServerErrorException({
+                statusCode: ENUM_STATUS_CODE_ERROR.UNKNOWN_ERROR,
+                message: 'http.serverError.internalServerError'
+            });
+        }
+    }
+
+    @Response('patient.update')
+    // @AuthJwtGuard(ENUM_PERMISSIONS.ROLE_READ, ENUM_PERMISSIONS.ROLE_CREATE)
+    @Put('/update/:_id')
+    async update(
+        @Param('_id') _id: string,
+        @Body(RequestValidationPipe)
+        data: PatientUpdateValidation
+    ){
+        const errors: IErrors[] = await this.patientService.checkExistById(
+            _id
+        );
+
+        if(errors.length > 0){
+            throw new BadRequestException({
+                statusCode: ENUM_PATIENT_STATUS_CODE_ERROR.PATIENT_NOT_FOUND_ERROR,
+                message: 'patient.error.updateError',
+                errors
+            });
+        }
+
+        try {
+            const result = await this.patientService.updatePatientById(_id, data);
+            return {
+                _id
+            };
+        } catch (error) {
             throw new InternalServerErrorException({
                 statusCode: ENUM_STATUS_CODE_ERROR.UNKNOWN_ERROR,
                 message: 'http.serverError.internalServerError'

@@ -5,11 +5,13 @@ export default {
     delete: 'Delete User Success.',
     create: 'Create User Success.',
     update: 'Update User Success.',
+    updatePatient: 'Update Patient Success.',
     checkExit: 'User exist.',
     error: {
         phoneExist: 'Mobile Number user used',
         createError: 'Create Error',
         notFound: 'User not found.',
-        userExist: 'User exist.'
+        userExist: 'User exist.',
+        checkId: 'Patient not found by id.',
     }
 };
