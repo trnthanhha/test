@@ -1,4 +1,4 @@
-export const APPOINTMENT_DEFAULT_SORT = 'name@asc';
+export const APPOINTMENT_DEFAULT_SORT = 'name@desc';
 
 export enum ENUM_APPOINTMENT_STATUS_CODE_ERROR {
     APPOINTMENT_NOT_FOUND_ERROR = 5501,

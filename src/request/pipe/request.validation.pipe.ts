@@ -24,6 +24,7 @@ import { PatientCreateValidation } from 'src/modules/patient/validation/patient.
 import { PatientCheckExitValidation } from 'src/modules/patient/validation/patient.checkExit.validation';
 import { ExamRecordCreateValidation } from 'src/modules/examRecord/validation/examRecord.create';
 import { DoctorCreateValidation } from 'src/modules/doctor/validation/doctor.create.validation';
+import { AppointmentListValidation } from 'src/modules/appointment/validation/appointment.list.validate';
 
 export class RequestValidationPipe implements PipeTransform {
     constructor(
@@ -87,7 +88,8 @@ export class RequestValidationPipe implements PipeTransform {
             PatientCreateValidation,
             PatientCheckExitValidation,
             ExamRecordCreateValidation,
-            DoctorCreateValidation
+            DoctorCreateValidation,
+            AppointmentListValidation
         ];
         return types.includes(metatype);
     }

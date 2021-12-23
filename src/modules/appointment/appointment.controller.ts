@@ -7,7 +7,8 @@ import {
     NotFoundException,
     Param,
     Post,
-    Put
+    Put,
+    Query
 } from '@nestjs/common';
 import { Debugger } from 'src/debugger/debugger.decorator';
 import { Logger as DebuggerService } from 'winston';
@@ -20,13 +21,19 @@ import { AuthJwtGuard } from '../auth/auth.decorator';
 import { ENUM_PERMISSIONS } from '../permission/permission.constant';
 import { AppointmentService } from './appointment.service';
 import { AppointmentCreateValidation } from './validation/appointment.create.validate';
-import { IAppointmentDocument } from './appointment.interface';
+import {
+    AppointmentDocument,
+    IAppointmentDocument
+} from './appointment.interface';
 import {
     ENUM_APPOINTMENT_MESSAGE,
     ENUM_APPOINTMENT_STATUS_CODE_ERROR
 } from './appointment.constant';
 import { AppointmentUpdateValidation } from './validation/appointment.update.validate';
 import { SendSMSService } from '../sendSMS/sendSMS.service';
+import { AppointmentListValidation } from './validation/appointment.list.validate';
+import { PatientService } from '../patient/patient.service';
+import { PatientDocument } from '../patient/patient.interface';
 
 @Controller('/appointment')
 export class AppointmentController {
@@ -34,14 +41,69 @@ export class AppointmentController {
         @Debugger() private readonly debuggerService: DebuggerService,
         private readonly paginationService: PaginationService,
         private readonly appointmentService: AppointmentService,
-        private readonly sendSMSService: SendSMSService
+        private readonly sendSMSService: SendSMSService,
+        private readonly patientService: PatientService
     ) {}
 
     @Response('appointment.findAll')
-    @AuthJwtGuard(ENUM_PERMISSIONS.ROLE_READ)
+    // @AuthJwtGuard(ENUM_PERMISSIONS.ROLE_READ)
     @Get('/list')
-    async findAll(): Promise<IResponsePaging> {
-        return;
+    async findAll(
+        @Query(RequestValidationPipe)
+        { page, perPage, sort, search }: AppointmentListValidation
+    ): Promise<IResponsePaging> {
+        const skip: number = await this.paginationService.skip(page, perPage);
+        const findPatient: Record<string, any> = {};
+        if (search) {
+            findPatient['$or'] = [
+                {
+                    name: new RegExp(search)
+                },
+                {
+                    phone: new RegExp(search)
+                },
+                {
+                    email: new RegExp(search)
+                }
+            ];
+        }
+
+        const patients: PatientDocument[] = await this.patientService.findAll(
+            findPatient
+        );
+
+        const findAppointment: Record<string, any> = {};
+        findAppointment['$or'] = patients.map((patient) => {
+            return {
+                patient_id: patient._id
+            };
+        });
+
+        const appointment: AppointmentDocument[] = await this.appointmentService.findAll<AppointmentDocument>(
+            findAppointment,
+            {
+                limit: perPage,
+                skip: skip,
+                sort,
+                populate: true
+            }
+        );
+
+        const totalData: number = await this.appointmentService.getTotalData(
+            findAppointment
+        );
+        const totalPage: number = await this.paginationService.totalPage(
+            totalData,
+            perPage
+        );
+
+        return {
+            totalData,
+            totalPage,
+            currentPage: page,
+            perPage,
+            data: appointment
+        };
     }
 
     @Response('appointment.findOneById')
