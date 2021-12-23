@@ -8,11 +8,11 @@ Content-Type: application/json
 }
 
 ### CREATE USER
-POST https://parkinson-dev-api.medstore.com.vn/api/user/create
+POST http://localhost:3000/api/user/create
 Content-Type: application/json
 
 {
-    "email": "nhp2132@gmail.com",
+    "email": "",
     "lastName": "phu",
     "firstName": "Nguyen",
     "role": "61b9946bf328bd353022efb7",

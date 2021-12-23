@@ -1,16 +1,16 @@
 export default {
-    findAll: 'Get All MedicalHistory Success.',
-    findOneById: 'Get One By Id MedicalHistory Success.',
+    findAll: 'Get All medical history Success.',
+    findOneById: 'Get One By Id medical history Success.',
     profile: 'Profile Success',
-    delete: 'Delete MedicalHistory Success.',
-    create: 'Create OR Update MedicalHistory Success.',
-    update: 'Update MedicalHistory Success.',
+    delete: 'Delete medical history Success.',
+    create: 'Create OR Update medical history Success.',
+    update: 'Update medical history Success.',
     error: {
         notFoundPatient: "Patient Not Fuond",
-        emailExist: 'Email MedicalHistory used',
-        phoneExist: 'Mobile Number MedicalHistory used',
+        emailExist: 'Email medical history used',
+        phoneExist: 'Mobile Number medical history used',
         createError: 'Create Error',
-        notFound: 'MedicalHistory not found.',
-        MedicalHistoryExist: 'MedicalHistory exist.'
+        notFound: 'medical history not found.',
+        medicalHistoryExist: 'medical history exist.'
     }
 };

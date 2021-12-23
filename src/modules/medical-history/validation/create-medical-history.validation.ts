@@ -1,8 +1,9 @@
-import { IsString, IsIn, IsNotEmpty, IsObject, IsArray } from 'class-validator';
+import { IsString, IsIn, IsNotEmpty, IsObject, IsArray, IsEmpty, IsOptional } from 'class-validator';
 
 export class CreateMedicalHistoryDto {
     @IsNotEmpty()
     @IsString()
+    @IsOptional()
     patientId: string;
 
     @IsNotEmpty()
@@ -11,11 +12,11 @@ export class CreateMedicalHistoryDto {
 
     @IsNotEmpty()
     @IsArray()
-    regions: [ ]
+    regions: []
 
     @IsNotEmpty()
     @IsArray()
-    types: [ ]
+    types: []
 
     @IsNotEmpty()
     @IsArray()
@@ -27,9 +28,9 @@ export class CreateMedicalHistoryDto {
 
     @IsNotEmpty()
     @IsArray()
-    evolveds: [ ]
+    evolveds: []
 
     @IsNotEmpty()
-    @IsString()
+    @IsObject()
     others: []
 }

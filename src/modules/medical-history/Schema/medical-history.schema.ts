@@ -86,8 +86,8 @@ export class MedicalHistory {
 
     @Prop({
         required: true,
-        type: Array,
-        default: []
+        type: Object,
+        default: {}
     })
     others: [
         { // Đặc tính khác 
