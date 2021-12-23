@@ -25,6 +25,7 @@ import { SendMailModule } from 'src/modules/sendMail/sendMail.module';
 import { AppointmentModule } from 'src/modules/appointment/appointment.module';
 import { SendSMSModule } from 'src/modules/sendSMS/sendSMS.module';
 import { ExamRecordModule } from 'src/modules/examRecord/examRecord.module';
+import { SymptomsModule } from 'src/modules/symptoms/symptoms.module';
 // import { KafkaProducerModule } from 'src/kafka/producer/kafka.producer.module';
 // import { KafkaConsumerModule } from 'src/kafka/consumer/consumer.module';
 // import { KafkaAdminModule } from 'src/kafka/admin/kafka.admin.module';
@@ -73,6 +74,7 @@ import { ExamRecordModule } from 'src/modules/examRecord/examRecord.module';
         ForgetPasswordModule,
         AppointmentModule,
         ExamRecordModule,
+        SymptomsModule
     ]
 })
 export class AppModule {}
