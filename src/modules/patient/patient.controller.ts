@@ -12,7 +12,8 @@ import {
     Param,
     Post,
     Put,
-    Query
+    Query,
+    Req
 } from '@nestjs/common';
 import { PatientService } from './patient.service';
 import { PaginationService } from 'src/pagination/pagination.service';
@@ -31,7 +32,7 @@ import { ENUM_PATIENT_STATUS_CODE_ERROR } from './patient.constant';
 import { PatientCheckExitValidation } from './validation/patient.checkExit.validation';
 import { IPatientUpdate } from './patient.interface';
 import { PatientUpdateValidation } from './validation/patient.update.validation';
-import { error } from 'console';
+import { Request } from 'express'
 
 @Controller('/patient')
 export class PatientController {
@@ -40,6 +41,31 @@ export class PatientController {
         private readonly paginationService: PaginationService,
         private readonly patientService: PatientService
     ) {}
+
+    @Response('patient.findPatient')
+     // @AuthJwtGuard(ENUM_PERMISSIONS.ROLE_READ)
+    @Get(':_id')
+    async getPatient(@Req() request: Request ): Promise<IResponse>{
+        try {
+            const { _id } = request.params;
+            const patient = await this.patientService.findPatientById(_id);
+           if(patient){
+               return patient;
+           }else{
+            throw new BadRequestException({
+                statusCode: ENUM_PATIENT_STATUS_CODE_ERROR.PATIENT_NOT_FOUND_ERROR,
+                message: 'patient.error.getNotFound',
+            });
+           }
+        } catch (err: any) {
+            Logger.log("err:",err)
+            throw new InternalServerErrorException({
+                statusCode: ENUM_STATUS_CODE_ERROR.UNKNOWN_ERROR,
+                message: 'http.serverError.internalServerError',
+                error: err
+            });
+        }
+    }
 
     @Response('patient.checkExit')
     // @AuthJwtGuard(ENUM_PERMISSIONS.ROLE_READ)
@@ -104,7 +130,6 @@ export class PatientController {
         const errors: IErrors[] = await this.patientService.checkExistById(
             _id
         );
-        Logger.log(JSON.stringify(errors));
         if(errors.length > 0){
             throw new BadRequestException({
                 statusCode: ENUM_PATIENT_STATUS_CODE_ERROR.PATIENT_NOT_FOUND_ERROR,

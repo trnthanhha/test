@@ -1,6 +1,7 @@
 export default {
     findAll: 'Get All User Success.',
-    findOneById: 'Get One By Id User Success.',
+    findOneById: 'Get One By Id Patient Success.',
+    findPatient: 'Get Patient Success.',
     profile: 'Profile Success',
     delete: 'Delete User Success.',
     create: 'Create User Success.',
