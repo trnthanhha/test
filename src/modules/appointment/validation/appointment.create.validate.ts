@@ -28,9 +28,9 @@ export class AppointmentCreateValidation {
     readonly date: Date;
 
     @IsMongoId()
-    // @IsNotEmpty()
-    @IsOptional()
-    readonly exam_place_id?: string;
+    @IsNotEmpty()
+    // @IsOptional()
+    readonly exam_place_id: string;
 
     @IsMongoId()
     @IsNotEmpty()

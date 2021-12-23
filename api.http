@@ -91,6 +91,112 @@ Content-Type: application/json
     ]
 }
 
+
+################################ +++++++++++++++++++++++++++++ ################################
+###LOGIN
+POST http://localhost:3000/api/auth/login
+Content-Type: application/json
+
+{
+    "email": "admin@gmail.com",
+    ""password": "123456"
+}
+ 
+#REGISTER DOCTOR
+POST http://localhost:3000/api/auth/register
+Content-Type: application/json
+
+{
+    "email":"xxxx@gmail.com",
+    "name":"xxx",
+    "password":"123456",
+    "type_base":"123456",
+    "exam_place":"123456",
+    "education":"123456",
+    "department":"123456"
+}
+
+################################ +++++++++++++++++++++++++++++ ################################
+#FORGET PASSWORD
+POST http://localhost:3000/api/forgetpassword
+Content-Type: application/json
+
+{
+    "email": "xxxx@gmail.com"
+}
+
+#UPDATE PASSWORD
+PUT http://localhost:3000/api/forgetpassword
+Content-Type: application/json
+Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJfaWQiOiI2MWJiMjY2Y2U5NTgyNTM5MDBjZjY5NGQiLCJpc0FjdGl2ZSI6dHJ1ZSwiZW1haWwiOiJkMTdkY2NuMTk1QGdtYWlsLmNvbSIsInBob25lIjoiMDgxMTExMTExMTEiLCJyb2xlIjp7Im5hbWUiOiJhZG1pbiIsInBlcm1pc3Npb25zIjpbIlBFUk1JU1NJT05fUkVBRCIsIlBST0ZJTEVfUkVBRCIsIlBST0ZJTEVfVVBEQVRFIiwiUk9MRV9DUkVBVEUiLCJST0xFX0RFTEVURSIsIlJPTEVfUkVBRCIsIlJPTEVfVVBEQVRFIiwiVVNFUl9DUkVBVEUiLCJVU0VSX0RFTEVURSIsIlVTRVJfUkVBRCIsIlVTRVJfVVBEQVRFIl19LCJyZW1lbWJlck1lIjpmYWxzZSwiaWF0IjoxNjQwMDI3NzA4LCJuYmYiOjE2NDAwMjc3MDgsImV4cCI6MTY0MDExNDEwOH0.YIpPvGiPeV0nuouAcGvI5_jvnlrNiaDwWzNQTiTRXio
+
+{
+    "password": "1234567"
+}
+
+################################ +++++++++++++++++++++++++++++ ################################
+#CREATE PATIENT
+POST http://localhost:3000/api/patient/create
+Content-Type: application/json
+
+{
+    "name":"xxxxxxxx",
+    "address":"xxxxxxxxxxx",
+    "phone":"0987536024",
+    "email":"0987536021",
+    "job":"0987536021",
+    "relative_name":"0987536021",
+    "numberProfile": "X-12",
+    "preferredHand": "tay trái",
+    "nation": "kinh",
+    "birthday": "1998-13-04",
+    "gender": true,
+    "education": "ptit",
+    "nationality": "viet nam",
+    "relative_patient": "bố",
+    "relative_name": "xxx",
+    "relative_phone": "0987536021"
+}
+
+#FIND PROFILE PATIENT BY PHONE
+POST http://localhost:3000/api/patient/findprofile 
+Content-Type: application/json
+
+{
+    "phone":"0987536021"
+}
+
+################################ +++++++++++++++++++++++++++++ ################################
+#CREATE APPOITMENT
+POST http://localhost:3000/api/appointment/create
+Content-Type: application/json
+
+{
+    "name": "x",
+    "desc": "xxx",
+    "date": "2021-12-24T00:00:00.000Z",
+    "exam_place_id": "61bdd9cf994494b90f82fda7",
+    "doctor_id": "61bdd9a0994494b90f82fd8f",
+    "patient_id": "61bdd9b3994494b90f82fd92",
+    "type": "KHÁM MỚI"
+}
+
+#UPDATE APPOITMENT
+PUT http://localhost:3000/api/appointment/update/61bdedbb37ad8c5d4c7b6c36
+Content-Type: application/json
+
+{
+    "name":"x"
+}
+
+#DELETE APPOITMENT
+DELETE http://localhost:3000/api/appointment/delete/61becf1ba336c20498ed3d48
+Content-Type: application/json
+
+#GET LIST APPOITMENT, SEARCH (NAME, PHONE, EMAIL) OF PATIENT, SORT ALL FILED, PAGINATION
+GET http://localhost:3000/api/appointment/list?search=tranthanhha&&sort=name@desc&&limit=20&&page=1
+Content-Type: application/json
+
 ### DELETE SYMPTOMS 
 # param "patientId"
 DELETE  http://localhost:3000/api/symptoms/61c45066339d1aea9ae0ccd9?symptom=Co giật5
@@ -139,3 +245,4 @@ Content-Type: application/json
     ],
     "prehistoric": false
 }
+

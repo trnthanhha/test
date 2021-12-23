@@ -110,10 +110,12 @@ export class AuthController {
                 doctor._id,
                 ['login', 'withEmail']
             );
+            delete doctor.password
     
             return {
                 accessToken,
-                refreshToken
+                refreshToken,
+                user: doctor
             };
             
         } else if (!user.isActive) {
@@ -165,7 +167,7 @@ export class AuthController {
 
         const refreshToken: string = await this.authService.createRefreshToken(
             payload,
-            rememberMe
+            rememberMe,
         );
 
         await this.loggerService.info(
@@ -174,10 +176,14 @@ export class AuthController {
             user._id,
             ['login', 'withEmail']
         );
+        
+        delete user.password
+        delete user.role
 
         return {
             accessToken,
-            refreshToken
+            refreshToken,
+            user
         };
     }
 

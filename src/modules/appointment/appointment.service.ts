@@ -7,6 +7,7 @@ import { PatientEntity } from '../patient/patient.schema';
 import {
     AppointmentDocument,
     IAppointmentCreate,
+    IAppointmentDocument,
     IAppointmentUpdate
 } from './appointment.interface';
 import { AppointmentEntity } from './appointment.schema';
@@ -17,6 +18,45 @@ export class AppointmentService {
         @InjectModel(AppointmentEntity.name)
         private readonly appointmentModel: Model<AppointmentDocument>
     ) {}
+
+    async findAll<T>(
+        find?: Record<string, any>,
+        options?: Record<string, any>
+    ): Promise<T[]> {
+        const appointments = this.appointmentModel
+            .find(find)
+            .skip(options && options.skip ? options.skip : 0);
+
+        if (options && options.limit) {
+            appointments.limit(options.limit);
+        }
+
+        if (options && options.sort) {
+            appointments.sort(options.sort);
+        }
+
+        if (options && options.populate) {
+            appointments
+                .populate({
+                    path: 'doctor_id',
+                    model: DoctorEntity.name
+                })
+                .populate({
+                    path: 'patient_id',
+                    model: PatientEntity.name
+                })
+                .populate({
+                    path: 'exam_place_id',
+                    model: ExamplaceEntity.name
+                });
+        }
+
+        return appointments.lean();
+    }
+    async getTotalData(find: Record<string, any>): Promise<number> {        
+        return this.appointmentModel.countDocuments(find);
+    }
+    
 
     async create(entity: IAppointmentCreate): Promise<AppointmentDocument> {
         const newAppointment: AppointmentEntity = {
@@ -78,4 +118,5 @@ export class AppointmentService {
             data
         );
     }
+
 }
