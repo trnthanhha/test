@@ -40,7 +40,7 @@ export class SymptomsController {
       data.patientId = patientId;
       const create = await this.symptomsService.create(data);
       return {
-        _id: patientId
+        patientId: patientId
       }
     } catch (error) {
       throw new InternalServerErrorException({
@@ -50,22 +50,7 @@ export class SymptomsController {
       });
     }
   }
-
-  @Get()
-  findAll() {
-    return this.symptomsService.findAll();
-  }
-
-  @Get(':id')
-  findOne(@Param('id') id: string) {
-    // return this.symptomsService.findOne(+id);
-  }
-
-  @Put(':id')
-  update(@Param('id') id: string, @Body() updateSymptomDto: UpdateSymptomDto) {
-    return this.symptomsService.update(+id, updateSymptomDto);
-  }
-
+ 
   @Response('symptom.delete')
   @Delete(':patientId')
   async remove(@Param('patientId') patientId: string, @Query('symptom') symptom: string ) {

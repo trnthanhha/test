@@ -38,17 +38,9 @@ export class SymptomsService {
 
     return create.save();
   }
-
-  findAll() {
-    return `This action returns all symptoms`;
-  }
-
+ 
   findOneByPatientId(patientId: string) {
     return this.symptomModel.findOne({ patientId });
-  }
-
-  update(id: number, updateSymptomDto: UpdateSymptomDto) {
-    return `This action updates a #${id} symptom`;
   }
 
   async remove(patientId: string, symptom: string) {

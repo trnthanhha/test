@@ -1,16 +1,16 @@
 export default {
-    findAll: 'Get All User Success.',
-    findOneById: 'Get One By Id User Success.',
+    findAll: 'Get All Symptom Success.',
+    findOneById: 'Get One By Id Symptom Success.',
     profile: 'Profile Success',
-    delete: 'Delete User Success.',
+    delete: 'Delete Symptom Success.',
     create: 'Create Symptom Success.',
-    update: 'Update User Success.',
+    update: 'Update Symptom Success.',
     sendMail: 'Send Mail Success, Please Check Email.',
     error: {
-        emailExist: 'Email user used',
-        phoneExist: 'Mobile Number user used',
+        emailExist: 'Email Symptom used',
+        phoneExist: 'Mobile Number Symptom used',
         createError: 'Create Error',
-        notFound: 'User not found.',
-        userExist: 'User exist.'
+        notFound: 'Symptom not found.',
+        SymptomExist: 'Symptom exist.'
     }
 };
