@@ -1,9 +1,9 @@
 ### LOGIN
-POST http://localhost:3000/api/auth/login
+POST https://parkinson-dev-api.medstore.com.vn/api/auth/login
 Content-Type: application/json
 
 {
-    "email":"nhp213212@gmail.com",
+    "email":"nhp2132@gmail.com",
     "password":"123456"
 }
 
@@ -12,12 +12,12 @@ POST https://parkinson-dev-api.medstore.com.vn/api/user/create
 Content-Type: application/json
 
 {
-    "email": "nhp213212@gmail.com",
+    "email": "nhp2132@gmail.com",
     "lastName": "phu",
     "firstName": "Nguyen",
-    "role": "61beb73b97439812080c7faa",
+    "role": "61b9946bf328bd353022efb7",
     "password": "123456",
-    "phone": "098765432112"
+    "phone": "0369202024"
 }
 ### UPDATE USER
 PUT http://localhost:3000/api/user/update/61c35eb73a0ba4374cafcc8c
@@ -67,7 +67,7 @@ Content-Type: application/json
 # param patientId
 POST http://localhost:3000/api/symptoms/61c45066339d1aea9ae0ccd9
 Content-Type: application/json
-# Authorization: Basic eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJfaWQiOiI2MWMzNWViNzNhMGJhNDM3NGNhZmNjOGMiLCJpc0FjdGl2ZSI6dHJ1ZSwiYXZhdGFyIjpudWxsLCJlbWFpbCI6Im5ocDIxMzIxMkBnbWFpbC5jb20iLCJwaG9uZSI6IjA5ODc2NTQzMjExMiIsInJvbGUiOnsibmFtZSI6ImFkbWluIiwicGVybWlzc2lvbnMiOlsiUEVSTUlTU0lPTl9SRUFEIiwiUFJPRklMRV9SRUFEIiwiUFJPRklMRV9VUERBVEUiLCJST0xFX0NSRUFURSIsIlJPTEVfREVMRVRFIiwiUk9MRV9SRUFEIiwiUk9MRV9VUERBVEUiLCJVU0VSX0NSRUFURSIsIlVTRVJfREVMRVRFIiwiVVNFUl9SRUFEIiwiVVNFUl9VUERBVEUiXX0sInJlbWVtYmVyTWUiOmZhbHNlLCJpYXQiOjE2NDAyNTQ4ODUsIm5iZiI6MTY0MDI1NDg4NSwiZXhwIjoxNjQwMzQxMjg1fQ.GMHcdf36v31i2u49J53fPIlHvaTif1ffSkDJg2iSiOE
+Authorization: Basic eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJfaWQiOiI2MWMzNWViNzNhMGJhNDM3NGNhZmNjOGMiLCJpc0FjdGl2ZSI6dHJ1ZSwiYXZhdGFyIjpudWxsLCJlbWFpbCI6Im5ocDIxMzIxMkBnbWFpbC5jb20iLCJwaG9uZSI6IjA5ODc2NTQzMjExMiIsInJvbGUiOnsibmFtZSI6ImFkbWluIiwicGVybWlzc2lvbnMiOlsiUEVSTUlTU0lPTl9SRUFEIiwiUFJPRklMRV9SRUFEIiwiUFJPRklMRV9VUERBVEUiLCJST0xFX0NSRUFURSIsIlJPTEVfREVMRVRFIiwiUk9MRV9SRUFEIiwiUk9MRV9VUERBVEUiLCJVU0VSX0NSRUFURSIsIlVTRVJfREVMRVRFIiwiVVNFUl9SRUFEIiwiVVNFUl9VUERBVEUiXX0sInJlbWVtYmVyTWUiOmZhbHNlLCJpYXQiOjE2NDAyNTQ4ODUsIm5iZiI6MTY0MDI1NDg4NSwiZXhwIjoxNjQwMzQxMjg1fQ.GMHcdf36v31i2u49J53fPIlHvaTif1ffSkDJg2iSiOE
 
 {
     "symptoms":[
@@ -95,9 +95,11 @@ Content-Type: application/json
 # param "patientId"
 DELETE  http://localhost:3000/api/symptoms/61c45066339d1aea9ae0ccd9?symptom=Co giật5
 
-####
+#### CREATE, UPDATE
+## param "patientId"
 POST http://localhost:3000/api/prehistoric/61c35529512eff465c241486
 Content-Type: application/json
+Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJfaWQiOiI2MWMzNWViNzNhMGJhNDM3NGNhZmNjOGMiLCJpc0FjdGl2ZSI6dHJ1ZSwiYXZhdGFyIjpudWxsLCJlbWFpbCI6Im5ocDIxMzIxMkBnbWFpbC5jb20iLCJwaG9uZSI6IjA5ODc2NTQzMjExMiIsInJvbGUiOnsibmFtZSI6ImFkbWluIiwicGVybWlzc2lvbnMiOlsiUEVSTUlTU0lPTl9SRUFEIiwiUFJPRklMRV9SRUFEIiwiUFJPRklMRV9VUERBVEUiLCJST0xFX0NSRUFURSIsIlJPTEVfREVMRVRFIiwiUk9MRV9SRUFEIiwiUk9MRV9VUERBVEUiLCJVU0VSX0NSRUFURSIsIlVTRVJfREVMRVRFIiwiVVNFUl9SRUFEIiwiVVNFUl9VUERBVEUiXX0sInJlbWVtYmVyTWUiOmZhbHNlLCJpYXQiOjE2NDAyNTQ4ODUsIm5iZiI6MTY0MDI1NDg4NSwiZXhwIjoxNjQwMzQxMjg1fQ.GMHcdf36v31i2u49J53fPIlHvaTif1ffSkDJg2iSiOE
 
 {
     "use_medicine":[
@@ -134,8 +136,87 @@ Content-Type: application/json
             "time_start": "08-08-2020",
             "status": "Lorem ipsum",
             "Stage": 1,
-            "decrpition": "Lorem ipsum dolor sit amet, consectetur adipiscing elit.Lorem ipsum dol" 
+            "decrpition": "Lorem ipsum dolor sit amet, consectetur adipiscing elit.Lorem ipsum dol 1" 
         }
     ],
     "prehistoric": false
+}
+
+### CREATE UPDATE TAB3 BỆNH SỬ
+POST http://localhost:3000/api/medical-history/61c35529512eff465c241486
+Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJfaWQiOiI2MWMzNWViNzNhMGJhNDM3NGNhZmNjOGMiLCJpc0FjdGl2ZSI6dHJ1ZSwiYXZhdGFyIjpudWxsLCJlbWFpbCI6Im5ocDIxMzIxMkBnbWFpbC5jb20iLCJwaG9uZSI6IjA5ODc2NTQzMjExMiIsInJvbGUiOnsibmFtZSI6ImFkbWluIiwicGVybWlzc2lvbnMiOlsiUEVSTUlTU0lPTl9SRUFEIiwiUFJPRklMRV9SRUFEIiwiUFJPRklMRV9VUERBVEUiLCJST0xFX0NSRUFURSIsIlJPTEVfREVMRVRFIiwiUk9MRV9SRUFEIiwiUk9MRV9VUERBVEUiLCJVU0VSX0NSRUFURSIsIlVTRVJfREVMRVRFIiwiVVNFUl9SRUFEIiwiVVNFUl9VUERBVEUiXX0sInJlbWVtYmVyTWUiOmZhbHNlLCJpYXQiOjE2NDAyNTQ4ODUsIm5iZiI6MTY0MDI1NDg4NSwiZXhwIjoxNjQwMzQxMjg1fQ.GMHcdf36v31i2u49J53fPIlHvaTif1ffSkDJg2iSiOE
+Content-Type: application/json
+
+{
+    "symptoms":[
+        {
+            "time_start": "23/12/2021 - 1",
+            "symptom": "Lúc thức 1",
+            "age": 31,
+            "situation": "Lúc thức", 
+            "descrpition": "Lorem ipsum dolor sit amet, consectetur adipiscing elit.Lorem ipsum dol"
+        },
+         {
+            "time_start": "23/12/2021",
+            "symptom": "Lúc thức 2",
+            "age": 31,
+            "situation": "Lúc thức", 
+            "descrpition": "Lorem ipsum dolor sit amet, consectetur adipiscing elit.Lorem ipsum dol"
+        }
+    ],
+    "regions": [
+        {
+            "region": "Tay -1",
+            "descrpition": "run"
+        }
+    ],
+    "types": [
+        {
+            "type": "Ngồi run - 1",
+            "descrpition": "Ngồi chơi cũng run"
+        }
+    ],
+    "distributions": [
+        {
+            "distribution": "khuỷu tay trở xuống -1 ",
+            "descrpition": "Ngồi chơi cũng run"
+        }
+    ],
+    "symmetrys":[
+         {
+            "symmetry": "không -1",
+            "descrpition": "Ngồi chơi cũng run"
+        }
+    ],
+    "evolveds":[
+         {
+            "symmetry": "symmetry -1",
+            "descrpition": "descrpition"
+        }
+    ],
+    "others":{
+        "heavy_factor":"Yếu tố làm nặng - 2",
+        "factors_light": "Yếu tố làm nhẹ",
+        "drugs_and_treatment":[
+             {
+                "type": "Loại thuốc - 2",
+                "response_to_treatment": "Kết quả điều trị",
+                "side_effects": "tác dụng phụ"
+            }
+        ],
+        "related_dopaminergic": [
+            {
+                "type": "Loại thuốc -2",
+                "descrpition": "Mô tả"
+            }
+        ],
+        "impact_on_daily_work": "Ảnh hưởng đến công việc hàng ngày",
+        "impact_on_daily_life": "Ảnh hưởng sinh hoạt hằng ngày",
+        "others":[
+            {
+                "symptom": "Triệu chứng",
+                "descrpition": "Mô tả 1"
+            }
+        ]
+    }
 }

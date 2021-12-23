@@ -8,6 +8,7 @@ import examRecord from 'src/modules/examRecord/message/examRecord';
 import doctor from 'src/modules/doctor/message/doctor';
 import symptom from 'src/modules/symptoms/message/symptom';
 import prehistoric from 'src/modules/prehistoric/message/prehistoric';
+import medical_history from 'src/modules/medical-history/message/medical-history';
 
 export default {
     en: {
@@ -20,7 +21,8 @@ export default {
         examRecord,
         doctor,
         symptom,
-        prehistoric
+        prehistoric,
+        medical_history
     },
     
 };
