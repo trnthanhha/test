@@ -48,12 +48,12 @@ Content-Type: application/json
     "name": "Nguyen Huu Phu",
     "email": "nhp2132@gmail.com",
     "address": "Ha Noi",
-    "phone": "0987654321",
+    "phone": "09876543212",
     "message": "test message",
     "job": "doctor"
 }
 #### UPDATE PATIENT
-PUT https://parkinson-dev-api.medstore.com.vn/api/patient/update/61c36d1ccee2244cacdd2d68
+PUT https://parkinson-dev-api.medstore.com.vn/api/patient/update/61c45066339d1aea9ae0ccd9
 Content-Type: application/json
 
 {
@@ -65,7 +65,7 @@ Content-Type: application/json
 
 ### CREATE, UPDATE SYMPTOMS
 # param patientId
-POST http://localhost:3000/api/symptoms/61c2b5f79f4d3a31f81bb095
+POST http://localhost:3000/api/symptoms/61c45066339d1aea9ae0ccd9
 Content-Type: application/json
 # Authorization: Basic eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJfaWQiOiI2MWMzNWViNzNhMGJhNDM3NGNhZmNjOGMiLCJpc0FjdGl2ZSI6dHJ1ZSwiYXZhdGFyIjpudWxsLCJlbWFpbCI6Im5ocDIxMzIxMkBnbWFpbC5jb20iLCJwaG9uZSI6IjA5ODc2NTQzMjExMiIsInJvbGUiOnsibmFtZSI6ImFkbWluIiwicGVybWlzc2lvbnMiOlsiUEVSTUlTU0lPTl9SRUFEIiwiUFJPRklMRV9SRUFEIiwiUFJPRklMRV9VUERBVEUiLCJST0xFX0NSRUFURSIsIlJPTEVfREVMRVRFIiwiUk9MRV9SRUFEIiwiUk9MRV9VUERBVEUiLCJVU0VSX0NSRUFURSIsIlVTRVJfREVMRVRFIiwiVVNFUl9SRUFEIiwiVVNFUl9VUERBVEUiXX0sInJlbWVtYmVyTWUiOmZhbHNlLCJpYXQiOjE2NDAyNTQ4ODUsIm5iZiI6MTY0MDI1NDg4NSwiZXhwIjoxNjQwMzQxMjg1fQ.GMHcdf36v31i2u49J53fPIlHvaTif1ffSkDJg2iSiOE
 
@@ -93,5 +93,49 @@ Content-Type: application/json
 
 ### DELETE SYMPTOMS 
 # param "patientId"
-DELETE  http://localhost:3000/api/symptoms/61c35529512eff465c241486?symptom=Co giật5
+DELETE  http://localhost:3000/api/symptoms/61c45066339d1aea9ae0ccd9?symptom=Co giật5
 
+####
+POST http://localhost:3000/api/prehistoric/61c35529512eff465c241486
+Content-Type: application/json
+
+{
+    "use_medicine":[
+        {
+            "type": "Loại 1",
+            "time_start": "08-08-2020",
+            "total_time": "3",
+            "decrpition": "Lorem ipsum dolor sit amet, consectetur adipiscing elit.Lorem ipsum dol" 
+        }
+    ],
+    "disabilities":[
+       {
+            "type": "Loại 1",
+            "decrpition": "Lorem ipsum dolor sit amet, consectetur adipiscing elit.Lorem ipsum dol" 
+       }
+    ],
+    "surgerys":[
+        {
+            "type": "Loại undefined",
+            "date": "08-08-2020",
+            "decrpition": "Lorem ipsum dolor sit amet, consectetur adipiscing elit.Lorem ipsum dol" 
+        }
+    ],
+    "allergys":[
+        {
+            "type": "Loại 1",
+            "time": "08-08-2020",
+            "decrpition": "Lorem ipsum dolor sit amet, consectetur adipiscing elit.Lorem ipsum dol" 
+        }
+    ],
+    "diseases":[
+        {
+            "type": "Loại 1",
+            "time_start": "08-08-2020",
+            "status": "Lorem ipsum",
+            "Stage": 1,
+            "decrpition": "Lorem ipsum dolor sit amet, consectetur adipiscing elit.Lorem ipsum dol" 
+        }
+    ],
+    "prehistoric": false
+}

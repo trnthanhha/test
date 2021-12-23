@@ -7,6 +7,7 @@ import role from 'src/modules/role/message/role';
 import examRecord from 'src/modules/examRecord/message/examRecord';
 import doctor from 'src/modules/doctor/message/doctor';
 import symptom from 'src/modules/symptoms/message/symptom';
+import prehistoric from 'src/modules/prehistoric/message/prehistoric';
 
 export default {
     en: {
@@ -18,7 +19,8 @@ export default {
         role,
         examRecord,
         doctor,
-        symptom
+        symptom,
+        prehistoric
     },
     
 };
