@@ -7,6 +7,7 @@ import { MessageService } from 'src/message/message.service';
 import {
     IPatientCheckExit,
     IPatientCreate,
+    IPatientDocument,
     PatientDocument
 } from './patient.interface';
 import { PatientEntity } from './patient.schema';
@@ -18,6 +19,25 @@ export class PatientService {
         private readonly patientModel: Model<PatientDocument>,
         @Message() private readonly messageService: MessageService
     ) {}
+
+    async findAll(
+        find?: Record<string, any>,
+        options?: Record<string, any>
+    ): Promise<PatientDocument[]> {
+        const findAll = this.patientModel
+            .find(find)
+            .skip(options && options.skip ? options.skip : 0);
+
+        if (options && options.limit) {            
+            findAll.limit(options.limit);
+        }
+
+        if (options && options.sort) {
+            findAll.sort(options.sort);
+        }
+
+        return findAll.lean();
+    }
 
     async checkExist(phone: string): Promise<IErrors[]> {
         const existMobileNumber: PatientDocument = await this.findPatient({
@@ -40,9 +60,7 @@ export class PatientService {
         return create.save();
     }
 
-    async updatePatientById(_id: string, data){
-
-    }
+    async updatePatientById(_id: string, data) {}
 
     async findPatient(data: IPatientCheckExit): Promise<PatientDocument> {
         return await this.patientModel.findOne(data).lean();

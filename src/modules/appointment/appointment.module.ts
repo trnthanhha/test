@@ -1,6 +1,7 @@
 import { Module } from '@nestjs/common';
 import { MongooseModule } from '@nestjs/mongoose';
 import { PaginationModule } from 'src/pagination/pagination.module';
+import { PatientModule } from '../patient/patient.module';
 import { SendSMSModule } from '../sendSMS/sendSMS.module';
 import { AppointmentController } from './appointment.controller';
 import {
@@ -22,7 +23,8 @@ import { AppointmentService } from './appointment.service';
             }
         ]),
         PaginationModule,
-        SendSMSModule
+        SendSMSModule,
+        PatientModule
     ],
     controllers: [AppointmentController]
 })

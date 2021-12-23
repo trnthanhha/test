@@ -21,33 +21,38 @@ export class AppointmentEntity {
 
     @Prop({
         required: true, //tạm thời ko yêu cầu
-        enum: ENUM_APPOINTMENT_TYPE
+        enum: ENUM_APPOINTMENT_TYPE,
+        index: true
     })
     type: string;
 
     @Prop({
-        required: true
+        required: true,
+        index: true
     })
     date: Date;
 
     @Prop({
-        required: false, //tạm thời ko yêu cầu
+        required: true,
         type: Types.ObjectId,
-        ref: ExamplaceEntity.name
+        ref: ExamplaceEntity.name,
+        index: true
     })
-    exam_place_id?: Types.ObjectId;
+    exam_place_id: Types.ObjectId;
 
     @Prop({
         required: true,
         type: Types.ObjectId,
-        ref: DoctorEntity.name
+        ref: DoctorEntity.name,
+        index: true
     })
     doctor_id: Types.ObjectId;
 
     @Prop({
         required: true,
         type: Types.ObjectId,
-        ref: PatientEntity.name
+        ref: PatientEntity.name,
+        index: true
     })
     patient_id: Types.ObjectId;
 }

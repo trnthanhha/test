@@ -30,9 +30,9 @@ export class AppointmentUpdateValidation {
     readonly date: Date;
 
     @IsMongoId()
-    @IsOptional()
-    // @IsNotEmpty()
-    readonly exam_place_id?: string;
+    // @IsOptional()
+    @IsNotEmpty()
+    readonly exam_place_id: string;
 
     @IsMongoId()
     @IsOptional()
