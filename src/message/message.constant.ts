@@ -6,6 +6,7 @@ import user from 'src/modules/user/message/user';
 import role from 'src/modules/role/message/role';
 import examRecord from 'src/modules/examRecord/message/examRecord';
 import doctor from 'src/modules/doctor/message/doctor';
+import symptom from 'src/modules/symptoms/message/symptom';
 
 export default {
     en: {
@@ -17,6 +18,7 @@ export default {
         role,
         examRecord,
         doctor,
+        symptom
     },
     
 };

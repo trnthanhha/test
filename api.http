@@ -1,5 +1,5 @@
 ### LOGIN
-POST https://parkinson-dev-api.medstore.com.vn/api/auth/login
+POST http://localhost:3000/api/auth/login
 Content-Type: application/json
 
 {
@@ -64,8 +64,10 @@ Content-Type: application/json
 }
 
 ### CREATE, UPDATE SYMPTOMS
+# param patientId
 POST http://localhost:3000/api/symptoms/61c2b5f79f4d3a31f81bb095
 Content-Type: application/json
+# Authorization: Basic eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJfaWQiOiI2MWMzNWViNzNhMGJhNDM3NGNhZmNjOGMiLCJpc0FjdGl2ZSI6dHJ1ZSwiYXZhdGFyIjpudWxsLCJlbWFpbCI6Im5ocDIxMzIxMkBnbWFpbC5jb20iLCJwaG9uZSI6IjA5ODc2NTQzMjExMiIsInJvbGUiOnsibmFtZSI6ImFkbWluIiwicGVybWlzc2lvbnMiOlsiUEVSTUlTU0lPTl9SRUFEIiwiUFJPRklMRV9SRUFEIiwiUFJPRklMRV9VUERBVEUiLCJST0xFX0NSRUFURSIsIlJPTEVfREVMRVRFIiwiUk9MRV9SRUFEIiwiUk9MRV9VUERBVEUiLCJVU0VSX0NSRUFURSIsIlVTRVJfREVMRVRFIiwiVVNFUl9SRUFEIiwiVVNFUl9VUERBVEUiXX0sInJlbWVtYmVyTWUiOmZhbHNlLCJpYXQiOjE2NDAyNTQ4ODUsIm5iZiI6MTY0MDI1NDg4NSwiZXhwIjoxNjQwMzQxMjg1fQ.GMHcdf36v31i2u49J53fPIlHvaTif1ffSkDJg2iSiOE
 
 {
     "symptoms":[
@@ -81,7 +83,7 @@ Content-Type: application/json
             "symptom": "Co giật3",
             "decrpition":" run tay3"
         },
-         {
+        {
             "symptom": "Co giật5",
             "decrpition":" run tay5"
         }
@@ -89,6 +91,7 @@ Content-Type: application/json
     ]
 }
 
-### DELETE SYMPTOMS
+### DELETE SYMPTOMS 
+# param "patientId"
 DELETE  http://localhost:3000/api/symptoms/61c35529512eff465c241486?symptom=Co giật5
 

@@ -6,7 +6,7 @@ import { HelperService } from 'src/helper/helper.service';
 import { Message } from 'src/message/message.decorator';
 import { MessageService } from 'src/message/message.service';
 import { ICreateSymptoms, SymptomsDocument } from './Interface/symptoms.interface';
-import symptoms from './message/symptoms';
+import symptoms from './message/symptom';
 import { Symptom } from './Schema/symptom.schema';
 import { CreateSymptomValidation } from './validation/create-symptom.validation';
 import { UpdateSymptomDto } from './validation/update-symptom.dto';

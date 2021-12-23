@@ -9,6 +9,8 @@ import { IErrors } from 'src/error/error.interface';
 import { RequestValidationPipe } from 'src/request/pipe/request.validation.pipe';
 import { ENUM_SYMPTOM_STATUS_CODE_ERROR } from './symptoms.constant';
 import { ENUM_STATUS_CODE_ERROR } from 'src/error/error.constant';
+import { AuthJwtGuard } from '../auth/auth.decorator';
+import { ENUM_PERMISSIONS } from '../permission/permission.constant';
 @Controller('symptoms')
 export class SymptomsController {
   constructor(
@@ -16,8 +18,8 @@ export class SymptomsController {
     private readonly patientService: PatientService
   ) { }
 
-  @Response('symptoms.create')
-  // @AuthJwtGuard(ENUM_PERMISSIONS.ROLE_READ)
+  @Response('symptom.create')
+  // @AuthJwtGuard(ENUM_PERMISSIONS.USER_READ)
   @Post(":patientId")
   async create(
     @Param('patientId') patientId: string,
@@ -64,7 +66,7 @@ export class SymptomsController {
     return this.symptomsService.update(+id, updateSymptomDto);
   }
 
-  @Response('symptoms.delete')
+  @Response('symptom.delete')
   @Delete(':patientId')
   async remove(@Param('patientId') patientId: string, @Query('symptom') symptom: string ) {
     try {
