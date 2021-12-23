@@ -128,7 +128,7 @@ export class AuthController {
                 statusCode: ENUM_USER_STATUS_CODE_ERROR.USER_IS_INACTIVE,
                 message: 'http.clientError.unauthorized'
             });
-        } else if (!user.role.isActive) {
+        } else if (!user.role || (user.role && !user.role.isActive)) {
             throw new ForbiddenException({
                 statusCode: ENUM_ROLE_STATUS_CODE_ERROR.ROLE_IS_INACTIVE,
                 message: 'http.clientError.forbidden'
@@ -208,7 +208,7 @@ export class AuthController {
                 statusCode: ENUM_USER_STATUS_CODE_ERROR.USER_IS_INACTIVE,
                 message: 'http.clientError.unauthorized'
             });
-        } else if (!user.role.isActive) {
+        } else if (!user.role || (user.role && !user.role.isActive)) {
             throw new ForbiddenException({
                 statusCode: ENUM_ROLE_STATUS_CODE_ERROR.ROLE_IS_INACTIVE,
                 message: 'http.clientError.forbidden'

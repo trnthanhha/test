@@ -1,44 +1,96 @@
-### CREATE USER
-POST http://localhost:3000/api/user/create
+### LOGIN
+POST http://localhost:3000/api/auth/login
 Content-Type: application/json
 
 {
-    "email": "nhp21321@gmail.com",
+    "email":"nhp213212@gmail.com",
+    "password":"123456"
+}
+
+### CREATE USER
+POST https://parkinson-dev-api.medstore.com.vn/api/user/create
+Content-Type: application/json
+
+{
+    "email": "nhp213212@gmail.com",
     "lastName": "phu",
     "firstName": "Nguyen",
     "role": "61beb73b97439812080c7faa",
     "password": "123456",
-    "phone": "09876543211"
+    "phone": "098765432112"
 }
 ### UPDATE USER
-PUT http://localhost:3000/api/user/update/61bf610828259b3e8c7b1be4
+PUT http://localhost:3000/api/user/update/61c35eb73a0ba4374cafcc8c
 Content-Type: application/json
 
 {
     "lastName": "phu",
     "firstName": "Nguyen tesst",
-    "phone": "0396202024"
+    "phone": "0865452090"
 }
 ### UPDATE PASSWORD
-PUT http://localhost:3000/api/user/update-password/61bf610828259b3e8c7b1be4
+PUT http://localhost:3000/api/user/update-password/61c2b5f79f4d3a31f81bb095
 Content-Type: application/json
 
 {
     "password": "123456789",
     "passwordNew": "123456789"
 }
+#### GET PATIENT BY ID
+GET http://localhost:3000/api/patient/61c2b5f79f4d3a31f81bb095
 
-################################ +++++++++++++++++++++++++++++ ################################
-POST http://localhost:3000/api/patient/create
+
+#### CREATE PATIENT
+POST https://parkinson-dev-api.medstore.com.vn/api/patient/create
 Content-Type: application/json
 
 {
-    "email": "nhp2132@gmail.com",
     "name": "Nguyen Huu Phu",
-    "address": "Bình Định",
-    "phone": "0369202024",
-    "job": "IT"
+    "email": "nhp2132@gmail.com",
+    "address": "Ha Noi",
+    "phone": "09876543212",
+    "message": "test message",
+    "job": "doctor"
 }
+#### UPDATE PATIENT
+PUT https://parkinson-dev-api.medstore.com.vn/api/patient/update/61c45066339d1aea9ae0ccd9
+Content-Type: application/json
+
+{
+    "phone": "036920204",
+    "email": "nhp2132+2@gmail.com",
+    "education": "Bac",
+    "nationality": "VN"
+}
+
+### CREATE, UPDATE SYMPTOMS
+# param patientId
+POST http://localhost:3000/api/symptoms/61c45066339d1aea9ae0ccd9
+Content-Type: application/json
+# Authorization: Basic eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJfaWQiOiI2MWMzNWViNzNhMGJhNDM3NGNhZmNjOGMiLCJpc0FjdGl2ZSI6dHJ1ZSwiYXZhdGFyIjpudWxsLCJlbWFpbCI6Im5ocDIxMzIxMkBnbWFpbC5jb20iLCJwaG9uZSI6IjA5ODc2NTQzMjExMiIsInJvbGUiOnsibmFtZSI6ImFkbWluIiwicGVybWlzc2lvbnMiOlsiUEVSTUlTU0lPTl9SRUFEIiwiUFJPRklMRV9SRUFEIiwiUFJPRklMRV9VUERBVEUiLCJST0xFX0NSRUFURSIsIlJPTEVfREVMRVRFIiwiUk9MRV9SRUFEIiwiUk9MRV9VUERBVEUiLCJVU0VSX0NSRUFURSIsIlVTRVJfREVMRVRFIiwiVVNFUl9SRUFEIiwiVVNFUl9VUERBVEUiXX0sInJlbWVtYmVyTWUiOmZhbHNlLCJpYXQiOjE2NDAyNTQ4ODUsIm5iZiI6MTY0MDI1NDg4NSwiZXhwIjoxNjQwMzQxMjg1fQ.GMHcdf36v31i2u49J53fPIlHvaTif1ffSkDJg2iSiOE
+
+{
+    "symptoms":[
+        {
+            "symptom": "Co giật",
+            "decrpition":" run tay"
+        },
+        {
+            "symptom": "Co giật1",
+            "decrpition":" run tay2"
+        },
+        {
+            "symptom": "Co giật3",
+            "decrpition":" run tay3"
+        },
+        {
+            "symptom": "Co giật5",
+            "decrpition":" run tay5"
+        }
+        
+    ]
+}
+
 
 ################################ +++++++++++++++++++++++++++++ ################################
 ###LOGIN
@@ -144,3 +196,53 @@ Content-Type: application/json
 #GET LIST APPOITMENT, SEARCH (NAME, PHONE, EMAIL) OF PATIENT, SORT ALL FILED, PAGINATION
 GET http://localhost:3000/api/appointment/list?search=tranthanhha&&sort=name@desc&&limit=20&&page=1
 Content-Type: application/json
+
+### DELETE SYMPTOMS 
+# param "patientId"
+DELETE  http://localhost:3000/api/symptoms/61c45066339d1aea9ae0ccd9?symptom=Co giật5
+
+####
+POST http://localhost:3000/api/prehistoric/61c35529512eff465c241486
+Content-Type: application/json
+
+{
+    "use_medicine":[
+        {
+            "type": "Loại 1",
+            "time_start": "08-08-2020",
+            "total_time": "3",
+            "decrpition": "Lorem ipsum dolor sit amet, consectetur adipiscing elit.Lorem ipsum dol" 
+        }
+    ],
+    "disabilities":[
+       {
+            "type": "Loại 1",
+            "decrpition": "Lorem ipsum dolor sit amet, consectetur adipiscing elit.Lorem ipsum dol" 
+       }
+    ],
+    "surgerys":[
+        {
+            "type": "Loại undefined",
+            "date": "08-08-2020",
+            "decrpition": "Lorem ipsum dolor sit amet, consectetur adipiscing elit.Lorem ipsum dol" 
+        }
+    ],
+    "allergys":[
+        {
+            "type": "Loại 1",
+            "time": "08-08-2020",
+            "decrpition": "Lorem ipsum dolor sit amet, consectetur adipiscing elit.Lorem ipsum dol" 
+        }
+    ],
+    "diseases":[
+        {
+            "type": "Loại 1",
+            "time_start": "08-08-2020",
+            "status": "Lorem ipsum",
+            "Stage": 1,
+            "decrpition": "Lorem ipsum dolor sit amet, consectetur adipiscing elit.Lorem ipsum dol" 
+        }
+    ],
+    "prehistoric": false
+}
+

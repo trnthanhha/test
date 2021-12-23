@@ -18,7 +18,7 @@ import { JwtGuard } from './guard/jwt/auth.jwt.guard';
 
 export function AuthJwtGuard(
     ...permissions: ENUM_PERMISSIONS[]
-): IAuthApplyDecorator {
+) {
     return applyDecorators(
         UseGuards(JwtGuard, PermissionDefaultGuard, AuthDefaultGuard),
         SetMetadata(PERMISSION_META_KEY, permissions)

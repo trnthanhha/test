@@ -23,6 +23,8 @@ export interface IPatientCreate {
     relative_phone?: string;
 }
 
+export type IPatientUpdate = Pick<IPatientCreate, 'name' | 'birthday' | 'gender' | 'address' | 'phone' | 'email' | 'job' | 'education' | 'relative_name' | 'relative_phone'>;
+
 export interface IPatientCheckExit {
     phone: string;
 }
