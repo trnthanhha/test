@@ -27,6 +27,7 @@ import { SendSMSModule } from 'src/modules/sendSMS/sendSMS.module';
 import { ExamRecordModule } from 'src/modules/examRecord/examRecord.module';
 import { SymptomsModule } from 'src/modules/symptoms/symptoms.module';
 import { PrehistoricModule } from 'src/modules/prehistoric/prehistoric.module';
+import { MedicalHistoryModule } from 'src/modules/medical-history/medical-history.module';
 // import { KafkaProducerModule } from 'src/kafka/producer/kafka.producer.module';
 // import { KafkaConsumerModule } from 'src/kafka/consumer/consumer.module';
 // import { KafkaAdminModule } from 'src/kafka/admin/kafka.admin.module';
@@ -76,7 +77,8 @@ import { PrehistoricModule } from 'src/modules/prehistoric/prehistoric.module';
         AppointmentModule,
         ExamRecordModule,
         SymptomsModule,
-        PrehistoricModule
+        PrehistoricModule,
+        MedicalHistoryModule
     ]
 })
 export class AppModule {}
