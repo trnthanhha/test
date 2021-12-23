@@ -64,11 +64,11 @@ export class SymptomsController {
     return this.symptomsService.update(+id, updateSymptomDto);
   }
 
+  @Response('symptoms.delete')
   @Delete(':patientId')
   async remove(@Param('patientId') patientId: string, @Query('symptom') symptom: string ) {
     try {
       const remove = await this.symptomsService.remove(patientId, symptom);
-      console.log(remove);
       if(remove.nModified !== 0){
         return await this.symptomsService.findOneByPatientId(patientId);
       }else{

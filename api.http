@@ -91,3 +91,4 @@ Content-Type: application/json
 
 ### DELETE SYMPTOMS
 DELETE  http://localhost:3000/api/symptoms/61c35529512eff465c241486?symptom=Co giật5
+
