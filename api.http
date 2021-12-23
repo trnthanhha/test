@@ -1,5 +1,14 @@
+### LOGIN
+POST https://parkinson-dev-api.medstore.com.vn/api/auth/login
+Content-Type: application/json
+
+{
+    "email":"nhp213212@gmail.com",
+    "password":"123456"
+}
+
 ### CREATE USER
-POST http://localhost:3000/api/user/create
+POST https://parkinson-dev-api.medstore.com.vn/api/user/create
 Content-Type: application/json
 
 {
@@ -20,33 +29,66 @@ Content-Type: application/json
     "phone": "0865452090"
 }
 ### UPDATE PASSWORD
-PUT http://localhost:3000/api/user/update-password/61bf610828259b3e8c7b1be4
+PUT http://localhost:3000/api/user/update-password/61c2b5f79f4d3a31f81bb095
 Content-Type: application/json
 
 {
     "password": "123456789",
     "passwordNew": "123456789"
 }
+#### GET PATIENT BY ID
+GET http://localhost:3000/api/patient/61c2b5f79f4d3a31f81bb095
+
 
 #### CREATE PATIENT
-POST http://localhost:3000/api/patient/create
+POST https://parkinson-dev-api.medstore.com.vn/api/patient/create
 Content-Type: application/json
 
 {
     "name": "Nguyen Huu Phu",
+    "email": "nhp2132@gmail.com",
     "address": "Ha Noi",
     "phone": "0987654321",
     "message": "test message",
     "job": "doctor"
 }
 #### UPDATE PATIENT
-PUT http://localhost:3000/api/patient/update/61c2b5f79f4d3a31f81bb095
+PUT https://parkinson-dev-api.medstore.com.vn/api/patient/update/61c36d1ccee2244cacdd2d68
 Content-Type: application/json
 
 {
     "phone": "036920204",
-    "email": "",
+    "email": "nhp2132+2@gmail.com",
     "education": "Bac",
     "nationality": "VN"
 }
- 
+
+### CREATE, UPDATE SYMPTOMS
+POST http://localhost:3000/api/symptoms/61c2b5f79f4d3a31f81bb095
+Content-Type: application/json
+
+{
+    "symptoms":[
+        {
+            "symptom": "Co giật",
+            "decrpition":" run tay"
+        },
+        {
+            "symptom": "Co giật1",
+            "decrpition":" run tay2"
+        },
+        {
+            "symptom": "Co giật3",
+            "decrpition":" run tay3"
+        },
+         {
+            "symptom": "Co giật5",
+            "decrpition":" run tay5"
+        }
+        
+    ]
+}
+
+### DELETE SYMPTOMS
+DELETE  http://localhost:3000/api/symptoms/61c35529512eff465c241486?symptom=Co giật5
+
