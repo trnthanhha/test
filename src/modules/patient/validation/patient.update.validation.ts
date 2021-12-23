@@ -1,6 +1,7 @@
 import {
     IsBoolean,
     IsDateString,
+    IsEmail,
     IsNotEmpty,
     IsOptional,
     IsString,
@@ -42,8 +43,8 @@ export class PatientUpdateValidation {
 
     @IsString()
     @IsNotEmpty()
-    @Length(10)
-    readonly phone: string
+    @MinLength(10)
+    phone: string
 
     @IsString()
     @IsNotEmpty()

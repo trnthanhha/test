@@ -7,9 +7,11 @@ import { MessageService } from 'src/message/message.service';
 import {
     IPatientCheckExit,
     IPatientCreate,
+    IPatientUpdate,
     PatientDocument
 } from './patient.interface';
 import { PatientEntity } from './patient.schema';
+import { PatientUpdateValidation } from './validation/patient.update.validation';
 
 @Injectable()
 export class PatientService {
@@ -17,7 +19,7 @@ export class PatientService {
         @InjectModel(PatientEntity.name)
         private readonly patientModel: Model<PatientDocument>,
         @Message() private readonly messageService: MessageService
-    ) {}
+    ) { }
 
     async checkExist(phone: string): Promise<IErrors[]> {
         const existMobileNumber: PatientDocument = await this.findPatient({
@@ -35,13 +37,41 @@ export class PatientService {
         return errors;
     }
 
+    async checkExistById(_id: string): Promise<IErrors[]> {
+        const checkExistById: PatientDocument = await this.findPatientById(_id);
+
+        const errors: IErrors[] = [];
+
+        if (!checkExistById) {
+            errors.push({
+                message: this.messageService.get('patient.error.checkId'),
+                property: '_id'
+            });
+        }
+
+        return errors;
+    }
+
     async create(entity: IPatientCreate): Promise<PatientDocument> {
         const create: PatientDocument = await new this.patientModel(entity);
         return create.save();
     }
 
-    async updatePatientById(_id: string, data){
+    async updatePatientById(_id: string, data: PatientUpdateValidation): Promise<IPatientUpdate> {
+        const patient = await this.findPatientById(_id);
+        data.phone = patient.phone;
+        return this.patientModel.updateOne(
+            {
+                _id: new Types.ObjectId(_id)
+            },
+            {
+                ...data
+            }
+        )
+    }
 
+    async findPatientById(_id: string): Promise<PatientDocument> {
+        return await this.patientModel.findOne({ _id }).lean();
     }
 
     async findPatient(data: IPatientCheckExit): Promise<PatientDocument> {
