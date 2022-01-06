@@ -8,19 +8,7 @@ import { ENUM_APPOINTMENT_TYPE } from './appointment.constant';
 @Schema()
 export class AppointmentEntity {
     @Prop({
-        required: false, //tạm thời ko yêu cầu
-        trim: true
-    })
-    name?: string;
-
-    @Prop({
-        required: false,
-        trim: true
-    })
-    desc?: string;
-
-    @Prop({
-        required: true, //tạm thời ko yêu cầu
+        required: true,
         enum: ENUM_APPOINTMENT_TYPE,
         index: true
     })

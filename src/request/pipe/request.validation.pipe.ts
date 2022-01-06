@@ -26,6 +26,14 @@ import { ExamRecordCreateValidation } from 'src/modules/examRecord/validation/ex
 import { DoctorCreateValidation } from 'src/modules/doctor/validation/doctor.create.validation';
 import { AppointmentListValidation } from 'src/modules/appointment/validation/appointment.list.validate';
 import { CreateMedicalHistoryDto } from 'src/modules/medical-history/validation/create-medical-history.validation';
+import { ExamplaceCreateValidation } from 'src/modules/examplace/validation/examplace.create.validation';
+import { ExamplaceUpdateValidation } from 'src/modules/examplace/validation/examplace.update.validation';
+import { TypeBaseUpdateValidation } from 'src/modules/typebase/validation/typebase.update.validation';
+import { TypeBaseCreateValidation } from 'src/modules/typebase/validation/typebase.create.validation';
+import { DepartmentCreateValidation } from 'src/modules/department/validation/department.create.validation';
+import { DepartmentUpdateValidation } from 'src/modules/department/validation/department.update.validation';
+import { EducationCreateValidation } from 'src/modules/education/validation/education.create.validation';
+import { EducationUpdateValidation } from 'src/modules/education/validation/education.update.validation';
 
 export class RequestValidationPipe implements PipeTransform {
     constructor(
@@ -91,7 +99,15 @@ export class RequestValidationPipe implements PipeTransform {
             ExamRecordCreateValidation,
             DoctorCreateValidation,
             AppointmentListValidation,
-            CreateMedicalHistoryDto
+            CreateMedicalHistoryDto,
+            ExamplaceCreateValidation,
+            ExamplaceUpdateValidation,
+            TypeBaseUpdateValidation,
+            TypeBaseCreateValidation,
+            DepartmentCreateValidation,
+            DepartmentUpdateValidation,
+            EducationCreateValidation,
+            EducationUpdateValidation
         ];
         return types.includes(metatype);
     }

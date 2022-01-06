@@ -8,7 +8,6 @@ import {
     BadRequestException,
     UnauthorizedException,
     ForbiddenException,
-    InternalServerErrorException
 } from '@nestjs/common';
 import { AuthService } from 'src/modules/auth/auth.service';
 import { UserService } from 'src/modules/user/user.service';
@@ -19,8 +18,12 @@ import { classToPlain } from 'class-transformer';
 import { RequestValidationPipe } from 'src/request/pipe/request.validation.pipe';
 import { AuthLoginValidation } from './validation/auth.login.validation';
 import { LoggerService } from 'src/logger/logger.service';
-import { ENUM_LOGGER_ACTION } from 'src/logger/logger.constant';
-import { AuthJwtRefreshGuard, User } from './auth.decorator';
+import {
+    AuthJwtBasicGuard,
+    AuthJwtRefreshGuard,
+    Token,
+    User
+} from './auth.decorator';
 import { Response } from 'src/response/response.decorator';
 import { IResponse } from 'src/response/response.interface';
 import { UserLoginTransformer } from 'src/modules/user/transformer/user.login.transformer';
@@ -33,7 +36,6 @@ import { ENUM_ROLE_STATUS_CODE_ERROR } from 'src/modules/role/role.constant';
 import { DoctorCreateValidation } from '../doctor/validation/doctor.create.validation';
 import { IErrors } from 'src/error/error.interface';
 import { DoctorService } from '../doctor/doctor.service';
-import { ENUM_STATUS_CODE_ERROR } from 'src/error/error.constant';
 import { ENUM_DOCTOR_STATUS_CODE_ERROR } from '../doctor/doctor.constant';
 import { IDoctorDocument } from '../doctor/doctor.interface';
 
@@ -64,8 +66,9 @@ export class AuthController {
         if (!user) {
             const doctor: IDoctorDocument = await this.doctorService.findOne<IDoctorDocument>(
                 {
-                    email: data.email
-                },
+                    email: data.email,
+                    exam_place: data.exam_place
+                }
             );
 
             if (!doctor) {
@@ -85,7 +88,7 @@ export class AuthController {
                 data.password,
                 doctor.password
             );
-    
+
             if (!validate) {
                 throw new BadRequestException({
                     statusCode:
@@ -93,37 +96,30 @@ export class AuthController {
                     message: 'auth.error.passwordNotMatch'
                 });
             }
-    
+
             const accessToken: string = await this.authService.createAccessToken(
                 doctor,
                 rememberMe
             );
-    
+
             const refreshToken: string = await this.authService.createRefreshToken(
                 doctor,
                 rememberMe
             );
-    
-            await this.loggerService.info(
-                ENUM_LOGGER_ACTION.LOGIN,
-                `${doctor._id} do login`,
-                doctor._id,
-                ['login', 'withEmail']
-            );
-            delete doctor.password
-    
+
+            await this.authService.createRefreshTokenBD({
+                id_user: doctor._id,
+                refresh_token: refreshToken
+            });
+
+            delete doctor.password;
+
             return {
                 accessToken,
                 refreshToken,
                 user: doctor
             };
-            
         } else if (!user.isActive) {
-            this.debuggerService.error('Auth Block', {
-                class: 'AuthController',
-                function: 'refresh'
-            });
-
             throw new UnauthorizedException({
                 statusCode: ENUM_USER_STATUS_CODE_ERROR.USER_IS_INACTIVE,
                 message: 'http.clientError.unauthorized'
@@ -141,11 +137,6 @@ export class AuthController {
         );
 
         if (!validate) {
-            this.debuggerService.error('Authorized error', {
-                class: 'AuthController',
-                function: 'login'
-            });
-
             throw new BadRequestException({
                 statusCode:
                     ENUM_AUTH_STATUS_CODE_ERROR.AUTH_PASSWORD_NOT_MATCH_ERROR,
@@ -167,18 +158,16 @@ export class AuthController {
 
         const refreshToken: string = await this.authService.createRefreshToken(
             payload,
-            rememberMe,
+            rememberMe
         );
 
-        await this.loggerService.info(
-            ENUM_LOGGER_ACTION.LOGIN,
-            `${user._id} do login`,
-            user._id,
-            ['login', 'withEmail']
-        );
-        
-        delete user.password
-        delete user.role
+        await this.authService.createRefreshTokenBD({
+            id_user: user._id,
+            refresh_token: refreshToken
+        });
+
+        delete user.password;
+        delete user.role;
 
         return {
             accessToken,
@@ -191,19 +180,68 @@ export class AuthController {
     @AuthJwtRefreshGuard()
     @HttpCode(HttpStatus.OK)
     @Post('/refresh')
-    async refresh(@User() payload: Record<string, any>): Promise<IResponse> {
+    async refresh(
+        @User() payload: Record<string, any>,
+        @Token() token: string
+    ): Promise<IResponse> {
         const { _id, rememberMe } = payload;
         const user: IUserDocument = await this.userService.findOneById<IUserDocument>(
             _id,
             { populate: true }
         );
 
-        if (!user.isActive) {
-            this.debuggerService.error('Auth Block', {
-                class: 'AuthController',
-                function: 'refresh'
+        if (!user) {
+            const doctor: IDoctorDocument = await this.doctorService.findOne<IDoctorDocument>(
+                { _id }
+            );
+
+            if (!doctor) {
+                throw new NotFoundException({
+                    statusCode:
+                        ENUM_AUTH_STATUS_CODE_ERROR.AUTH_USER_NOT_FOUND_ERROR,
+                    message: 'auth.error.userNotFound'
+                });
+            } else if (!doctor.isActive) {
+                throw new UnauthorizedException({
+                    statusCode: ENUM_USER_STATUS_CODE_ERROR.USER_IS_INACTIVE,
+                    message: 'http.clientError.unauthorized'
+                });
+            }
+
+            const checkRefreshTokenExit = await this.authService.checkRefeshTokenExit(
+                token
+            );
+
+            if (!checkRefreshTokenExit) {
+                throw new UnauthorizedException({
+                    statusCode: ENUM_USER_STATUS_CODE_ERROR.USER_IS_INACTIVE,
+                    message: 'http.clientError.unauthorized'
+                });
+            }
+
+            const accessToken: string = await this.authService.createAccessToken(
+                doctor,
+                rememberMe
+            );
+
+            const refreshToken: string = await this.authService.createRefreshToken(
+                doctor,
+                rememberMe
+            );
+
+            await this.authService.createRefreshTokenBD({
+                id_user: doctor._id,
+                refresh_token: refreshToken
             });
 
+            delete doctor.password;
+
+            return {
+                accessToken,
+                refreshToken,
+                user: doctor
+            };
+        } else if (!user.isActive) {
             throw new UnauthorizedException({
                 statusCode: ENUM_USER_STATUS_CODE_ERROR.USER_IS_INACTIVE,
                 message: 'http.clientError.unauthorized'
@@ -233,6 +271,11 @@ export class AuthController {
             rememberMe
         );
 
+        await this.authService.createRefreshTokenBD({
+            id_user: user._id,
+            refresh_token: refreshToken
+        });
+
         return {
             accessToken,
             refreshToken
@@ -256,17 +299,20 @@ export class AuthController {
             });
         }
 
-        try {
-            const create = await this.doctorService.create(data);
+        const create = await this.doctorService.create(data);
 
-            return {
-                _id: create._id
-            };
-        } catch (err: any) {
-            throw new InternalServerErrorException({
-                statusCode: ENUM_STATUS_CODE_ERROR.UNKNOWN_ERROR,
-                message: 'http.server.internalServerError'
-            });
-        }
+        return {
+            _id: create._id
+        };
+    }
+
+    @Response('auth.logout')
+    @HttpCode(HttpStatus.OK)
+    @AuthJwtBasicGuard()
+    @Post('/logout')
+    async logout(@User() payload: Record<string, any>): Promise<IResponse> {
+        const { _id } = payload;
+        await this.authService.deleteRefreshTokenDB(_id);
+        return;
     }
 }

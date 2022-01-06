@@ -3,7 +3,9 @@ import {
     IsEmail,
     MaxLength,
     IsBoolean,
-    IsOptional
+    IsOptional,
+    IsString,
+    IsMongoId
 } from 'class-validator';
 
 export class AuthLoginValidation {
@@ -16,5 +18,10 @@ export class AuthLoginValidation {
     @IsBoolean()
     readonly rememberMe?: boolean;
 
+    @IsString()
     readonly password: string;
+
+    @IsMongoId()
+    @IsOptional()
+    readonly exam_place: string;
 }

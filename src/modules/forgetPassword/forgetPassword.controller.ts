@@ -103,22 +103,8 @@ export class ForgetPasswordController {
             data.password,
             salt
         );
-        try {
-            await this.forgetPassword.updateOneById(_id, passwordHash);
+        await this.forgetPassword.updateOneById(_id, passwordHash);
 
-            return;
-        } catch (err: any) {
-            this.debuggerService.error('update try catch', {
-                class: 'UserController',
-                function: 'update',
-                error: {
-                    ...err
-                }
-            });
-            throw new InternalServerErrorException({
-                statusCode: ENUM_STATUS_CODE_ERROR.UNKNOWN_ERROR,
-                message: 'http.server.internalServerError'
-            });
-        }
+        return;
     }
 }

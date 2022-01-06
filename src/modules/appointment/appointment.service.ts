@@ -7,7 +7,6 @@ import { PatientEntity } from '../patient/patient.schema';
 import {
     AppointmentDocument,
     IAppointmentCreate,
-    IAppointmentDocument,
     IAppointmentUpdate
 } from './appointment.interface';
 import { AppointmentEntity } from './appointment.schema';
@@ -53,10 +52,10 @@ export class AppointmentService {
 
         return appointments.lean();
     }
-    async getTotalData(find: Record<string, any>): Promise<number> {        
+
+    async getTotalData(find: Record<string, any>): Promise<number> {
         return this.appointmentModel.countDocuments(find);
     }
-    
 
     async create(entity: IAppointmentCreate): Promise<AppointmentDocument> {
         const newAppointment: AppointmentEntity = {
@@ -118,5 +117,4 @@ export class AppointmentService {
             data
         );
     }
-
 }

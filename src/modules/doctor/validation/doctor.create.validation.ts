@@ -24,18 +24,18 @@ export class DoctorCreateValidation {
     readonly name: string;
 
     @IsString()
-    @IsNotEmpty()
+    @IsMongoId()
     readonly type_base: string;
 
     @IsString()
-    @IsNotEmpty()
+    @IsMongoId()
     readonly exam_place: string;
 
     @IsString()
-    @IsNotEmpty()
+    @IsMongoId()
     readonly education: string;
 
     @IsString()
-    @IsNotEmpty()
+    @IsMongoId()
     readonly department: string;
 }

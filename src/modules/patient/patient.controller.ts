@@ -32,7 +32,7 @@ import { ENUM_PATIENT_STATUS_CODE_ERROR } from './patient.constant';
 import { PatientCheckExitValidation } from './validation/patient.checkExit.validation';
 import { IPatientUpdate } from './patient.interface';
 import { PatientUpdateValidation } from './validation/patient.update.validation';
-import { Request } from 'express'
+import { Request } from 'express';
 
 @Controller('/patient')
 export class PatientController {
@@ -43,26 +43,17 @@ export class PatientController {
     ) {}
 
     @Response('patient.findPatient')
-     // @AuthJwtGuard(ENUM_PERMISSIONS.ROLE_READ)
+    // @AuthJwtGuard(ENUM_PERMISSIONS.ROLE_READ)
     @Get(':_id')
-    async getPatient(@Req() request: Request ): Promise<IResponse>{
-        try {
-            const { _id } = request.params;
-            const patient = await this.patientService.findPatientById(_id);
-           if(patient){
-               return patient;
-           }else{
+    async getPatient(@Param('_id') _id: string): Promise<IResponse> {
+        const patient = await this.patientService.findPatientById(_id);
+        if (patient) {
+            return patient;
+        } else {
             throw new BadRequestException({
-                statusCode: ENUM_PATIENT_STATUS_CODE_ERROR.PATIENT_NOT_FOUND_ERROR,
-                message: 'patient.error.getNotFound',
-            });
-           }
-        } catch (err: any) {
-            Logger.log("err:",err)
-            throw new InternalServerErrorException({
-                statusCode: ENUM_STATUS_CODE_ERROR.UNKNOWN_ERROR,
-                message: 'http.serverError.internalServerError',
-                error: err
+                statusCode:
+                    ENUM_PATIENT_STATUS_CODE_ERROR.PATIENT_NOT_FOUND_ERROR,
+                message: 'patient.error.notFound'
             });
         }
     }
@@ -78,7 +69,8 @@ export class PatientController {
         const patient = await this.patientService.findPatient(data);
         if (!patient) {
             throw new NotFoundException({
-                statusCode: ENUM_PATIENT_STATUS_CODE_ERROR.PATIENT_NOT_FOUND_ERROR,
+                statusCode:
+                    ENUM_PATIENT_STATUS_CODE_ERROR.PATIENT_NOT_FOUND_ERROR,
                 message: 'patient.error.notFound'
             });
         }
@@ -104,19 +96,11 @@ export class PatientController {
             });
         }
 
-        try {
-            const create = await this.patientService.create(data);
+        const create = await this.patientService.create(data);
 
-            return {
-                _id: create._id
-            };
-        } catch (err: any) {
-            Logger.log("err:",err)
-            throw new InternalServerErrorException({
-                statusCode: ENUM_STATUS_CODE_ERROR.UNKNOWN_ERROR,
-                message: 'http.serverError.internalServerError'
-            });
-        }
+        return {
+            _id: create._id
+        };
     }
 
     @Response('patient.update')
@@ -126,13 +110,12 @@ export class PatientController {
         @Param('_id') _id: string,
         @Body(RequestValidationPipe)
         data: PatientUpdateValidation
-    ){
-        const errors: IErrors[] = await this.patientService.checkExistById(
-            _id
-        );
-        if(errors.length > 0){
+    ) {
+        const errors: IErrors[] = await this.patientService.checkExistById(_id);
+        if (errors.length > 0) {
             throw new BadRequestException({
-                statusCode: ENUM_PATIENT_STATUS_CODE_ERROR.PATIENT_NOT_FOUND_ERROR,
+                statusCode:
+                    ENUM_PATIENT_STATUS_CODE_ERROR.PATIENT_NOT_FOUND_ERROR,
                 message: 'patient.error.updateError',
                 errors
             });
