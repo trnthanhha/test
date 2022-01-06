@@ -3,16 +3,12 @@ import {
     Controller,
     Delete,
     Get,
-    InternalServerErrorException,
     NotFoundException,
     Param,
     Post,
     Put,
     Query
 } from '@nestjs/common';
-import { Debugger } from 'src/debugger/debugger.decorator';
-import { Logger as DebuggerService } from 'winston';
-import { ENUM_STATUS_CODE_ERROR } from 'src/error/error.constant';
 import { PaginationService } from 'src/pagination/pagination.service';
 import { RequestValidationPipe } from 'src/request/pipe/request.validation.pipe';
 import { Response } from 'src/response/response.decorator';
@@ -38,7 +34,6 @@ import { PatientDocument } from '../patient/patient.interface';
 @Controller('/appointment')
 export class AppointmentController {
     constructor(
-        @Debugger() private readonly debuggerService: DebuggerService,
         private readonly paginationService: PaginationService,
         private readonly appointmentService: AppointmentService,
         private readonly sendSMSService: SendSMSService,
@@ -54,7 +49,8 @@ export class AppointmentController {
     ): Promise<IResponsePaging> {
         const skip: number = await this.paginationService.skip(page, perPage);
         const findPatient: Record<string, any> = {};
-        if (search) {
+        const findAppointment: Record<string, any> = {};
+        if (search && search !== '') {
             findPatient['$or'] = [
                 {
                     name: new RegExp(search)
@@ -66,18 +62,20 @@ export class AppointmentController {
                     email: new RegExp(search)
                 }
             ];
+            const patients: PatientDocument[] = await this.patientService.findAll(
+                findPatient
+            );
+
+            findAppointment['$or'] = patients.map((patient) => {
+                return {
+                    patient_id: patient._id
+                };
+            });
+
+            if (findAppointment['$or'].length === 0) {
+                findAppointment['$or'] = [{ _id: null }];
+            }
         }
-
-        const patients: PatientDocument[] = await this.patientService.findAll(
-            findPatient
-        );
-
-        const findAppointment: Record<string, any> = {};
-        findAppointment['$or'] = patients.map((patient) => {
-            return {
-                patient_id: patient._id
-            };
-        });
 
         const appointment: AppointmentDocument[] = await this.appointmentService.findAll<AppointmentDocument>(
             findAppointment,
@@ -119,28 +117,23 @@ export class AppointmentController {
     async create(
         @Body(RequestValidationPipe) data: AppointmentCreateValidation
     ): Promise<IResponse> {
-        try {
-            const create = await this.appointmentService.create(data);
+        const create = await this.appointmentService.create(data);
 
-            const appointment: IAppointmentDocument = await this.appointmentService.findOneById<IAppointmentDocument>(
-                create._id,
-                {
-                    populate: true
-                }
-            );
+        const appointment: IAppointmentDocument = await this.appointmentService.findOneById<IAppointmentDocument>(
+            create._id,
+            {
+                populate: true
+            }
+        );
+        if (appointment.patient_id?.phone) {
             await this.sendSMSService.sendSMS(
-                appointment.patient_id.phone.toString(),
+                appointment.patient_id?.phone.toString(),
                 ENUM_APPOINTMENT_MESSAGE.APPOINTMENT_CREATE
             );
-            return {
-                _id: create._id
-            };
-        } catch (err: any) {
-            throw new InternalServerErrorException({
-                statusCode: ENUM_STATUS_CODE_ERROR.UNKNOWN_ERROR,
-                message: 'http.serverError.internalServerError'
-            });
         }
+        return {
+            _id: create._id
+        };
     }
 
     @Response('appointment.update')
@@ -165,21 +158,16 @@ export class AppointmentController {
             });
         }
 
-        try {
-            await this.appointmentService.updateOneById(_id, data);
+        await this.appointmentService.updateOneById(_id, data);
+        if (appointment.patient_id?.phone) {
             await this.sendSMSService.sendSMS(
-                appointment.patient_id.phone.toString(),
-                ENUM_APPOINTMENT_MESSAGE.APPOINTMENT_UPDATE
+                appointment.patient_id?.phone.toString(),
+                ENUM_APPOINTMENT_MESSAGE.APPOINTMENT_CREATE
             );
-            return {
-                _id
-            };
-        } catch (err: any) {
-            throw new InternalServerErrorException({
-                statusCode: ENUM_STATUS_CODE_ERROR.UNKNOWN_ERROR,
-                message: 'http.serverError.internalServerError'
-            });
         }
+        return {
+            _id
+        };
     }
 
     @Response('appointment.delete')
@@ -200,18 +188,13 @@ export class AppointmentController {
             });
         }
 
-        try {
-            await this.appointmentService.deleteOneById(_id);
+        await this.appointmentService.deleteOneById(_id);
+        if (appointment.patient_id?.phone) {
             await this.sendSMSService.sendSMS(
-                appointment.patient_id.phone.toString(),
-                ENUM_APPOINTMENT_MESSAGE.APPOINTMENT_UPDATE
+                appointment.patient_id?.phone.toString(),
+                ENUM_APPOINTMENT_MESSAGE.APPOINTMENT_CREATE
             );
-            return;
-        } catch (err) {
-            throw new InternalServerErrorException({
-                statusCode: ENUM_STATUS_CODE_ERROR.UNKNOWN_ERROR,
-                message: 'http.serverError.internalServerError'
-            });
         }
+        return;
     }
 }

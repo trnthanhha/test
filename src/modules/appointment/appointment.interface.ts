@@ -14,8 +14,6 @@ export interface IAppointmentDocument
 }
 
 export interface IAppointmentCreate {
-    name?: string;
-    desc?: string;
     type: string;
     date: Date;
     exam_place_id: string;

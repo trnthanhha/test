@@ -1,16 +1,21 @@
 import {
     IsString,
     IsNotEmpty,
-    MaxLength,
-    MinLength,
-    IsArray,
-    IsMongoId
+    IsIn
 } from 'class-validator';
+import { ENUM_EXAMPLACE_TYPE } from '../examplace.constant';
 
 export class ExamplaceCreateValidation {
     @IsString()
     @IsNotEmpty()
-    @MinLength(3)
-    @MaxLength(30)
     readonly name: string;
+
+    @IsString()
+    @IsNotEmpty()
+    readonly address: string;
+
+    @IsString()
+    @IsNotEmpty()
+    @IsIn(Object.values(ENUM_EXAMPLACE_TYPE))
+    readonly type: string;
 }

@@ -92,13 +92,13 @@ Authorization: Basic eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJfaWQiOiI2MWMzNWViNz
 }
 
 
-################################ +++++++++++++++++++++++++++++ ################################
+################################ +++++++++++++++++++++++++++++ ################################ THANH-HÀ
 ###LOGIN
 POST http://localhost:3000/api/auth/login
 Content-Type: application/json
 
 {
-    "email": "admin@gmail.com",
+    "email": "tranthanhha@gmail.com",
     "password": "123456"
 }
 ###
@@ -107,16 +107,16 @@ POST http://localhost:3000/api/auth/register
 Content-Type: application/json
 
 {
-    "email":"xxxx@gmail.com",
+    "email":"tranthanhha3@gmail.com",
     "name":"xxx",
     "password":"123456",
-    "type_base":"123456",
-    "exam_place":"123456",
-    "education":"123456",
-    "department":"123456"
+    "type_base":"61d5ae7dd6c8b37560bec7a8",
+    "exam_place":"61d5ad7917b2d17f0476b94a",
+    "education":"61d5bd17d1d33f5830786de7",
+    "department":"61d5bc8cd1d33f5830786de5"
 }
 
-################################ +++++++++++++++++++++++++++++ ################################
+################################ +++++++++++++++++++++++++++++ ################################ THANH-HÀ
 #FORGET PASSWORD
 POST http://localhost:3000/api/forgetpassword
 Content-Type: application/json
@@ -124,7 +124,7 @@ Content-Type: application/json
 {
     "email": "xxxx@gmail.com"
 }
-
+###
 #UPDATE PASSWORD
 PUT http://localhost:3000/api/forgetpassword
 Content-Type: application/json
@@ -134,9 +134,9 @@ Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJfaWQiOiI2MWJiMjY2Y
     "password": "1234567"
 }
 
-################################ +++++++++++++++++++++++++++++ ################################
+################################ +++++++++++++++++++++++++++++ ################################ THANH-HÀ
 #CREATE PATIENT
-POST http://localhost:3000/api/patient/create
+POST http://localhost:3000/api/patient/create 
 Content-Type: application/json
 
 {
@@ -157,16 +157,16 @@ Content-Type: application/json
     "relative_name": "xxx",
     "relative_phone": "0987536021"
 }
-
+###
 #FIND PROFILE PATIENT BY PHONE
-POST http://localhost:3000/api/patient/findprofile 
+POST http://localhost:3000/api/patient/findprofile
 Content-Type: application/json
 
 {
     "phone":"0987536021"
 }
 
-################################ +++++++++++++++++++++++++++++ ################################
+################################ +++++++++++++++++++++++++++++ ################################ THANH-HÀ
 #CREATE APPOITMENT
 POST http://localhost:3000/api/appointment/create
 Content-Type: application/json
@@ -175,27 +175,136 @@ Content-Type: application/json
     "name": "x",
     "desc": "xxx",
     "date": "2021-12-24T00:00:00.000Z",
-    "exam_place_id": "61bdd9cf994494b90f82fda7",
-    "doctor_id": "61bdd9a0994494b90f82fd8f",
-    "patient_id": "61bdd9b3994494b90f82fd92",
+    "exam_place_id": "61d5ad7917b2d17f0476b94a",
+    "doctor_id": "61c200a6054a2a1cd4ad953c",
+    "patient_id": "61c5259140d38446a421d6f5",
     "type": "KHÁM MỚI"
 }
-
+###
 #UPDATE APPOITMENT
-PUT http://localhost:3000/api/appointment/update/61bdedbb37ad8c5d4c7b6c36
+PUT http://localhost:3000/api/appointment/update/61c5267340d38446a421d6fa
 Content-Type: application/json
 
 {
     "name":"x"
 }
-
+###
 #DELETE APPOITMENT
 DELETE http://localhost:3000/api/appointment/delete/61becf1ba336c20498ed3d48
 Content-Type: application/json
-
+###
 #GET LIST APPOITMENT, SEARCH (NAME, PHONE, EMAIL) OF PATIENT, SORT ALL FILED, PAGINATION
-GET http://localhost:3000/api/appointment/list?search=tranthanhha&&sort=name@desc&&limit=20&&page=1
+GET http://localhost:3000/api/appointment/list?sort=name@desc&&limit=20&&page=1&&search=09
 Content-Type: application/json
+
+################################ +++++++++++++++++++++++++++++ ################################ THANH-HÀ
+### LIST EXAMPLACE
+GET http://localhost:3000/api/examplace/list
+
+### CREATE EXAMPLACE
+POST http://localhost:3000/api/examplace/create
+Content-Type: application/json
+
+{
+    "name": "hà",
+    "type": "HOSPITAL",
+    "address": "hà nội"
+}
+
+### GET DETAIL EXAMPLACE
+GET http://localhost:3000/api/examplace/detail/61d6623efc318e5358250c2f
+
+### UPDATE EXAMPLACE
+PUT  http://localhost:3000/api/examplace/update/61d6623efc318e5358250c2f
+Content-Type: application/json
+
+{
+    "name": "hà",
+    "type": "HOSPITAL",
+    "address": "hà nội"
+}
+
+### DELETE EXAMPLACE
+DELETE  http://localhost:3000/api/examplace/delete/61d6623efc318e5358250c2f
+
+################################ +++++++++++++++++++++++++++++ ################################ THANH-HÀ
+### LIST EDUCATION
+GET http://localhost:3000/api/education/list
+
+### CREATE EDUCATION
+POST http://localhost:3000/api/education/create
+Content-Type: application/json
+
+{
+    "name": "ĐH HN"
+}
+
+### GET DETAIL EDUCATION
+GET http://localhost:3000/api/education/detail/61d6623efc318e5358250c2f
+
+### UPDATE EDUCATION
+PUT  http://localhost:3000/api/education/update/61d6623efc318e5358250c2f
+Content-Type: application/json
+
+{
+    "name": "PTIT"
+}
+
+### DELETE EDUCATION
+DELETE  http://localhost:3000/api/education/delete/61d6623efc318e5358250c2f
+
+################################ +++++++++++++++++++++++++++++ ################################ THANH-HÀ
+### LIST TYPEBASE
+GET http://localhost:3000/api/typebase/list
+
+### CREATE TYPEBASE
+POST http://localhost:3000/api/typebase/create
+Content-Type: application/json
+
+{
+    "name": "ĐH HN"
+}
+
+### GET DETAIL TYPEBASE
+GET http://localhost:3000/api/typebase/detail/61d6623efc318e5358250c2f
+
+### UPDATE TYPEBASE
+PUT  http://localhost:3000/api/typebase/update/61d6623efc318e5358250c2f
+Content-Type: application/json
+
+{
+    "name": "PTIT"
+}
+
+### DELETE TYPEBASE
+DELETE  http://localhost:3000/api/typebase/delete/61d6623efc318e5358250c2f
+
+################################ +++++++++++++++++++++++++++++ ################################ THANH-HÀ
+### LIST DEPARTMENT
+GET http://localhost:3000/api/department/list
+
+### CREATE DEPARTMENT
+POST http://localhost:3000/api/department/create
+Content-Type: application/json
+
+{
+    "name": "CNTT"
+}
+
+### GET DETAIL DEPARTMENT
+GET http://localhost:3000/api/department/detail/61d6623efc318e5358250c2f
+
+### UPDATE DEPARTMENT
+PUT  http://localhost:3000/api/department/update/61d6623efc318e5358250c2f
+Content-Type: application/json
+
+{
+    "name": "DĐT"
+}
+
+### DELETE DEPARTMENT
+DELETE  http://localhost:3000/api/department/delete/61d6623efc318e5358250c2f
+
 
 ### DELETE SYMPTOMS 
 # param "patientId"

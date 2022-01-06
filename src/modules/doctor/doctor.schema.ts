@@ -1,4 +1,9 @@
 import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose';
+import { Types } from 'mongoose';
+import { DepartmentEntity } from '../department/department.schema';
+import { EducationEntity } from '../education/education.schema';
+import { ExamplaceEntity } from '../examplace/examplace.schema';
+import { TypeBaseEntity } from '../typebase/typebase.schema';
 
 @Schema({ timestamps: true, versionKey: false })
 export class DoctorEntity {
@@ -22,27 +27,35 @@ export class DoctorEntity {
     name: string;
 
     @Prop({
-        required: true
+        required: true,
+        type: Types.ObjectId,
+        ref: TypeBaseEntity.name,
     })
-    type_base: string; // loại hình cơ sở sau -> ObjId
+    type_base: string;
 
     @Prop({
-        required: true
+        required: true,
+        type: Types.ObjectId,
+        ref: ExamplaceEntity.name,
     })
-    exam_place: string; // đơn vị công tác sau -> ObjId
+    exam_place: string;
 
     @Prop({
-        required: true
+        required: true,
+        type: Types.ObjectId,
+        ref: EducationEntity.name,
     })
-    education: string; // học hàm học vị sau -> ObjId
+    education: string;
 
     @Prop({
-        required: true
+        required: true,
+        type: Types.ObjectId,
+        ref: DepartmentEntity.name,
     })
-    department: string; // khoa phòng sau -> ObjId
+    department: string;
 
     @Prop({
-        default: true // set tạm
+        default: false
     })
     isActive: boolean;
 }

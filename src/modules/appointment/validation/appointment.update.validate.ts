@@ -4,21 +4,11 @@ import {
     IsMongoId,
     IsOptional,
     IsDateString,
-    IsIn,
+    IsIn
 } from 'class-validator';
 import { ENUM_APPOINTMENT_TYPE } from '../appointment.constant';
 
 export class AppointmentUpdateValidation {
-    @IsString()
-    @IsOptional()
-    // @IsNotEmpty()
-    readonly name?: string;
-
-    @IsString()
-    @IsOptional()
-    // @IsNotEmpty()
-    readonly desc?: string;
-
     @IsString()
     @IsOptional()
     @IsIn(Object.values(ENUM_APPOINTMENT_TYPE))
@@ -30,7 +20,7 @@ export class AppointmentUpdateValidation {
     readonly date: Date;
 
     @IsMongoId()
-    // @IsOptional()
+    @IsOptional()
     @IsNotEmpty()
     readonly exam_place_id: string;
 

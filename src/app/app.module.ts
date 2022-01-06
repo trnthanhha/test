@@ -28,6 +28,9 @@ import { ExamRecordModule } from 'src/modules/examRecord/examRecord.module';
 import { SymptomsModule } from 'src/modules/symptoms/symptoms.module';
 import { PrehistoricModule } from 'src/modules/prehistoric/prehistoric.module';
 import { MedicalHistoryModule } from 'src/modules/medical-history/medical-history.module';
+import { TypeBaseModule } from 'src/modules/typebase/typebase.module';
+import { DepartmentModule } from 'src/modules/department/department.module';
+import { EducationModule } from 'src/modules/education/education.module';
 // import { KafkaProducerModule } from 'src/kafka/producer/kafka.producer.module';
 // import { KafkaConsumerModule } from 'src/kafka/consumer/consumer.module';
 // import { KafkaAdminModule } from 'src/kafka/admin/kafka.admin.module';
@@ -78,7 +81,10 @@ import { MedicalHistoryModule } from 'src/modules/medical-history/medical-histor
         ExamRecordModule,
         SymptomsModule,
         PrehistoricModule,
-        MedicalHistoryModule
+        MedicalHistoryModule,
+        TypeBaseModule,
+        DepartmentModule,
+        EducationModule
     ]
 })
 export class AppModule {}

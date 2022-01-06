@@ -3,7 +3,7 @@ import { Document } from 'mongoose';
 
 export type PatientDocument = PatientEntity & Document;
 
-export type IPatientDocument = PatientDocument
+export type IPatientDocument = PatientDocument;
 
 export interface IPatientCreate {
     name: string;
@@ -23,7 +23,7 @@ export interface IPatientCreate {
     relative_phone?: string;
 }
 
-export type IPatientUpdate = Pick<IPatientCreate, 'name' | 'birthday' | 'gender' | 'address' | 'phone' | 'email' | 'job' | 'education' | 'relative_name' | 'relative_phone'>;
+export type IPatientUpdate = Omit<IPatientCreate, 'phone'>;
 
 export interface IPatientCheckExit {
     phone: string;

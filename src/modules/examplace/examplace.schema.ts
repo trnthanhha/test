@@ -1,5 +1,5 @@
 import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose';
-import { Types } from 'mongoose';
+import { ENUM_EXAMPLACE_TYPE } from './examplace.constant';
 
 @Schema({ timestamps: true, versionKey: false })
 export class ExamplaceEntity {
@@ -11,31 +11,16 @@ export class ExamplaceEntity {
     name: string;
 
     @Prop({
-        required: false,
-        trim: true
+        required: true,
+        enum: ENUM_EXAMPLACE_TYPE
     })
-    desc: string;
+    type: string;
 
     @Prop({
         required: true,
         trim: true
     })
-    businessLicense: string;
-
-    @Prop({
-        required: true
-    })
-    type: boolean;
-
-    @Prop({
-        required: false
-    })
     address: string;
-
-    @Prop({
-        required: true
-    })
-    isActive: boolean;
 }
 
 export const ExamplaceDatabaseName = 'examplaces';

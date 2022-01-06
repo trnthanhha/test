@@ -18,7 +18,7 @@ import { JwtGuard } from './guard/jwt/auth.jwt.guard';
 
 export function AuthJwtGuard(
     ...permissions: ENUM_PERMISSIONS[]
-) {
+): IAuthApplyDecorator {
     return applyDecorators(
         UseGuards(JwtGuard, PermissionDefaultGuard, AuthDefaultGuard),
         SetMetadata(PERMISSION_META_KEY, permissions)
@@ -31,6 +31,10 @@ export function AuthBasicGuard(): IAuthApplyDecorator {
 
 export function AuthJwtRefreshGuard(): IAuthApplyDecorator {
     return applyDecorators(UseGuards(JwtRefreshGuard));
+}
+
+export function AuthJwtBasicGuard(): IAuthApplyDecorator {
+    return applyDecorators(UseGuards(JwtGuard));
 }
 
 export const User = createParamDecorator(
