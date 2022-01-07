@@ -1,9 +1,10 @@
 import { Module } from '@nestjs/common';
 import { MongooseModule } from '@nestjs/mongoose';
 import { AuthModule } from '../auth/auth.module';
+import { DoctorModule } from '../doctor/doctor.module';
+import { DoctorDatabaseName, DoctorEntity, DoctorSchema } from '../doctor/doctor.schema';
 import { SendMailModule } from '../sendMail/sendMail.module';
 import { UserModule } from '../user/user.module';
-import { UserDatabaseName, UserEntity, UserSchema } from '../user/user.schema';
 import { ForgetPasswordController } from './forgetPassword.controller';
 import { ForgetPasswordService } from './forgetPassword.service';
 
@@ -11,12 +12,13 @@ import { ForgetPasswordService } from './forgetPassword.service';
     imports: [
         MongooseModule.forFeature([
             {
-                name: UserEntity.name,
-                schema: UserSchema,
-                collection: UserDatabaseName
+                name: DoctorEntity.name,
+                schema: DoctorSchema,
+                collection: DoctorDatabaseName
             }
         ]),
         UserModule,
+        DoctorModule,
         AuthModule,
         SendMailModule
     ],

@@ -4,6 +4,7 @@ import {
     MaxLength,
     IsString,
     MinLength,
+    IsMongoId,
 } from 'class-validator';
 
 export class ForgetPasswordValidation {
@@ -11,6 +12,11 @@ export class ForgetPasswordValidation {
     @IsNotEmpty()
     @MaxLength(100)
     readonly email: string;
+
+    @IsMongoId()
+    @IsNotEmpty()
+    readonly exam_place: string
+
 }
 
 export class ChangePasswordValidation{

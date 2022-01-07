@@ -10,7 +10,8 @@ export class DoctorEntity {
     @Prop({
         required: true,
         index: true,
-        trim: true
+        trim: true,
+        unique: true
     })
     email: string;
 

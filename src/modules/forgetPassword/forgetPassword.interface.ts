@@ -1,8 +1,9 @@
-import { UserEntity } from '../user/user.schema';
+import { DoctorEntity } from '../doctor/doctor.schema';
 import { Document } from 'mongoose';
 
-export type ForgetDocument = UserEntity & Document;
+export type ForgetDocument = DoctorEntity & Document;
 
-export interface IForgetDocument extends Pick<UserEntity, 'email'> {
+export interface IForgetDocument extends Pick<DoctorEntity, 'email' | 'exam_place'> {
     email: string;
+    exam_place: string;
 }
