@@ -31,6 +31,7 @@ import { MedicalHistoryModule } from 'src/modules/medical-history/medical-histor
 import { TypeBaseModule } from 'src/modules/typebase/typebase.module';
 import { DepartmentModule } from 'src/modules/department/department.module';
 import { EducationModule } from 'src/modules/education/education.module';
+import { PointLadderModule } from 'src/modules/pointladder/pointladder.module';
 // import { KafkaProducerModule } from 'src/kafka/producer/kafka.producer.module';
 // import { KafkaConsumerModule } from 'src/kafka/consumer/consumer.module';
 // import { KafkaAdminModule } from 'src/kafka/admin/kafka.admin.module';
@@ -84,7 +85,8 @@ import { EducationModule } from 'src/modules/education/education.module';
         MedicalHistoryModule,
         TypeBaseModule,
         DepartmentModule,
-        EducationModule
+        EducationModule,
+        PointLadderModule
     ]
 })
 export class AppModule {}
