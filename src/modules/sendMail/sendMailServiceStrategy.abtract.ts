@@ -1,7 +1,7 @@
 import nodemailer from 'nodemailer';
 import { ISendMail, ISendMailService } from './senMail.interface';
 
-export abstract class sendMailServiceStrategy implements ISendMailService {
+export abstract class SendMailServiceStrategy implements ISendMailService {
     protected transporter = nodemailer.createTransport({
         service: 'Gmail',
         auth: {

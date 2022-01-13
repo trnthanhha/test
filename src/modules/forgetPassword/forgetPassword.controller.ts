@@ -64,7 +64,8 @@ export class ForgetPasswordController {
         }
         const send: ISendMail = await this.sendMailChangePassword.sendMail(
             data.email,
-            await this.authService.createAccessToken(doctor, false)
+            await this.authService.createAccessToken(doctor, false),
+            data.url
         );
 
         if (!send.status) {

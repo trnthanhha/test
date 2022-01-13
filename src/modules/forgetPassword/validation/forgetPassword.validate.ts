@@ -5,6 +5,7 @@ import {
     IsString,
     MinLength,
     IsMongoId,
+    IsOptional,
 } from 'class-validator';
 
 export class ForgetPasswordValidation {
@@ -17,6 +18,9 @@ export class ForgetPasswordValidation {
     @IsNotEmpty()
     readonly exam_place: string
 
+    @IsString()
+    @IsOptional()
+    readonly url: string
 }
 
 export class ChangePasswordValidation{

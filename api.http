@@ -122,7 +122,9 @@ POST http://localhost:3000/api/forgetpassword
 Content-Type: application/json
 
 {
-    "email": "xxxx@gmail.com"
+    "exam_place": "61d472ddfdfaac6f4cceec68",
+    "email": "xxxx@gmail.com",
+    "url":"http://localhost:3000/changepass"
 }
 ###
 #UPDATE PASSWORD
