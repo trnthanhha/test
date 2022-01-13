@@ -5,6 +5,7 @@ export default {
     delete: 'Delete Doctor Success.',
     create: 'Create Doctor Success.',
     update: 'Update Doctor Success.',
+    sendMail: 'Send Mail Success, Please Check Email.',
     error: {
         emailExist: 'Email doctor used',
         phoneExist: 'Mobile Number doctor used',

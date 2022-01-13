@@ -18,19 +18,18 @@ import {
     ChangePasswordValidation,
     ForgetPasswordValidation
 } from './validation/forgetPassword.validate';
-import { ENUM_USER_STATUS_CODE_ERROR } from '../user/user.constant';
 import { ForgetPasswordService } from './forgetPassword.service';
 import { ENUM_STATUS_CODE_ERROR } from 'src/error/error.constant';
 import { AuthService } from '../auth/auth.service';
 import { IUserDocument } from '../user/user.interface';
 import { SendMailChangePassword } from '../sendMail/sendMailChangePassword.service';
-import { ENUM_PERMISSIONS } from '../permission/permission.constant';
-import { AuthJwtGuard, User } from '../auth/auth.decorator';
-import { UserLoginTransformer } from '../user/transformer/user.login.transformer';
-import { classToPlain } from 'class-transformer';
+import { AuthJwtBasicGuard, User } from '../auth/auth.decorator';
 import { Helper } from 'src/helper/helper.decorator';
 import { HelperService } from 'src/helper/helper.service';
 import { ISendMail } from '../sendMail/senMail.interface';
+import { DoctorService } from '../doctor/doctor.service';
+import { IDoctorDocument } from '../doctor/doctor.interface';
+import { ENUM_DOCTOR_STATUS_CODE_ERROR } from '../doctor/doctor.constant';
 
 @Controller('/forgetpassword')
 export class ForgetPasswordController {
@@ -38,46 +37,34 @@ export class ForgetPasswordController {
         @Debugger() private readonly debuggerService: DebuggerService,
         @Helper() private readonly helperService: HelperService,
         private readonly userService: UserService,
+        private readonly doctorService: DoctorService,
         private readonly forgetPassword: ForgetPasswordService,
         private readonly authService: AuthService,
         private readonly sendMailChangePassword: SendMailChangePassword
     ) {}
 
-    @Response('user.sendMail')
+    @Response('doctor.sendMail')
     @HttpCode(HttpStatus.OK)
     @Post()
     async sendMail(
         @Body(RequestValidationPipe) data: ForgetPasswordValidation
     ): Promise<IResponse> {
-        const user: IUserDocument = await this.userService.findOne<IUserDocument>(
+        const doctor: IDoctorDocument = await this.doctorService.findOne<IDoctorDocument>(
             {
-                email: data.email
-            },
-            { populate: true }
+                email: data.email,
+                exam_place: data.exam_place
+            }
         );
 
-        if (!user) {
-            this.debuggerService.error('Send Mail Error', {
-                class: 'ForgetPasswordController',
-                function: 'sendMail'
-            });
-
+        if (!doctor) {
             throw new NotFoundException({
-                statusCode: ENUM_USER_STATUS_CODE_ERROR.USER_NOT_FOUND_ERROR,
-                message: 'user.error.notFound'
+                statusCode: ENUM_DOCTOR_STATUS_CODE_ERROR.DOCTOR_NOT_FOUND_ERROR,
+                message: 'doctor.error.notFound'
             });
         }
-
-        const safe: UserLoginTransformer = await this.userService.mapLogin(
-            user
-        );
-        const payload: Record<string, any> = {
-            ...classToPlain(safe)
-        };
-
         const send: ISendMail = await this.sendMailChangePassword.sendMail(
             data.email,
-            await this.authService.createAccessToken(payload, false)
+            await this.authService.createAccessToken(doctor, false)
         );
 
         if (!send.status) {
@@ -90,19 +77,19 @@ export class ForgetPasswordController {
         return;
     }
 
-    @Response('user.update')
-    @AuthJwtGuard(ENUM_PERMISSIONS.PROFILE_UPDATE)
+    @Response('doctor.update')
     @HttpCode(HttpStatus.OK)
+    @AuthJwtBasicGuard()
     @Put()
     async changePassword(
         @Body(RequestValidationPipe) data: ChangePasswordValidation,
         @User('_id') _id: string
-    ): Promise<IResponse> {
+    ): Promise<IResponse> {        
         const salt: string = await this.helperService.randomSalt();
         const passwordHash = await this.helperService.bcryptHashPassword(
             data.password,
             salt
-        );
+        );        
         await this.forgetPassword.updateOneById(_id, passwordHash);
 
         return;
