@@ -34,6 +34,7 @@ import { DepartmentCreateValidation } from 'src/modules/department/validation/de
 import { DepartmentUpdateValidation } from 'src/modules/department/validation/department.update.validation';
 import { EducationCreateValidation } from 'src/modules/education/validation/education.create.validation';
 import { EducationUpdateValidation } from 'src/modules/education/validation/education.update.validation';
+import { PointLadderCreateValidation } from 'src/modules/pointladder/validation/pointladder.create.validate';
 
 export class RequestValidationPipe implements PipeTransform {
     constructor(
@@ -107,7 +108,8 @@ export class RequestValidationPipe implements PipeTransform {
             DepartmentCreateValidation,
             DepartmentUpdateValidation,
             EducationCreateValidation,
-            EducationUpdateValidation
+            EducationUpdateValidation,
+            PointLadderCreateValidation
         ];
         return types.includes(metatype);
     }

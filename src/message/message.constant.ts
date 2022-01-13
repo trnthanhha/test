@@ -13,6 +13,7 @@ import examplace from 'src/modules/examplace/message/examplace';
 import typebase from 'src/modules/typebase/message/typebase';
 import department from 'src/modules/department/message/department';
 import education from 'src/modules/education/message/education';
+import pointladder from 'src/modules/pointladder/message/pointladder';
 
 export default {
     en: {
@@ -30,7 +31,8 @@ export default {
         examplace,
         typebase,
         department,
-        education
+        education,
+        pointladder
     },
     
 };
