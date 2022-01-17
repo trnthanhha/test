@@ -196,7 +196,7 @@ DELETE http://localhost:3000/api/appointment/delete/61becf1ba336c20498ed3d48
 Content-Type: application/json
 ###
 #GET LIST APPOITMENT, SEARCH (NAME, PHONE, EMAIL) OF PATIENT, SORT ALL FILED, PAGINATION
-GET http://localhost:3000/api/appointment/list?sort=name@desc&&perPage=20&&page=1&&search=09
+GET http://localhost:3000/api/appointment/list?sort=name@desc&perPage=20&page=1&search=09
 Content-Type: application/json
 
 ################################ +++++++++++++++++++++++++++++ ################################ THANH-HÀ
@@ -309,7 +309,7 @@ DELETE  http://localhost:3000/api/department/delete/61d6623efc318e5358250c2f
 
 ################################ +++++++++++++++++++++++++++++ ################################ THANH-HÀ
 #GET LIST DOCTOR, SEARCH (NAME, EMAIL) OF DOCTOR, SORT ALL FILED, PAGINATION
-GET http://localhost:3000/api/doctor/list?sort=name@desc&&perPage=20&&page=1&&search=xxx
+GET http://localhost:3000/api/doctor/list?sort=name@desc&perPage=20&page=1&search=xxx
 Content-Type: application/json
 Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJfaWQiOiI2MWJiMjY2Y2U5NTgyNTM5MDBjZjY5NGQiLCJpc0FjdGl2ZSI6dHJ1ZSwiZW1haWwiOiJkMTdkY2NuMTk2QGdtYWlsLmNvbSIsInBob25lIjoiMDgxMTExMTExMTEiLCJyb2xlIjp7Im5hbWUiOiJhZG1pbiIsInBlcm1pc3Npb25zIjpbIlBFUk1JU1NJT05fUkVBRCIsIlBST0ZJTEVfUkVBRCIsIlBST0ZJTEVfVVBEQVRFIiwiUk9MRV9DUkVBVEUiLCJST0xFX0RFTEVURSIsIlJPTEVfUkVBRCIsIlJPTEVfVVBEQVRFIiwiVVNFUl9DUkVBVEUiLCJVU0VSX0RFTEVURSIsIlVTRVJfUkVBRCIsIlVTRVJfVVBEQVRFIl19LCJyZW1lbWJlck1lIjpmYWxzZSwiaWF0IjoxNjQyMzk0MDcyLCJuYmYiOjE2NDIzOTQwNzIsImV4cCI6MTY0MjQ4MDQ3Mn0.hLV-4AUByeU8XM8yTvsdkMSJfbUsXcQF13joN76Izpk
 
@@ -323,7 +323,28 @@ Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJfaWQiOiI2MWJiMjY2Y
     "isActive":true, 
     "conten":"thành công" 
 }
+################################ +++++++++++++++++++++++++++++ ################################ THANH-HÀ
+### UPDATE PASSWORD
+PUT http://localhost:3000/api/doctor/updateprofile
+Content-Type: application/json
+Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJfaWQiOiI2MWQ1YzEzMjA2OTNjMDY5NmM3NWNmNjIiLCJpc0FjdGl2ZSI6dHJ1ZSwiZW1haWwiOiJkMTdkY2NuMTk1QGdtYWlsLmNvbSIsIm5hbWUiOiJnw6wgxJHDsyIsInBhc3N3b3JkIjoiJDJiJDA4JFhTUFdOUXBjR001ODhCLjEuUmloVk8vMFZNTDNHbGF6QjljMzhXaS5OUGxxODdKSTc4bmptIiwidHlwZV9iYXNlIjoiNjFkNWFlN2RkNmM4YjM3NTYwYmVjN2E4IiwiZXhhbV9wbGFjZSI6IjYxZDVhZDc5MTdiMmQxN2YwNDc2Yjk0YSIsImVkdWNhdGlvbiI6IjYxZDViZDE3ZDFkMzNmNTgzMDc4NmRlNyIsImRlcGFydG1lbnQiOiI2MWQ1YmM4Y2QxZDMzZjU4MzA3ODZkZTUiLCJjcmVhdGVkQXQiOiIyMDIyLTAxLTA1VDE2OjAyOjU4LjQ2MFoiLCJ1cGRhdGVkQXQiOiIyMDIyLTAxLTE3VDA1OjE1OjAxLjc1N1oiLCJpYXQiOjE2NDI0Mzg4NTUsIm5iZiI6MTY0MjQzODg1NSwiZXhwIjoxNjQyNTI1MjU1fQ.M_hZj09nDKZ8W6htuIjKjfQF-Y32_NcO-8lKHwoaYPo
 
+{
+    "password": "123456"
+}
+
+### UPDATE PROFILE
+PUT http://localhost:3000/api/doctor/updateprofile
+Content-Type: application/json
+Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJfaWQiOiI2MWQ1YzEzMjA2OTNjMDY5NmM3NWNmNjIiLCJpc0FjdGl2ZSI6dHJ1ZSwiZW1haWwiOiJkMTdkY2NuMTk1QGdtYWlsLmNvbSIsIm5hbWUiOiJnw6wgxJHDsyIsInBhc3N3b3JkIjoiJDJiJDA4JFhTUFdOUXBjR001ODhCLjEuUmloVk8vMFZNTDNHbGF6QjljMzhXaS5OUGxxODdKSTc4bmptIiwidHlwZV9iYXNlIjoiNjFkNWFlN2RkNmM4YjM3NTYwYmVjN2E4IiwiZXhhbV9wbGFjZSI6IjYxZDVhZDc5MTdiMmQxN2YwNDc2Yjk0YSIsImVkdWNhdGlvbiI6IjYxZDViZDE3ZDFkMzNmNTgzMDc4NmRlNyIsImRlcGFydG1lbnQiOiI2MWQ1YmM4Y2QxZDMzZjU4MzA3ODZkZTUiLCJjcmVhdGVkQXQiOiIyMDIyLTAxLTA1VDE2OjAyOjU4LjQ2MFoiLCJ1cGRhdGVkQXQiOiIyMDIyLTAxLTE3VDA1OjE1OjAxLjc1N1oiLCJpYXQiOjE2NDI0Mzg4NTUsIm5iZiI6MTY0MjQzODg1NSwiZXhwIjoxNjQyNTI1MjU1fQ.M_hZj09nDKZ8W6htuIjKjfQF-Y32_NcO-8lKHwoaYPo
+
+{
+    "exam_place": "61d5ad7917b2d17f0476b94a",
+    "education": "61d5ad7917b2d17f0476b94a",
+    "type_base": "61d5ad7917b2d17f0476b94a",
+    "department": "61d5ad7917b2d17f0476b94a",
+    "name": "hà"
+}
 ### DELETE SYMPTOMS 
 # param "patientId"
 DELETE  http://localhost:3000/api/symptoms/61c45066339d1aea9ae0ccd9?symptom=Co giật5

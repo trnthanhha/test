@@ -1,4 +1,5 @@
 import { Injectable } from '@nestjs/common';
+import { ENUM_SENDMAIL_CONSTANT } from './sendMail.constant';
 import { SendMailServiceStrategy } from './sendMailServiceStrategy.abtract';
 import { ISendMail } from './senMail.interface';
 
@@ -12,7 +13,7 @@ export class SendMailActiveAndUnActiveUser extends SendMailServiceStrategy {
         const mailOptions = {
             from: process.env.EMAIL_USER as string,
             to: toEmail,
-            subject: 'Register Account',
+            subject: ENUM_SENDMAIL_CONSTANT.REGISTER_SUBJECT,
             html: `<p>${data}</p>`
         };
 

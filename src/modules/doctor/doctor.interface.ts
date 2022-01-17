@@ -4,6 +4,7 @@ import { ITypeBaseDocument } from '../typebase/typebase.interface';
 import { IExamplaceDocument } from '../examplace/examplace.interface';
 import { IEducationDocument } from '../education/education.interface';
 import { IDepartmentDocument } from '../department/department.interface';
+import { type } from 'os';
 
 export type DoctorDocument = DoctorEntity & Document;
 
@@ -24,6 +25,17 @@ export interface IDoctorCreate {
     education: string;
     department: string;
 }
+
+export interface IDoctorUpdate {
+    email: string;
+    password: string;
+    name: string;
+    type_base: string;
+    exam_place: string;
+    education: string;
+    department: string;
+    isActive: boolean;
+} 
 
 export interface IActiveDoctor {
     isActive: boolean;
