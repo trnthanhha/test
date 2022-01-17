@@ -71,7 +71,7 @@ export class ForgetPasswordController {
         if (!send.status) {
             throw new InternalServerErrorException({
                 statusCode: ENUM_STATUS_CODE_ERROR.UNKNOWN_ERROR,
-                message: 'http.server.internalServerError'
+                message: 'http.serverError.internalServerError'
             });
         }
 

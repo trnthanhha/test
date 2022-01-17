@@ -6,7 +6,11 @@ import { Helper } from 'src/helper/helper.decorator';
 import { HelperService } from 'src/helper/helper.service';
 import { Message } from 'src/message/message.decorator';
 import { MessageService } from 'src/message/message.service';
-import { IDoctorCreate, DoctorDocument } from './doctor.interface';
+import { DepartmentEntity } from '../department/department.schema';
+import { EducationEntity } from '../education/education.schema';
+import { ExamplaceEntity } from '../examplace/examplace.schema';
+import { TypeBaseEntity } from '../typebase/typebase.schema';
+import { IDoctorCreate, DoctorDocument, IActiveDoctor } from './doctor.interface';
 import { DoctorEntity } from './doctor.schema';
 
 @Injectable()
@@ -17,6 +21,44 @@ export class DoctorService {
         @Helper() private readonly helperService: HelperService,
         @Message() private readonly messageService: MessageService
     ) {}
+
+    async findAll<T>(
+        find?: Record<string, any>,
+        options?: Record<string, any>
+    ): Promise<T[]> {
+        const doctors = this.doctorModel
+        .find(find)
+        .skip(options && options.skip ? options.skip : 0);
+
+    if (options && options.limit) {
+        doctors.limit(options.limit);
+    }
+
+    if (options && options.sort) {
+        doctors.sort(options.sort);
+    }
+
+    if (options && options.populate) {
+        doctors
+            .populate({
+                path: 'type_base',
+                model: TypeBaseEntity.name
+            })
+            .populate({
+                path: 'exam_place',
+                model: ExamplaceEntity.name
+            })
+            .populate({
+                path: 'education',
+                model: EducationEntity.name
+            }).populate({
+                path: 'department',
+                model: DepartmentEntity.name
+            });
+    }
+
+    return doctors.lean();
+    }
 
     async findOne<T>(
         find?: Record<string, any>,
@@ -57,5 +99,21 @@ export class DoctorService {
 
         const create: DoctorDocument = new this.doctorModel(newDoctor);
         return create.save();
+    }
+
+    async getTotalData(find: Record<string, any>): Promise<number> {
+        return this.doctorModel.countDocuments(find);
+    }
+
+    async updateOneById(
+        _id: string,
+        data: IActiveDoctor
+    ): Promise<DoctorDocument> {
+        return await this.doctorModel.updateOne(
+            {
+                _id: new Types.ObjectId(_id)
+            },
+            data
+        );
     }
 }
