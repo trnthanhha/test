@@ -10,7 +10,7 @@ import { DepartmentEntity } from '../department/department.schema';
 import { EducationEntity } from '../education/education.schema';
 import { ExamplaceEntity } from '../examplace/examplace.schema';
 import { TypeBaseEntity } from '../typebase/typebase.schema';
-import { IDoctorCreate, DoctorDocument, IActiveDoctor } from './doctor.interface';
+import { IDoctorCreate, DoctorDocument, IActiveDoctor, IDoctorUpdate } from './doctor.interface';
 import { DoctorEntity } from './doctor.schema';
 
 @Injectable()
@@ -107,7 +107,7 @@ export class DoctorService {
 
     async updateOneById(
         _id: string,
-        data: IActiveDoctor
+        data: IDoctorUpdate
     ): Promise<DoctorDocument> {
         return await this.doctorModel.updateOne(
             {

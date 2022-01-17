@@ -9,29 +9,40 @@ import {
     Param,
     Post,
     Put,
-    Query
+    Query,
+    Req,
+    Res
 } from '@nestjs/common';
 import { DoctorService } from './doctor.service';
 import { IResponse, IResponsePaging } from 'src/response/response.interface';
 
 import { Response } from 'src/response/response.decorator';
 import { ENUM_PERMISSIONS } from '../permission/permission.constant';
-import { AuthJwtGuard } from '../auth/auth.decorator';
+import { AuthJwtBasicGuard, AuthJwtGuard, User } from '../auth/auth.decorator';
 import { RequestValidationPipe } from 'src/request/pipe/request.validation.pipe';
 import { DoctorListValidation } from './validation/doctor.list.validation';
 import { PaginationService } from 'src/pagination/pagination.service';
 import { SendSMSService } from '../sendSMS/sendSMS.service';
-import { DoctorDocument } from './doctor.interface';
+import { DoctorDocument, IDoctorUpdate } from './doctor.interface';
 import { ENUM_DOCTOR_STATUS_CODE_ERROR } from './doctor.constant';
 import { DoctorUpdateActiveAndUnActiveValidation } from './validation/doctor.updateActiveAndUnActive.validation';
 import { SendMailActiveAndUnActiveUser } from '../sendMail/sendMailActiveAndUnActiveUser.service';
-
+import { Helper } from 'src/helper/helper.decorator';
+import { HelperService } from 'src/helper/helper.service';
+import { DoctorUpdateProfileValidation } from './validation/doctor.updateProfile.validation';
+import { IErrors } from 'src/error/error.interface';
+import { SendMailChangeEmail } from '../sendMail/sendMailChangeEmail.service';
+import { AuthService } from '../auth/auth.service';
+import { Request } from 'express';
 @Controller('/doctor')
 export class DoctorController {
     constructor(
+        @Helper() private readonly helperService: HelperService,
         private readonly doctorService: DoctorService,
         private readonly paginationService: PaginationService,
-        private readonly sendMailActiveAndUnActiveUser: SendMailActiveAndUnActiveUser
+        private readonly sendMailActiveAndUnActiveUser: SendMailActiveAndUnActiveUser,
+        private readonly sendMailChangeEmail: SendMailChangeEmail,
+        // private readonly authService: AuthService,
     ) {}
 
     @Response('doctor.findAll')
@@ -41,7 +52,7 @@ export class DoctorController {
         @Query(RequestValidationPipe)
         { page, perPage, sort, search }: DoctorListValidation
     ): Promise<IResponsePaging> {
-        const skip: number = await this.paginationService.skip(page, perPage);        
+        const skip: number = await this.paginationService.skip(page, perPage);
         const findDoctor: Record<string, any> = {};
         if (search && search !== '') {
             findDoctor['$or'] = [
@@ -86,11 +97,12 @@ export class DoctorController {
     @Put('/updatestatus/:_id')
     async updateStatus(
         @Param('_id') _id: string,
-        @Body(RequestValidationPipe) data: DoctorUpdateActiveAndUnActiveValidation
+        @Body(RequestValidationPipe)
+        data: DoctorUpdateActiveAndUnActiveValidation
     ): Promise<IResponse> {
-        const doctor: DoctorDocument = await this.doctorService.findOne(
-            { _id }
-        );
+        const doctor: DoctorDocument = await this.doctorService.findOne({
+            _id
+        });
 
         if (!doctor) {
             throw new NotFoundException({
@@ -100,12 +112,66 @@ export class DoctorController {
             });
         }
 
-        this.sendMailActiveAndUnActiveUser.sendMail(
-            doctor.email,
-            data.conten
+        this.sendMailActiveAndUnActiveUser.sendMail(doctor.email, data.conten);
+
+        await this.doctorService.updateOneById(_id, data);
+        return {
+            _id
+        };
+    }
+
+    @Response('doctor.update')
+    @AuthJwtBasicGuard()
+    @Put('/updateprofile')
+    async update(
+        @User() payload: Record<string, any>,
+        @Body(RequestValidationPipe)
+        data: DoctorUpdateProfileValidation,
+        @Req() request: Request
+    ): Promise<IResponse> {
+        const { password } = data;
+        const { _id } = payload;
+        if (password) {
+            const salt: string = await this.helperService.randomSalt();
+            const passwordHash = await this.helperService.bcryptHashPassword(
+                password,
+                salt
+            );
+            await this.doctorService.updateOneById(_id, {
+                password: passwordHash
+            } as IDoctorUpdate);
+            return {
+                _id
+            };
+        }
+
+        if (data.email && data.email !== payload.email) {
+            const errors: IErrors[] = await this.doctorService.checkExist(
+                data.email
+            );
+
+            if (errors.length > 0) {
+                throw new BadRequestException({
+                    statusCode:
+                        ENUM_DOCTOR_STATUS_CODE_ERROR.DOCTOR_EXIST_ERROR,
+                    message: 'doctor.error.createError',
+                    errors
+                });
+            }
+
+            // await this.sendMailChangeEmail.sendMail(
+            //     data.email,
+            //     token,
+            //     data.url
+            // );
+            // return;
+        }
+
+        await this.doctorService.updateOneById(
+            _id,
+            (data as unknown) as IDoctorUpdate
         );
         
-        await this.doctorService.updateOneById(_id, data);
         return {
             _id
         };
