@@ -4,6 +4,7 @@ import { PaginationModule } from 'src/pagination/pagination.module';
 import { DoctorService } from 'src/modules/doctor/doctor.service';
 import { DoctorController } from './doctor.controller';
 import { DoctorDatabaseName, DoctorEntity, DoctorSchema } from './doctor.schema';
+import { SendMailModule } from '../sendMail/sendMail.module';
 
 @Module({
     controllers: [DoctorController],
@@ -17,7 +18,8 @@ import { DoctorDatabaseName, DoctorEntity, DoctorSchema } from './doctor.schema'
                 collection: DoctorDatabaseName
             }
         ]),
-        PaginationModule
+        PaginationModule,
+        SendMailModule
     ]
 })
 export class DoctorModule {}

@@ -1,9 +1,19 @@
 import { DoctorEntity } from './doctor.schema';
 import { Document } from 'mongoose';
+import { ITypeBaseDocument } from '../typebase/typebase.interface';
+import { IExamplaceDocument } from '../examplace/examplace.interface';
+import { IEducationDocument } from '../education/education.interface';
+import { IDepartmentDocument } from '../department/department.interface';
 
 export type DoctorDocument = DoctorEntity & Document;
 
-export type IDoctorDocument = DoctorDocument // tạm thời
+export interface IDoctorDocument 
+    extends Omit<DoctorDocument, 'type_base' | 'exam_place' | 'education' | 'department'> {
+        type_base: ITypeBaseDocument;
+        exam_place: IExamplaceDocument;
+        education: IEducationDocument;
+        department: IDepartmentDocument;
+}
 
 export interface IDoctorCreate {
     email: string;
@@ -13,4 +23,8 @@ export interface IDoctorCreate {
     exam_place: string;
     education: string;
     department: string;
+}
+
+export interface IActiveDoctor {
+    isActive: boolean;
 }

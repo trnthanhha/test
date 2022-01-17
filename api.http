@@ -196,7 +196,7 @@ DELETE http://localhost:3000/api/appointment/delete/61becf1ba336c20498ed3d48
 Content-Type: application/json
 ###
 #GET LIST APPOITMENT, SEARCH (NAME, PHONE, EMAIL) OF PATIENT, SORT ALL FILED, PAGINATION
-GET http://localhost:3000/api/appointment/list?sort=name@desc&&limit=20&&page=1&&search=09
+GET http://localhost:3000/api/appointment/list?sort=name@desc&&perPage=20&&page=1&&search=09
 Content-Type: application/json
 
 ################################ +++++++++++++++++++++++++++++ ################################ THANH-HÀ
@@ -307,6 +307,22 @@ Content-Type: application/json
 ### DELETE DEPARTMENT
 DELETE  http://localhost:3000/api/department/delete/61d6623efc318e5358250c2f
 
+################################ +++++++++++++++++++++++++++++ ################################ THANH-HÀ
+#GET LIST DOCTOR, SEARCH (NAME, EMAIL) OF DOCTOR, SORT ALL FILED, PAGINATION
+GET http://localhost:3000/api/doctor/list?sort=name@desc&&perPage=20&&page=1&&search=xxx
+Content-Type: application/json
+Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJfaWQiOiI2MWJiMjY2Y2U5NTgyNTM5MDBjZjY5NGQiLCJpc0FjdGl2ZSI6dHJ1ZSwiZW1haWwiOiJkMTdkY2NuMTk2QGdtYWlsLmNvbSIsInBob25lIjoiMDgxMTExMTExMTEiLCJyb2xlIjp7Im5hbWUiOiJhZG1pbiIsInBlcm1pc3Npb25zIjpbIlBFUk1JU1NJT05fUkVBRCIsIlBST0ZJTEVfUkVBRCIsIlBST0ZJTEVfVVBEQVRFIiwiUk9MRV9DUkVBVEUiLCJST0xFX0RFTEVURSIsIlJPTEVfUkVBRCIsIlJPTEVfVVBEQVRFIiwiVVNFUl9DUkVBVEUiLCJVU0VSX0RFTEVURSIsIlVTRVJfUkVBRCIsIlVTRVJfVVBEQVRFIl19LCJyZW1lbWJlck1lIjpmYWxzZSwiaWF0IjoxNjQyMzk0MDcyLCJuYmYiOjE2NDIzOTQwNzIsImV4cCI6MTY0MjQ4MDQ3Mn0.hLV-4AUByeU8XM8yTvsdkMSJfbUsXcQF13joN76Izpk
+
+###PUT ACTIVE DOCTOR
+PUT http://localhost:3000/api/doctor/updatestatus/61d5c1320693c0696c75cf62
+Content-Type: application/json
+Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJfaWQiOiI2MWJiMjY2Y2U5NTgyNTM5MDBjZjY5NGQiLCJpc0FjdGl2ZSI6dHJ1ZSwiZW1haWwiOiJkMTdkY2NuMTk2QGdtYWlsLmNvbSIsInBob25lIjoiMDgxMTExMTExMTEiLCJyb2xlIjp7Im5hbWUiOiJhZG1pbiIsInBlcm1pc3Npb25zIjpbIlBFUk1JU1NJT05fUkVBRCIsIlBST0ZJTEVfUkVBRCIsIlBST0ZJTEVfVVBEQVRFIiwiUk9MRV9DUkVBVEUiLCJST0xFX0RFTEVURSIsIlJPTEVfUkVBRCIsIlJPTEVfVVBEQVRFIiwiVVNFUl9DUkVBVEUiLCJVU0VSX0RFTEVURSIsIlVTRVJfUkVBRCIsIlVTRVJfVVBEQVRFIl19LCJyZW1lbWJlck1lIjpmYWxzZSwiaWF0IjoxNjQyMzk0MDcyLCJuYmYiOjE2NDIzOTQwNzIsImV4cCI6MTY0MjQ4MDQ3Mn0.hLV-4AUByeU8XM8yTvsdkMSJfbUsXcQF13joN76Izpk
+### từ chối thì ko cần gửi filed "isActive" lên hoặc "isActive": false 
+### field conten để gửi nội dung qua mail báo cho doctor
+{
+    "isActive":true, 
+    "conten":"thành công" 
+}
 
 ### DELETE SYMPTOMS 
 # param "patientId"

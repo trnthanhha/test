@@ -35,6 +35,8 @@ import { DepartmentUpdateValidation } from 'src/modules/department/validation/de
 import { EducationCreateValidation } from 'src/modules/education/validation/education.create.validation';
 import { EducationUpdateValidation } from 'src/modules/education/validation/education.update.validation';
 import { PointLadderCreateValidation } from 'src/modules/pointladder/validation/pointladder.create.validate';
+import { DoctorUpdateActiveAndUnActiveValidation } from 'src/modules/doctor/validation/doctor.updateActiveAndUnActive.validation';
+import { DoctorListValidation } from 'src/modules/doctor/validation/doctor.list.validation';
 
 export class RequestValidationPipe implements PipeTransform {
     constructor(
@@ -109,7 +111,9 @@ export class RequestValidationPipe implements PipeTransform {
             DepartmentUpdateValidation,
             EducationCreateValidation,
             EducationUpdateValidation,
-            PointLadderCreateValidation
+            PointLadderCreateValidation,
+            DoctorUpdateActiveAndUnActiveValidation,
+            DoctorListValidation,
         ];
         return types.includes(metatype);
     }
