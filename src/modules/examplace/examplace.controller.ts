@@ -17,6 +17,7 @@ import { RequestValidationPipe } from 'src/request/pipe/request.validation.pipe'
 import { ExamplaceUpdateValidation } from './validation/examplace.update.validation';
 import { ENUM_EXAMPLACE_STATUS_CODE_ERROR } from './examplace.constant';
 import { IExamplaceDocument } from './examplace.interface';
+import { QueryByIdValidation } from 'src/request/validation/request.query-by-id.validation';
 
 @Controller('/examplace')
 export class ExamplaceController {
@@ -33,8 +34,8 @@ export class ExamplaceController {
     @Response('examplace.findOneById')
     // @AuthJwtGuard(ENUM_PERMISSIONS.ROLE_READ)
     @Get('/detail/:_id')
-    async findOneById(@Param('_id') _id: string): Promise<IResponse> {
-        const examplace = await this.examplaceService.findOneById(_id);
+    async findOneById(@Param(RequestValidationPipe) _id: QueryByIdValidation): Promise<IResponse> {
+        const examplace = await this.examplaceService.findOneById(_id as unknown as string);
 
         if (examplace) {
             return examplace;
@@ -63,11 +64,11 @@ export class ExamplaceController {
     // @AuthJwtGuard(ENUM_PERMISSIONS.ROLE_READ, ENUM_PERMISSIONS.ROLE_UPDATE)
     @Put('/update/:_id')
     async update(
-        @Param('_id') _id: string,
+        @Param(RequestValidationPipe) _id: QueryByIdValidation,
         @Body(RequestValidationPipe) data: ExamplaceUpdateValidation
     ): Promise<IResponse> {
         const examplace: IExamplaceDocument = await this.examplaceService.findOneById(
-            _id
+            _id as unknown as string
         );
 
         if (!examplace) {
@@ -78,7 +79,7 @@ export class ExamplaceController {
             });
         }
 
-        await this.examplaceService.updateOneById(_id, data);
+        await this.examplaceService.updateOneById(_id as unknown as string, data);
         return {
             _id
         };
@@ -87,9 +88,9 @@ export class ExamplaceController {
     @Response('examplace.delete')
     // @AuthJwtGuard(ENUM_PERMISSIONS.ROLE_READ, ENUM_PERMISSIONS.ROLE_DELETE)
     @Delete('/delete/:_id')
-    async delete(@Param('_id') _id: string): Promise<void> {
+    async delete(@Param(RequestValidationPipe) _id: QueryByIdValidation): Promise<void> {
         const examplace: IExamplaceDocument = await this.examplaceService.findOneById(
-            _id
+            _id as unknown as string
         );
         if (!examplace) {
             throw new NotFoundException({
@@ -99,7 +100,7 @@ export class ExamplaceController {
             });
         }
 
-        await this.examplaceService.deleteOneById(_id);
+        await this.examplaceService.deleteOneById(_id as unknown as string);
         return;
     }
 }

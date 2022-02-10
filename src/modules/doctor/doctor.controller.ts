@@ -34,6 +34,7 @@ import { IErrors } from 'src/error/error.interface';
 import { SendMailChangeEmail } from '../sendMail/sendMailChangeEmail.service';
 import { AuthService } from '../auth/auth.service';
 import { Request } from 'express';
+import { QueryByIdValidation } from 'src/request/validation/request.query-by-id.validation';
 @Controller('/doctor')
 export class DoctorController {
     constructor(
@@ -96,7 +97,7 @@ export class DoctorController {
     @AuthJwtGuard(ENUM_PERMISSIONS.ROLE_READ, ENUM_PERMISSIONS.ROLE_UPDATE)
     @Put('/updatestatus/:_id')
     async updateStatus(
-        @Param('_id') _id: string,
+        @Param(RequestValidationPipe) _id: QueryByIdValidation,
         @Body(RequestValidationPipe)
         data: DoctorUpdateActiveAndUnActiveValidation
     ): Promise<IResponse> {
@@ -114,7 +115,7 @@ export class DoctorController {
 
         this.sendMailActiveAndUnActiveUser.sendMail(doctor.email, data.conten);
 
-        await this.doctorService.updateOneById(_id, data);
+        await this.doctorService.updateOneById(_id as unknown as string, data);
         return {
             _id
         };
@@ -172,8 +173,8 @@ export class DoctorController {
             (data as unknown) as IDoctorUpdate
         );
         
-        return {
+        return this.doctorService.findOne({
             _id
-        };
+        });
     }
 }

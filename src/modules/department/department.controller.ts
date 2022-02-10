@@ -17,6 +17,7 @@ import { DepartmentService } from './department.service';
 import { DepartmentCreateValidation } from './validation/department.create.validation';
 import { DepartmentUpdateValidation } from './validation/department.update.validation';
 import { ENUM_DEPARTMENT_STATUS_CODE_ERROR } from './department.constant';
+import { QueryByIdValidation } from 'src/request/validation/request.query-by-id.validation';
 
 @Controller('/department')
 export class DepartmentController {
@@ -31,8 +32,8 @@ export class DepartmentController {
     @Response('department.findOneById')
     // @AuthJwtGuard(ENUM_PERMISSIONS.ROLE_READ)
     @Get('/detail/:_id')
-    async findOneById(@Param('_id') _id: string): Promise<IResponse> {
-        const department = await this.departmentService.findOneById(_id);
+    async findOneById(@Param(RequestValidationPipe) _id: QueryByIdValidation): Promise<IResponse> {
+        const department = await this.departmentService.findOneById(_id as unknown as string);
 
         if (department) {
             return department;
@@ -61,11 +62,11 @@ export class DepartmentController {
     // @AuthJwtGuard(ENUM_PERMISSIONS.ROLE_READ, ENUM_PERMISSIONS.ROLE_UPDATE)
     @Put('/update/:_id')
     async update(
-        @Param('_id') _id: string,
+        @Param(RequestValidationPipe) _id: QueryByIdValidation,
         @Body(RequestValidationPipe) data: DepartmentUpdateValidation
     ): Promise<IResponse> {
         const department: IDepartmentDocument = await this.departmentService.findOneById(
-            _id
+            _id as unknown as string
         );
 
         if (!department) {
@@ -76,7 +77,7 @@ export class DepartmentController {
             });
         }
 
-        await this.departmentService.updateOneById(_id, data);
+        await this.departmentService.updateOneById(_id as unknown as string, data);
         return {
             _id
         };
@@ -85,9 +86,9 @@ export class DepartmentController {
     @Response('department.delete')
     // @AuthJwtGuard(ENUM_PERMISSIONS.ROLE_READ, ENUM_PERMISSIONS.ROLE_DELETE)
     @Delete('/delete/:_id')
-    async delete(@Param('_id') _id: string): Promise<void> {
+    async delete(@Param(RequestValidationPipe) _id: QueryByIdValidation): Promise<void> {
         const department: IDepartmentDocument = await this.departmentService.findOneById(
-            _id
+            _id as unknown as string
         );
         if (!department) {
             throw new NotFoundException({
@@ -97,7 +98,7 @@ export class DepartmentController {
             });
         }
 
-        await this.departmentService.deleteOneById(_id);
+        await this.departmentService.deleteOneById(_id as unknown as string);
         return;
     }
 }

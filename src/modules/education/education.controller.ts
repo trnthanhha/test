@@ -17,6 +17,7 @@ import { EducationService } from './education.service';
 import { EducationCreateValidation } from './validation/education.create.validation';
 import { EducationUpdateValidation } from './validation/education.update.validation';
 import { ENUM_EDUCATION_STATUS_CODE_ERROR } from './education.constant';
+import { QueryByIdValidation } from 'src/request/validation/request.query-by-id.validation';
 
 @Controller('/education')
 export class EducationController {
@@ -31,8 +32,8 @@ export class EducationController {
     @Response('education.findOneById')
     // @AuthJwtGuard(ENUM_PERMISSIONS.ROLE_READ)
     @Get('/detail/:_id')
-    async findOneById(@Param('_id') _id: string): Promise<IResponse> {
-        const education = await this.educationService.findOneById(_id);
+    async findOneById(@Param(RequestValidationPipe) _id: QueryByIdValidation): Promise<IResponse> {
+        const education = await this.educationService.findOneById(_id as unknown as string);
 
         if (education) {
             return education;
@@ -61,11 +62,11 @@ export class EducationController {
     // @AuthJwtGuard(ENUM_PERMISSIONS.ROLE_READ, ENUM_PERMISSIONS.ROLE_UPDATE)
     @Put('/update/:_id')
     async update(
-        @Param('_id') _id: string,
+        @Param(RequestValidationPipe) _id: QueryByIdValidation,
         @Body(RequestValidationPipe) data: EducationUpdateValidation
     ): Promise<IResponse> {
         const education: IEducationDocument = await this.educationService.findOneById(
-            _id
+            _id as unknown as string
         );
 
         if (!education) {
@@ -76,7 +77,7 @@ export class EducationController {
             });
         }
 
-        await this.educationService.updateOneById(_id, data);
+        await this.educationService.updateOneById(_id as unknown as string, data);
         return {
             _id
         };
@@ -85,9 +86,9 @@ export class EducationController {
     @Response('education.delete')
     // @AuthJwtGuard(ENUM_PERMISSIONS.ROLE_READ, ENUM_PERMISSIONS.ROLE_DELETE)
     @Delete('/delete/:_id')
-    async delete(@Param('_id') _id: string): Promise<void> {
+    async delete(@Param(RequestValidationPipe) _id: QueryByIdValidation): Promise<void> {
         const education: IEducationDocument = await this.educationService.findOneById(
-            _id
+            _id as unknown as string
         );
         if (!education) {
             throw new NotFoundException({
@@ -97,7 +98,7 @@ export class EducationController {
             });
         }
 
-        await this.educationService.deleteOneById(_id);
+        await this.educationService.deleteOneById(_id as unknown as string);
         return;
     }
 }

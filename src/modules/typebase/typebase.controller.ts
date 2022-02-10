@@ -17,6 +17,7 @@ import { TypeBaseService } from './typebase.service';
 import { TypeBaseCreateValidation } from './validation/typebase.create.validation';
 import { TypeBaseUpdateValidation } from './validation/typebase.update.validation';
 import { ENUM_TYPEBASE_STATUS_CODE_ERROR } from './typebase.constant';
+import { QueryByIdValidation } from 'src/request/validation/request.query-by-id.validation';
 
 @Controller('/typebase')
 export class TypeBaseController {
@@ -31,8 +32,8 @@ export class TypeBaseController {
     @Response('typebase.findOneById')
     // @AuthJwtGuard(ENUM_PERMISSIONS.ROLE_READ)
     @Get('/detail/:_id')
-    async findOneById(@Param('_id') _id: string): Promise<IResponse> {
-        const typeBase = await this.typeBaseService.findOneById(_id);
+    async findOneById(@Param(RequestValidationPipe) _id: QueryByIdValidation): Promise<IResponse> {
+        const typeBase = await this.typeBaseService.findOneById(_id as unknown as string);
 
         if (typeBase) {
             return typeBase;
@@ -61,11 +62,11 @@ export class TypeBaseController {
     // @AuthJwtGuard(ENUM_PERMISSIONS.ROLE_READ, ENUM_PERMISSIONS.ROLE_UPDATE)
     @Put('/update/:_id')
     async update(
-        @Param('_id') _id: string,
+        @Param(RequestValidationPipe) _id: QueryByIdValidation,
         @Body(RequestValidationPipe) data: TypeBaseUpdateValidation
     ): Promise<IResponse> {
         const typeBase: ITypeBaseDocument = await this.typeBaseService.findOneById(
-            _id
+            _id as unknown as string
         );
 
         if (!typeBase) {
@@ -76,7 +77,7 @@ export class TypeBaseController {
             });
         }
 
-        await this.typeBaseService.updateOneById(_id, data);
+        await this.typeBaseService.updateOneById(_id as unknown as string, data);
         return {
             _id
         };
@@ -85,9 +86,9 @@ export class TypeBaseController {
     @Response('typebase.delete')
     // @AuthJwtGuard(ENUM_PERMISSIONS.ROLE_READ, ENUM_PERMISSIONS.ROLE_DELETE)
     @Delete('/delete/:_id')
-    async delete(@Param('_id') _id: string): Promise<void> {
+    async delete(@Param(RequestValidationPipe) _id: QueryByIdValidation): Promise<void> {
         const typeBase: ITypeBaseDocument = await this.typeBaseService.findOneById(
-            _id
+            _id as unknown as string
         );
         if (!typeBase) {
             throw new NotFoundException({
@@ -97,7 +98,7 @@ export class TypeBaseController {
             });
         }
 
-        await this.typeBaseService.deleteOneById(_id);
+        await this.typeBaseService.deleteOneById(_id as unknown as string);
         return;
     }
 }

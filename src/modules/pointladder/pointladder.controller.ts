@@ -1,6 +1,7 @@
 import { BadRequestException, Body, Controller, Get, InternalServerErrorException, Param, Post } from "@nestjs/common";
 import { ENUM_STATUS_CODE_ERROR } from "src/error/error.constant";
 import { RequestValidationPipe } from "src/request/pipe/request.validation.pipe";
+import { QueryByIdValidation } from "src/request/validation/request.query-by-id.validation";
 import { Response } from "src/response/response.decorator";
 import { IResponse } from "src/response/response.interface";
 import { AuthJwtGuard } from "../auth/auth.decorator";
@@ -37,8 +38,8 @@ export class PointLadderController {
     @Response('pointladder.findOneByIdPatient')
     // @AuthJwtGuard(ENUM_PERMISSIONS.ROLE_READ)
     @Get('/detail/:_id')
-    async findOneById(@Param('_id') _id: string): Promise<IResponse> {
-        const pointladder = await this.pointLadderService.findOneByIdPatient(_id);
+    async findOneById(@Param(RequestValidationPipe) _id: QueryByIdValidation): Promise<IResponse> {
+        const pointladder = await this.pointLadderService.findOneByIdPatient(_id as unknown as string);
 
         if (pointladder) {
             return pointladder;

@@ -30,6 +30,7 @@ import { SendSMSService } from '../sendSMS/sendSMS.service';
 import { AppointmentListValidation } from './validation/appointment.list.validate';
 import { PatientService } from '../patient/patient.service';
 import { PatientDocument } from '../patient/patient.interface';
+import { QueryByIdValidation } from 'src/request/validation/request.query-by-id.validation';
 
 @Controller('/appointment')
 export class AppointmentController {
@@ -140,11 +141,11 @@ export class AppointmentController {
     // @AuthJwtGuard(ENUM_PERMISSIONS.ROLE_READ, ENUM_PERMISSIONS.ROLE_UPDATE)
     @Put('/update/:_id')
     async update(
-        @Param('_id') _id: string,
+        @Param(RequestValidationPipe) _id: QueryByIdValidation,
         @Body(RequestValidationPipe) data: AppointmentUpdateValidation
     ): Promise<IResponse> {
         const appointment: IAppointmentDocument = await this.appointmentService.findOneById<IAppointmentDocument>(
-            _id,
+            _id as unknown as string,
             {
                 populate: true
             }
@@ -158,7 +159,7 @@ export class AppointmentController {
             });
         }
 
-        await this.appointmentService.updateOneById(_id, data);
+        await this.appointmentService.updateOneById(_id as unknown as string, data);
         if (appointment.patient_id?.phone) {
             await this.sendSMSService.sendSMS(
                 appointment.patient_id?.phone.toString(),
@@ -173,9 +174,9 @@ export class AppointmentController {
     @Response('appointment.delete')
     // @AuthJwtGuard(ENUM_PERMISSIONS.ROLE_READ, ENUM_PERMISSIONS.ROLE_DELETE)
     @Delete('/delete/:_id')
-    async delete(@Param('_id') _id: string): Promise<void> {
+    async delete(@Param(RequestValidationPipe) _id: QueryByIdValidation): Promise<void> {
         const appointment: IAppointmentDocument = await this.appointmentService.findOneById<IAppointmentDocument>(
-            _id,
+            _id as unknown as string,
             {
                 populate: true
             }
@@ -188,7 +189,7 @@ export class AppointmentController {
             });
         }
 
-        await this.appointmentService.deleteOneById(_id);
+        await this.appointmentService.deleteOneById(_id as unknown as string);
         if (appointment.patient_id?.phone) {
             await this.sendSMSService.sendSMS(
                 appointment.patient_id?.phone.toString(),

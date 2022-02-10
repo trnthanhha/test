@@ -38,6 +38,7 @@ import { PointLadderCreateValidation } from 'src/modules/pointladder/validation/
 import { DoctorUpdateActiveAndUnActiveValidation } from 'src/modules/doctor/validation/doctor.updateActiveAndUnActive.validation';
 import { DoctorListValidation } from 'src/modules/doctor/validation/doctor.list.validation';
 import { DoctorUpdateProfileValidation } from 'src/modules/doctor/validation/doctor.updateProfile.validation';
+import { QueryByIdValidation } from '../validation/request.query-by-id.validation';
 
 export class RequestValidationPipe implements PipeTransform {
     constructor(
@@ -116,6 +117,7 @@ export class RequestValidationPipe implements PipeTransform {
             DoctorUpdateActiveAndUnActiveValidation,
             DoctorListValidation,
             DoctorUpdateProfileValidation,
+            QueryByIdValidation
         ];
         return types.includes(metatype);
     }
