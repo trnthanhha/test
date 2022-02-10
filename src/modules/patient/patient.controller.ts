@@ -33,6 +33,7 @@ import { PatientCheckExitValidation } from './validation/patient.checkExit.valid
 import { IPatientUpdate } from './patient.interface';
 import { PatientUpdateValidation } from './validation/patient.update.validation';
 import { Request } from 'express';
+import { QueryByIdValidation } from 'src/request/validation/request.query-by-id.validation';
 
 @Controller('/patient')
 export class PatientController {
@@ -45,8 +46,8 @@ export class PatientController {
     @Response('patient.findPatient')
     // @AuthJwtGuard(ENUM_PERMISSIONS.ROLE_READ)
     @Get(':_id')
-    async getPatient(@Param('_id') _id: string): Promise<IResponse> {
-        const patient = await this.patientService.findPatientById(_id);
+    async getPatient(@Param(RequestValidationPipe) _id: QueryByIdValidation): Promise<IResponse> {
+        const patient = await this.patientService.findPatientById(_id as unknown as string);
         if (patient) {
             return patient;
         } else {
@@ -107,11 +108,11 @@ export class PatientController {
     // @AuthJwtGuard(ENUM_PERMISSIONS.ROLE_READ, ENUM_PERMISSIONS.ROLE_CREATE)
     @Put('/update/:_id')
     async update(
-        @Param('_id') _id: string,
+        @Param(RequestValidationPipe) _id: QueryByIdValidation,
         @Body(RequestValidationPipe)
         data: PatientUpdateValidation
     ) {
-        const errors: IErrors[] = await this.patientService.checkExistById(_id);
+        const errors: IErrors[] = await this.patientService.checkExistById(_id as unknown as string);
         if (errors.length > 0) {
             throw new BadRequestException({
                 statusCode:
@@ -122,7 +123,7 @@ export class PatientController {
         }
 
         try {
-            await this.patientService.updatePatientById(_id, data);
+            await this.patientService.updatePatientById(_id as unknown as string, data);
             return {
                 _id
             };
