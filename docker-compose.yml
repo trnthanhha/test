@@ -1,0 +1,16 @@
+version: '3.4'
+
+services:
+  postgres:
+    container_name: db-postgres-localmos
+    image: postgres:9-alpine
+    restart: always
+    ports:
+      - "5432:5432"
+    volumes:
+      - psql_data:/var/lib/postgresql/data
+    env_file:
+      - .env
+
+volumes:
+  psql_data:
