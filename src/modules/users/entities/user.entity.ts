@@ -2,11 +2,7 @@ import {
     Column, CreateDateColumn,
     Entity, PrimaryGeneratedColumn, UpdateDateColumn,
 } from 'typeorm';
-
-enum UserType {
-    ADMIN = 'admin',
-    CUSTOMER = 'customer'
-}
+import {UserType} from "../users.constants";
 
 @Entity()
 export class User {
@@ -14,7 +10,10 @@ export class User {
     id: number;
 
     @Column({ unique: true })
-    username: string;
+    phone_number: string;
+
+    @Column({ unique: true })
+    email: string;
 
     @Column({ type: 'enum', enum: UserType })
     type: UserType;

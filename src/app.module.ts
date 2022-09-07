@@ -8,28 +8,15 @@ import { LocationsModule } from './modules/locations/locations.module';
 import { OrdersModule } from './modules/orders/orders.module';
 import { BillsModule } from './modules/bills/bills.module';
 import { PaymentModule } from './services/payment/payment.module';
-import {TypeOrmModule} from "@nestjs/typeorm";
+import {DatabaseModule} from "./modules/database/database.module";
 
 @Module({
   imports: [
-    TypeOrmModule.forRootAsync({
-      inject: [ConfigService],
-      useFactory: (config: ConfigService) => ({
-        type: 'postgres',
-        host: config.get<string>('POSTGRES_HOST'),
-        port: +config.get<string>('POSTGRES_PORT'),
-        username: config.get<string>('POSTGRES_USER'),
-        password: config.get<string>('POSTGRES_PASSWORD'),
-        database: config.get<string>('POSTGRES_DB'),
-        entities: [__dirname + '/../**/*.entity.ts'],
-        synchronize: true,
-        autoLoadEntities: true,
-      }),
-    }),
     ConfigModule.forRoot({
       isGlobal: true,
     }),
     ScheduleModule.forRoot(),
+    DatabaseModule,
     UsersModule,
     LocationsModule,
     OrdersModule,

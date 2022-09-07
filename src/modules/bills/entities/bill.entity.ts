@@ -1,9 +1,12 @@
 import {
-    Column, CreateDateColumn,
-    Entity, PrimaryGeneratedColumn,
-    Unique, UpdateDateColumn,
+    Column,
+    CreateDateColumn,
+    Entity,
+    PrimaryGeneratedColumn,
+    Unique,
+    UpdateDateColumn,
 } from 'typeorm';
-import { PaymentStatus } from "../../../types/payment.status.types";
+import {PaymentStatus} from "../bills.constants";
 
 enum PaymentVendor {
     VNPAY = 'vnpay'

@@ -2,14 +2,7 @@ import {
     Column, CreateDateColumn,
     Entity, PrimaryGeneratedColumn, UpdateDateColumn,
 } from 'typeorm';
-
-
-export enum PaymentStatus {
-    PENDING = 'pending',
-    UNAUTHORIZED = 'unauthorized',
-    PAID = 'paid',
-    CANCELLED = 'cancelled'
-}
+import {PaymentStatus} from "../orders.constants";
 
 @Entity()
 export class Order {
