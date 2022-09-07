@@ -47,10 +47,6 @@ export class UsersService {
     return `This action updates a #${id} user`;
   }
 
-  remove(id: number) {
-    return `This action removes a #${id} user`;
-  }
-
   //biz
   async resetPassword(id: number, password: string): Promise<boolean> {
     const update: UpdateResult = await this.userRepository.update(id, {

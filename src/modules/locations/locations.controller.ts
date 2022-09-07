@@ -1,17 +1,6 @@
-import {
-  Controller,
-  Get,
-  Post,
-  Body,
-  Patch,
-  Param,
-  Delete,
-  Query,
-} from '@nestjs/common';
+import { Controller, Get, Post, Body, Param, Query } from '@nestjs/common';
 import { LocationsService } from './locations.service';
 import { CreateLocationDto } from './dto/create-location.dto';
-import { UpdateLocationDto } from './dto/update-location.dto';
-import { Auth } from '../../decorators/roles.decorator';
 import { ApiOperation } from '@nestjs/swagger';
 
 @Controller('locations')
@@ -44,17 +33,11 @@ export class LocationsController {
   findOne(@Param('id') id: string) {
     return this.locationsService.findOne(+id);
   }
-
-  @Patch(':id')
-  update(
-    @Param('id') id: string,
-    @Body() updateLocationDto: UpdateLocationDto,
-  ) {
-    return this.locationsService.update(+id, updateLocationDto);
-  }
-
-  @Delete(':id')
-  remove(@Param('id') id: string) {
-    return this.locationsService.remove(+id);
-  }
+  // @Patch(':id')
+  // update(
+  //   @Param('id') id: string,
+  //   @Body() updateLocationDto: UpdateLocationDto,
+  // ) {
+  //   return this.locationsService.update(+id, updateLocationDto);
+  // }
 }
