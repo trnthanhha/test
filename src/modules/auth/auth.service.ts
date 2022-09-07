@@ -1,4 +1,3 @@
-
 import {
   BadRequestException,
   Injectable,
@@ -9,19 +8,14 @@ import * as admin from 'firebase-admin';
 import { DecodedIdToken } from 'firebase-admin/lib/auth/token-verifier';
 import { I18nService } from 'nestjs-i18n';
 import { UpdateResult } from 'typeorm';
-import { NotificationService } from '../notification/notification.service';
-import NotificationTopic from '../notification/entities/notificationTopic.entity';
-import { DeviceService } from '../device/device.service';
-import { MailService } from '@modules/mail/mail.service';
-import { Topics } from '../notification/notification.constant';
-import { User } from '../users/entities/user.entity'
+import { User } from '../users/entities/user.entity';
 import { UsersService } from '../users/users.service';
 import { checkPhoneNumber } from '../../utils/regex';
-import { LoginDto, LoginResponse, LogoutDto } from './dto/auth.dto';
+import { LoginDto, LoginResponse } from './dto/auth.dto';
 import { RefreshTokenDto } from './dto/refresh-token.dto';
 import { RegisterDto, CheckPhoneDto } from './dto/register.dto';
 import { ResetPasswordDto } from './dto/reset-password.dto';
-import {hashPassword} from "../../utils/password";
+import { hashPassword } from '../../utils/password';
 
 @Injectable()
 export class AuthService {
@@ -29,29 +23,10 @@ export class AuthService {
     private readonly userService: UsersService,
     private readonly jwtService: JwtService,
     private readonly i18n: I18nService,
-    private readonly mailService: MailService,
-    private readonly notificationService: NotificationService,
-    private readonly deviceService: DeviceService,
   ) {}
 
   expiredDay(day: number): number {
     return new Date().setDate(new Date().getDate() + day);
-  }
-
-  async registerNotification(fcmToken: string, user: User): Promise<void> {
-    if (fcmToken) {
-      this.deviceService.create(fcmToken, user);
-      this.notificationService.subcribeToTopic(fcmToken, Topics.ALL);
-
-      const userTopics: NotificationTopic[] =
-        await this.notificationService.findTopicByUser(user);
-
-      await Promise.all(
-        userTopics.map((topic: NotificationTopic) => {
-          this.notificationService.subcribeToTopic(fcmToken, topic.name);
-        }),
-      );
-    }
   }
 
   async generateToken(user: User): Promise<LoginResponse> {
@@ -100,8 +75,6 @@ export class AuthService {
         lang,
       );
 
-      await this.registerNotification(fcmToken, user);
-
       return await this.generateToken(user);
     } catch (error) {
       throw error;
@@ -113,9 +86,12 @@ export class AuthService {
     lang: string,
   ): Promise<boolean> {
     const nPhone: string = phone.replace('+', '');
-    const user: User = await this.userService.findByCondition({
-      phone: nPhone,
-    });
+    const user: User = await this.userService.findOne(
+      {
+        phone_number: nPhone,
+      } as User,
+      lang,
+    );
     if (user) {
       const message: string = await this.i18n.t('user.phone.existed', { lang });
 
@@ -126,7 +102,7 @@ export class AuthService {
   }
 
   async login(
-    { password, fcmToken, usernameOrPhone }: LoginDto,
+    { password, usernameOrPhone }: LoginDto,
     lang: string,
   ): Promise<LoginResponse> {
     const phone: string = usernameOrPhone.replace('+', '');
@@ -134,12 +110,15 @@ export class AuthService {
     let user: User;
 
     if (validPhone) {
-      user = await this.userService.findByPhone(phone, lang);
+      user = await this.userService.findOne(
+        { phone_number: phone } as User,
+        lang,
+      );
     } else {
-      throw new BadRequestException('invalid phone number')
+      throw new BadRequestException('invalid phone number');
     }
 
-    const isValidPassword = user.password === hashPassword(password)
+    const isValidPassword = user.password === hashPassword(password);
 
     if (!isValidPassword) {
       const message: string = await this.i18n.t('auth.password.wrong', {
@@ -148,8 +127,6 @@ export class AuthService {
 
       throw new BadRequestException(message);
     }
-
-    await this.registerNotification(fcmToken, user);
 
     return await this.generateToken(user);
   }
@@ -164,9 +141,11 @@ export class AuthService {
           secret: process.env.JWT_KEY_REFRESH,
         });
 
-      const user: User = await this.userService.findByRefreshToken(
-        verified.id,
-        refreshToken,
+      const user: User = await this.userService.findOne(
+        {
+          id: verified.id,
+          refresh_token: refreshToken,
+        } as User,
         lang,
       );
 
@@ -218,7 +197,10 @@ export class AuthService {
         throw new BadRequestException(message);
       }
 
-      const user: User = await this.userService.findByPhone(nPhone, lang);
+      const user: User = await this.userService.findOne(
+        { phone_number: nPhone } as User,
+        lang,
+      );
 
       return await this.userService.resetPassword(user.id, password);
     } catch (error) {
@@ -226,21 +208,7 @@ export class AuthService {
     }
   }
 
-  async logout({ fcmToken }: LogoutDto, user: User): Promise<UpdateResult> {
-    if (fcmToken) {
-      this.deviceService.remove(fcmToken, user);
-      this.notificationService.unsubscribeFromTopic(fcmToken, Topics.ALL);
-
-      const userTopics: NotificationTopic[] =
-        await this.notificationService.findTopicByUser(user);
-
-      await Promise.all(
-        userTopics.map((topic: NotificationTopic) => {
-          this.notificationService.unsubscribeFromTopic(fcmToken, topic.name);
-        }),
-      );
-    }
-
+  async logout(user: User): Promise<UpdateResult> {
     return await this.userService.updateRefreshToken(user.id, '');
   }
 }

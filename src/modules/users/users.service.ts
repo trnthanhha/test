@@ -1,33 +1,34 @@
-import {BadRequestException, Injectable, Logger, NotFoundException} from '@nestjs/common';
-import {CreateUserDto} from './dto/create-user.dto';
-import {UpdateUserDto} from './dto/update-user.dto';
-import {InjectRepository} from "@nestjs/typeorm";
-import {Repository, UpdateResult} from "typeorm";
-import {I18nService} from 'nestjs-i18n';
-import {User} from "./entities/user.entity";
-import {hashPassword} from "../../utils/password";
-import {RegisterDto} from "../auth/dto/register.dto";
-import {UserType} from "./users.constants";
+import {
+  BadRequestException,
+  Injectable,
+  Logger,
+  NotFoundException,
+} from '@nestjs/common';
+import { CreateUserDto } from './dto/create-user.dto';
+import { UpdateUserDto } from './dto/update-user.dto';
+import { InjectRepository } from '@nestjs/typeorm';
+import { Repository, UpdateResult } from 'typeorm';
+import { I18nService } from 'nestjs-i18n';
+import { User } from './entities/user.entity';
+import { hashPassword } from '../../utils/password';
+import { RegisterDto } from '../auth/dto/register.dto';
+import { UserType } from './users.constants';
 
 @Injectable()
 export class UsersService {
   private readonly logger = new Logger(UsersService.name);
   constructor(
-      @InjectRepository(User)
-      private userRepository: Repository<User>,
-      private readonly i18n: I18nService,
-  ) {
-  }
+    @InjectRepository(User)
+    private userRepository: Repository<User>,
+    private readonly i18n: I18nService,
+  ) {}
 
-  create(createUserDto: CreateUserDto) {
-    return 'This action adds a new user';
-  }
-  async findOne(phone: string, lang: string): Promise<User> {
-    const nPhone: string = phone.replace('+', '');
+  async findOne(req: User, lang: string): Promise<User> {
+    if (req.phone_number) {
+      req.phone_number = req.phone_number.replace('+', '');
+    }
 
-    const user: User = await this.userRepository.findOne(
-        { where: { phone_number: nPhone}  },
-    );
+    const user: User = await this.userRepository.findOneBy({ ...req });
 
     if (!user) {
       const message: string = await this.i18n.t('user.notFound', { lang });
@@ -39,7 +40,7 @@ export class UsersService {
   }
 
   findByID(id: number) {
-    return `This action returns a #${id} user`;
+    return this.userRepository.findOneBy({ id });
   }
 
   update(id: number, updateUserDto: UpdateUserDto) {
@@ -48,22 +49,6 @@ export class UsersService {
 
   remove(id: number) {
     return `This action removes a #${id} user`;
-  }
-
-  async findByPhone(phone: string, lang: string): Promise<User> {
-    const nPhone: string = phone.replace('+', '');
-
-    const user: User = await this.userRepository.findOne(
-        { where: { phone_number: nPhone}  },
-    );
-
-    if (!user) {
-      const message: string = await this.i18n.t('user.notFound', { lang });
-
-      throw new NotFoundException(message);
-    }
-
-    return user;
   }
 
   //biz
@@ -84,7 +69,9 @@ export class UsersService {
 
     const phone: string = registerDto.phone.replace('+', '');
 
-    const findUserByPhone: User = await this.userRepository.findOne({ where: {phone_number: phone} });
+    const findUserByPhone: User = await this.userRepository.findOne({
+      where: { phone_number: phone },
+    });
 
     if (findUserByPhone) {
       const message: string = await this.i18n.t('user.phone.existed', { lang });
@@ -97,17 +84,15 @@ export class UsersService {
     const hashedPwd = hashPassword(password);
     nUser.phone_number = phone;
     nUser.password = hashedPwd;
-    nUser.type = UserType.CUSTOMER
-
+    nUser.type = UserType.CUSTOMER;
 
     return this.userRepository.save(nUser);
   }
 
-
   // no use repo
   async updateRefreshToken(
-      id: number,
-      refreshToken: string,
+    id: number,
+    refreshToken: string,
   ): Promise<UpdateResult> {
     const modified: {
       refresh_token: string;

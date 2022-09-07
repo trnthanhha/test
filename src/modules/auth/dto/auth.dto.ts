@@ -1,5 +1,5 @@
 import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
-import { IsNotEmpty, IsOptional, IsString } from 'class-validator';
+import { IsNotEmpty, IsString } from 'class-validator';
 import { i18nValidationMessage } from 'nestjs-i18n';
 
 export interface LoginResponse {
@@ -8,21 +8,7 @@ export interface LoginResponse {
   expiredTime: number;
 }
 
-export interface ForgotPasswordResp {
-  token: string;
-}
-export class LogoutDto {
-  @IsOptional()
-  @IsString({
-    message: i18nValidationMessage('validation.isString', {
-      name: 'fcmToken',
-    }),
-  })
-  @ApiPropertyOptional({ example: '' })
-  fcmToken: string;
-}
-
-export class LoginDto extends LogoutDto {
+export class LoginDto {
   @IsString({
     message: i18nValidationMessage('validation.isString', {
       name: 'usernameOrPhone',

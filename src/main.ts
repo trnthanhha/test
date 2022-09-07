@@ -1,46 +1,41 @@
 import { NestFactory } from '@nestjs/core';
-import {Logger, ValidationPipe} from '@nestjs/common';
+import { Logger, ValidationPipe } from '@nestjs/common';
 import { NestExpressApplication } from '@nestjs/platform-express';
 import { DocumentBuilder, OpenAPIObject, SwaggerModule } from '@nestjs/swagger';
 import {
   i18nValidationErrorFactory,
   I18nValidationExceptionFilter,
 } from 'nestjs-i18n';
-import * as admin from 'firebase-admin';
 import { AppModule } from './app.module';
-import {HttpExceptionFilter} from "./utils/https.exception.filter";
-
-const serviceAccount = ''
+import { HttpExceptionFilter } from './utils/https.exception.filter';
 
 async function bootstrap() {
-  admin.initializeApp({ credential: admin.credential.cert(serviceAccount) });
-
   const app = await NestFactory.create<NestExpressApplication>(AppModule);
 
-  app.enableCors({ origin: '*' });
+  app.enableCors({ origin: process.env.APP_URL || '*' });
 
   app.useGlobalPipes(
-      new ValidationPipe({
-        exceptionFactory: i18nValidationErrorFactory,
-        transform: true,
-      }),
+    new ValidationPipe({
+      exceptionFactory: i18nValidationErrorFactory,
+      transform: true,
+    }),
   );
 
   app.useGlobalFilters(new HttpExceptionFilter());
 
   app.useGlobalFilters(
-      new I18nValidationExceptionFilter({ detailedErrors: false }),
+    new I18nValidationExceptionFilter({ detailedErrors: false }),
   );
 
   const { PORT, APP_URL } = process.env;
 
   const config: Omit<OpenAPIObject, 'paths'> = new DocumentBuilder()
-      .addBearerAuth()
-      .setTitle('VBike')
-      .setDescription('')
-      .setVersion('1.0')
-      .addTag('auth')
-      .build();
+    .addBearerAuth()
+    .setTitle('LocaMos')
+    .setDescription('')
+    .setVersion('1.0')
+    .addTag('auth')
+    .build();
 
   const document: OpenAPIObject = SwaggerModule.createDocument(app, config);
 

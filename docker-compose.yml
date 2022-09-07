@@ -2,7 +2,7 @@ version: '3.4'
 
 services:
   postgres:
-    container_name: db-postgres-localmos
+    container_name: postgres-localmos
     image: postgres:9-alpine
     restart: always
     ports:

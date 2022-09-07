@@ -1,12 +1,12 @@
-import { Auth } from '@decorators/roles.decorator';
-import { GetAuthUser } from '@decorators/user.decorator';
-import User from '@modules/user/entities/user.entity';
 import { Body, Controller, Post } from '@nestjs/common';
 import { ApiOperation, ApiTags } from '@nestjs/swagger';
 import { I18n, I18nContext } from 'nestjs-i18n';
 import { UpdateResult } from 'typeorm';
+import { Auth } from 'src/decorators/roles.decorator';
+import { GetAuthUser } from 'src/decorators/user.decorator';
+import { User } from 'src/modules/users/entities/user.entity';
 import { AuthService } from './auth.service';
-import { LoginDto, LoginResponse, LogoutDto } from './dto/auth.dto';
+import { LoginDto, LoginResponse } from './dto/auth.dto';
 import { RefreshTokenDto } from './dto/refresh-token.dto';
 import { CheckPhoneDto, RegisterDto } from './dto/register.dto';
 import { ResetPasswordDto } from './dto/reset-password.dto';
@@ -64,10 +64,7 @@ export class AuthController {
   @Auth()
   @ApiOperation({ summary: 'Logout to service' })
   @Post('logout')
-  logout(
-    @Body() logoutDto: LogoutDto,
-    @GetAuthUser() user: User,
-  ): Promise<UpdateResult> {
-    return this.authService.logout(logoutDto, user);
+  logout(@GetAuthUser() user: User): Promise<UpdateResult> {
+    return this.authService.logout(user);
   }
 }
