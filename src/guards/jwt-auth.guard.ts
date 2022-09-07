@@ -16,7 +16,7 @@ export class JwtAuthGuard extends AuthGuard('jwt') {
   /**
    * Handle error code if canActivate return false
    *
-   * @param {*} errror null
+   * @param {*} error null
    * @param {*} user
    * @param {*} info | TokenExpiredError | JsonWebTokenError
    * @returns

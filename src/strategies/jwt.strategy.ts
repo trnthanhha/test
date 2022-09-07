@@ -20,7 +20,7 @@ export class JwtStrategy extends PassportStrategy(Strategy) {
   validate(payload: any, done: (error: Error, user: any) => void): boolean {
     const { iat, exp, id } = payload;
 
-    const timeDiff: number = exp - iat;
+    const timeDiff: number = exp / 1000 - iat;
 
     if (timeDiff <= 0) {
       throw new UnauthorizedException();

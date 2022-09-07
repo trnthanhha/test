@@ -12,6 +12,9 @@ export class User {
   @PrimaryGeneratedColumn()
   id: number;
 
+  @Column({ unique: true })
+  username: string;
+
   @Column()
   password: string;
 
@@ -27,13 +30,13 @@ export class User {
   @Column({ nullable: true })
   refresh_token: string;
 
-  @Column()
+  @Column({ nullable: true })
   ref_user_id: number;
 
   @Column()
   is_kyc_verified: boolean;
 
-  @Column()
+  @Column({ nullable: true })
   created_by_id: number;
   @CreateDateColumn()
   created_at: Date;

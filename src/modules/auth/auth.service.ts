@@ -30,12 +30,17 @@ export class AuthService {
   }
 
   async generateToken(user: User): Promise<LoginResponse> {
-    const payload: { id: number; email: string } = {
+    const payload = {
       id: user.id,
       email: user.email,
+      type: user.type,
+      username: user.username,
+      phone_number: user.phone_number,
     };
 
-    const token: string = this.jwtService.sign(payload);
+    const token: string = this.jwtService.sign(payload, {
+      expiresIn: this.expiredDay(3),
+    });
 
     const refreshToken: string = this.jwtService.sign(payload, {
       secret: process.env.JWT_KEY_REFRESH,
@@ -57,7 +62,7 @@ export class AuthService {
     registerDto: RegisterDto,
     lang: string,
   ): Promise<LoginResponse> {
-    const { idToken, fcmToken } = registerDto;
+    const { idToken } = registerDto;
 
     try {
       try {
@@ -115,11 +120,13 @@ export class AuthService {
         lang,
       );
     } else {
-      throw new BadRequestException('invalid phone number');
+      user = await this.userService.findOne(
+        { username: usernameOrPhone } as User,
+        lang,
+      );
     }
-
+    //if (!user) => Exception occurred
     const isValidPassword = user.password === hashPassword(password);
-
     if (!isValidPassword) {
       const message: string = await this.i18n.t('auth.password.wrong', {
         lang,

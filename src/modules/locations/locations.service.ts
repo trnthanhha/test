@@ -22,8 +22,11 @@ export class LocationsService {
     return 'This action adds a new location';
   }
 
-  findAll() {
-    return `This action returns all locations`;
+  findAll(page: number, limit: number) {
+    return this.locationRepository.find({
+      skip: (page - 1) * limit,
+      take: limit,
+    });
   }
 
   findOne(id: number) {

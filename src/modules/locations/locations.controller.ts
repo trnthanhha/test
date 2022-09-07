@@ -1,7 +1,18 @@
-import { Controller, Get, Post, Body, Patch, Param, Delete } from '@nestjs/common';
+import {
+  Controller,
+  Get,
+  Post,
+  Body,
+  Patch,
+  Param,
+  Delete,
+  Query,
+} from '@nestjs/common';
 import { LocationsService } from './locations.service';
 import { CreateLocationDto } from './dto/create-location.dto';
 import { UpdateLocationDto } from './dto/update-location.dto';
+import { Auth } from '../../decorators/roles.decorator';
+import { ApiOperation } from '@nestjs/swagger';
 
 @Controller('locations')
 export class LocationsController {
@@ -12,9 +23,21 @@ export class LocationsController {
     return this.locationsService.create(createLocationDto);
   }
 
+  @ApiOperation({
+    summary: 'Get all locations by page',
+  })
   @Get()
-  findAll() {
-    return this.locationsService.findAll();
+  findAll(@Query('page') page?: string, @Query('limit') limit?: string) {
+    let nLimit = +limit;
+    if (!nLimit || nLimit > 200) {
+      nLimit = 50;
+    }
+
+    let nPage = +page;
+    if (!nPage || nPage <= 0) {
+      nPage = 1;
+    }
+    return this.locationsService.findAll(nPage, nLimit);
   }
 
   @Get(':id')
@@ -23,7 +46,10 @@ export class LocationsController {
   }
 
   @Patch(':id')
-  update(@Param('id') id: string, @Body() updateLocationDto: UpdateLocationDto) {
+  update(
+    @Param('id') id: string,
+    @Body() updateLocationDto: UpdateLocationDto,
+  ) {
     return this.locationsService.update(+id, updateLocationDto);
   }
 
