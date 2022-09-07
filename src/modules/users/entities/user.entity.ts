@@ -1,33 +1,42 @@
 import {
-    Column, CreateDateColumn,
-    Entity, PrimaryGeneratedColumn, UpdateDateColumn,
+  Column,
+  CreateDateColumn,
+  Entity,
+  PrimaryGeneratedColumn,
+  UpdateDateColumn,
 } from 'typeorm';
-import {UserType} from "../users.constants";
+import { UserType } from '../users.constants';
 
 @Entity()
 export class User {
-    @PrimaryGeneratedColumn()
-    id: number;
+  @PrimaryGeneratedColumn()
+  id: number;
 
-    @Column({ unique: true })
-    phone_number: string;
+  @Column()
+  password: string;
 
-    @Column({ unique: true })
-    email: string;
+  @Column({ unique: true })
+  phone_number: string;
 
-    @Column({ type: 'enum', enum: UserType })
-    type: UserType;
+  @Column({ unique: true })
+  email: string;
 
-    @Column()
-    ref_user_id: number;
+  @Column({ type: 'enum', enum: UserType })
+  type: UserType;
 
-    @Column()
-    is_kyc_verified: boolean;
+  @Column({ nullable: true })
+  refresh_token: string;
 
-    @Column()
-    created_by_id: number;
-    @CreateDateColumn()
-    created_at: Date;
-    @UpdateDateColumn()
-    updated_at: Date;
+  @Column()
+  ref_user_id: number;
+
+  @Column()
+  is_kyc_verified: boolean;
+
+  @Column()
+  created_by_id: number;
+  @CreateDateColumn()
+  created_at: Date;
+  @UpdateDateColumn()
+  updated_at: Date;
 }

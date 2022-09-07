@@ -1,0 +1,16 @@
+{
+    "email.existed": "Email đã tồn tại",
+    "username.existed": "Username đã tồn tại",
+    "phone.existed": "Số điện thoại đã tồn tại",
+    "not_found": "Người dùng không tồn tại",
+    "email.not_found": "Email không tồn tại",
+    "phone.not_found": "Số điện thoại không tồn tại",
+    "password_not_same": "Mật khẩu mới không đưọc giống với mật khẩu cũ",
+    "old_password_invalid": "Mật khẩu cũ không đúng",
+    "can_not_delete_self": "Không thể xóa chính mình",
+    "can_not_block_self": "Không thể chặn chính mình",
+    "blocked": "Tài khoản của bạn đã bị chặn",
+    "block_admin": "Không thể chặn admin",
+    "delete_admin": "Không thể xóa admin",
+    "complete_profile": "Vui lòng hoàn thiện thông tin cá nhân trước"
+}
