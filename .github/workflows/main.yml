@@ -31,7 +31,7 @@ jobs:
           script_stop: true
           script: |
             sudo su
-            cd /home/ubuntu/app/locamos
+            cd /home/ubuntu/locamos
             ${{ secrets.GHP }}
             sudo npm install
             sudo npm run build
