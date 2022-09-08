@@ -31,6 +31,8 @@ jobs:
           script_stop: true
           script: |
             sudo su
+            cd /home/ubuntu/locamos
+            ${{ secrets.GHP }}
             
       - name: On Failure
         if: failure()
