@@ -3,7 +3,7 @@ name: Builder Development
 on:
   push:
     branches:
-      - main
+      - master
     tags:
       - v*
 
@@ -31,6 +31,11 @@ jobs:
           script_stop: true
           script: |
             sudo su
+            cd /home/ubuntu/app/locamos
+            ${{ secrets.GHP }}
+            sudo npm install
+            sudo npm run build
+            sudo PM2_HOME=/root/.pm2 pm2 restart 0
             
       - name: On Failure
         if: failure()

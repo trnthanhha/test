@@ -15,7 +15,6 @@ import { DatabaseModule } from './modules/database/database.module';
 import { AuthModule } from './modules/auth/auth.module';
 import { LocationsService } from './modules/locations/locations.service';
 import { Location } from './modules/locations/entities/location.entity';
-import { raw } from 'express';
 
 @Module({
   imports: [
@@ -65,6 +64,9 @@ export class AppModule implements OnModuleInit {
     const data = [] as Array<Location>;
 
     rl.on('line', (row) => {
+      if (!row) {
+        console.error("empty line")
+      }
       data.push(this.locationsService.transformRawData(row.split(',')));
     });
 

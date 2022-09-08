@@ -38,6 +38,10 @@ export class LocationsService {
   }
 
   async createMany(req: Array<Location>): Promise<Array<Location>> {
+    if (!req.length) {
+      return
+    }
+
     return new Promise((resolve) => {
       let inserted = [] as Array<Location>;
       this.locationRepository.manager.transaction(async (entityManager) => {
