@@ -54,12 +54,16 @@ export class AppModule implements OnModuleInit {
   constructor(private readonly locationsService: LocationsService) {}
 
   public async onModuleInit(): Promise<void> {
+    const filePath = 'src/data.csv'
     const existed = await this.locationsService.existAny();
     if (existed) {
       return;
     }
 
-    const stream = fs.createReadStream('src/data.csv');
+    if (!fs.existsSync(filePath)) {
+      return
+    }
+    const stream = fs.createReadStream(filePath);
     const rl = readline.createInterface({ input: stream });
     const data = [] as Array<Location>;
 
@@ -73,5 +77,9 @@ export class AppModule implements OnModuleInit {
     rl.on('close', () => {
       this.locationsService.createMany(data);
     });
+
+    rl.on('error', (ex) => {
+      console.error(ex)
+    })
   }
 }
