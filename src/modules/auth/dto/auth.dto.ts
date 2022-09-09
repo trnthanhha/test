@@ -19,8 +19,11 @@ export class LoginDto {
       name: 'usernameOrPhone',
     }),
   })
-  @ApiPropertyOptional({ required: false, example: '84947754271' })
-  usernameOrPhone: string;
+  @ApiPropertyOptional({
+    required: false,
+    example: '84947754271 | customer@gmail.com',
+  })
+  username: string;
 
   @IsString({
     message: i18nValidationMessage('validation.isString', { name: 'password' }),

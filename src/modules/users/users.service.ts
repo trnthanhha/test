@@ -24,10 +24,6 @@ export class UsersService {
   ) {}
 
   async findOne(req: User, lang: string): Promise<User> {
-    if (req.phone_number) {
-      req.phone_number = req.phone_number.replace('+', '');
-    }
-
     const user: User = await this.userRepository.findOneBy({ ...req });
 
     if (!user) {
@@ -63,22 +59,21 @@ export class UsersService {
   async createBySignUp(registerDto: RegisterDto, lang: string): Promise<User> {
     const { password } = registerDto;
 
-    const phone: string = registerDto.phone.replace('+', '');
+    const username: string = registerDto.username.replace('+', '');
 
     const findUserByPhone: User = await this.userRepository.findOne({
-      where: { phone_number: phone },
+      where: { username },
     });
 
     if (findUserByPhone) {
       const message: string = await this.i18n.t('user.phone.existed', { lang });
-
       throw new BadRequestException(message);
     }
 
     const nUser: User = new User();
 
     const hashedPwd = hashPassword(password);
-    nUser.phone_number = phone;
+    nUser.username = username;
     nUser.password = hashedPwd;
     nUser.type = UserType.CUSTOMER;
 

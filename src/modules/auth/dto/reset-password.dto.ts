@@ -8,11 +8,11 @@ export class ResetPasswordDto {
   })
   @IsNotEmpty({
     message: i18nValidationMessage('validation.isRequired', {
-      name: 'phone',
+      name: 'username',
     }),
   })
   @ApiProperty({ required: true, example: '+84947754271' })
-  phone: string;
+  username: string;
 
   @IsString({
     message: i18nValidationMessage('validation.isString', {

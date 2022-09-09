@@ -10,10 +10,9 @@ import { I18nService } from 'nestjs-i18n';
 import { UpdateResult } from 'typeorm';
 import { User } from '../users/entities/user.entity';
 import { UsersService } from '../users/users.service';
-import { checkPhoneNumber } from '../../utils/regex';
 import { LoginDto, LoginResponse } from './dto/auth.dto';
 import { RefreshTokenDto } from './dto/refresh-token.dto';
-import { RegisterDto, CheckPhoneDto } from './dto/register.dto';
+import { RegisterDto } from './dto/register.dto';
 import { ResetPasswordDto } from './dto/reset-password.dto';
 import { hashPassword } from '../../utils/password';
 
@@ -32,10 +31,8 @@ export class AuthService {
   async generateToken(user: User): Promise<LoginResponse> {
     const payload = {
       id: user.id,
-      email: user.email,
       type: user.type,
       username: user.username,
-      phone_number: user.phone_number,
     };
 
     const token: string = this.jwtService.sign(payload, {
@@ -74,6 +71,20 @@ export class AuthService {
 
         throw new NotAcceptableException(message);
       }
+      const phone: string = registerDto.username.replace('+', '');
+      const existed = await this.userService
+        .findOne({ username: phone } as User, lang)
+        .catch((ex) => {
+          console.log(ex);
+        });
+
+      if (existed) {
+        const message: string = await this.i18n.t('user.username.existed', {
+          lang,
+        });
+
+        throw new NotAcceptableException(message);
+      }
 
       const user: User = await this.userService.createBySignUp(
         registerDto,
@@ -86,45 +97,15 @@ export class AuthService {
     }
   }
 
-  async checkPhoneNumber(
-    { phone }: CheckPhoneDto,
-    lang: string,
-  ): Promise<boolean> {
-    const nPhone: string = phone.replace('+', '');
-    const user: User = await this.userService.findOne(
-      {
-        phone_number: nPhone,
-      } as User,
-      lang,
-    );
-    if (user) {
-      const message: string = await this.i18n.t('user.phone.existed', { lang });
-
-      throw new BadRequestException(message);
-    }
-
-    return true;
-  }
-
   async login(
-    { password, usernameOrPhone }: LoginDto,
+    { password, username }: LoginDto,
     lang: string,
   ): Promise<LoginResponse> {
-    const phone: string = usernameOrPhone.replace('+', '');
-    const validPhone = checkPhoneNumber(phone);
-    let user: User;
-
-    if (validPhone) {
-      user = await this.userService.findOne(
-        { phone_number: phone } as User,
-        lang,
-      );
-    } else {
-      user = await this.userService.findOne(
-        { username: usernameOrPhone } as User,
-        lang,
-      );
-    }
+    const correctUsername: string = username.replace('+', '');
+    const user: User = await this.userService.findOne(
+      { username: correctUsername } as User,
+      lang,
+    );
     //if (!user) => Exception occurred
     const isValidPassword = user.password === hashPassword(password);
     if (!isValidPassword) {
@@ -167,7 +148,7 @@ export class AuthService {
   }
 
   async resetPassword(
-    { idToken, phone, password }: ResetPasswordDto,
+    { idToken, username, password }: ResetPasswordDto,
     lang: string,
   ): Promise<boolean> {
     try {
@@ -182,9 +163,8 @@ export class AuthService {
 
         throw new NotAcceptableException(message);
       }
-      const nPhone: string = phone.replace('+', '');
-
-      if (nPhone !== decode.phone_number.replace('+', '')) {
+      const correctUsername: string = username.replace('+', '');
+      if (correctUsername !== decode.phone_number.replace('+', '')) {
         const message: string = await this.i18n.t('auth.idToken.invalid', {
           lang,
         });
@@ -193,7 +173,6 @@ export class AuthService {
       }
 
       const expireTime: number = decode.exp * 1000;
-
       const currentTime: number = Date.now();
 
       if (currentTime > expireTime) {
@@ -205,7 +184,7 @@ export class AuthService {
       }
 
       const user: User = await this.userService.findOne(
-        { phone_number: nPhone } as User,
+        { username: correctUsername } as User,
         lang,
       );
 

@@ -8,7 +8,7 @@ import { User } from 'src/modules/users/entities/user.entity';
 import { AuthService } from './auth.service';
 import { LoginDto, LoginResponse } from './dto/auth.dto';
 import { RefreshTokenDto } from './dto/refresh-token.dto';
-import { CheckPhoneDto, RegisterDto } from './dto/register.dto';
+import { RegisterDto } from './dto/register.dto';
 import { ResetPasswordDto } from './dto/reset-password.dto';
 
 @ApiTags('auth')
@@ -41,15 +41,6 @@ export class AuthController {
     @I18n() i18n: I18nContext,
   ): Promise<LoginResponse> {
     return this.authService.register(registerDto, i18n.lang);
-  }
-
-  @ApiOperation({ summary: 'Check exist phone number before register' })
-  @Post('checkPhone')
-  checkPhone(
-    @Body() phone: CheckPhoneDto,
-    @I18n() i18n: I18nContext,
-  ): Promise<boolean> {
-    return this.authService.checkPhoneNumber(phone, i18n.lang);
   }
 
   @ApiOperation({ summary: 'Reset your password' })

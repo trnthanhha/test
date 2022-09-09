@@ -18,12 +18,6 @@ export class User {
   @Column()
   password: string;
 
-  @Column({ unique: true })
-  phone_number: string;
-
-  @Column({ unique: true })
-  email: string;
-
   @Column({ type: 'enum', enum: UserType })
   type: UserType;
 
