@@ -58,7 +58,6 @@ export class UsersService {
 
   async createBySignUp(registerDto: RegisterDto, lang: string): Promise<User> {
     const { password } = registerDto;
-
     const username: string = registerDto.username.replace('+', '');
 
     const findUserByPhone: User = await this.userRepository.findOne({
@@ -66,7 +65,9 @@ export class UsersService {
     });
 
     if (findUserByPhone) {
-      const message: string = await this.i18n.t('user.phone.existed', { lang });
+      const message: string = await this.i18n.t('user.username.existed', {
+        lang,
+      });
       throw new BadRequestException(message);
     }
 

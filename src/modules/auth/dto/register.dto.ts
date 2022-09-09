@@ -1,17 +1,10 @@
-import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
-import {
-  IsDateString,
-  IsNotEmpty,
-  IsPhoneNumber,
-  IsString,
-  ValidateIf,
-} from 'class-validator';
+import { ApiProperty } from '@nestjs/swagger';
+import { IsEmail, IsNotEmpty, IsPhoneNumber, IsString } from 'class-validator';
 import { i18nValidationMessage } from 'nestjs-i18n';
+import { IsPhoneOrEmail } from '../auth.validator.decorator';
 
 export class RegisterDto {
-  @IsPhoneNumber('VN', {
-    message: i18nValidationMessage('validation.phone.notValid'),
-  })
+  @IsPhoneOrEmail()
   @ApiProperty({ required: true, example: '+84947754271 | customer@gmail.com' })
   username: string;
 

@@ -59,32 +59,16 @@ export class AuthService {
     registerDto: RegisterDto,
     lang: string,
   ): Promise<LoginResponse> {
-    const { idToken } = registerDto;
-
     try {
-      try {
-        await admin.auth().verifyIdToken(idToken, true);
-      } catch (error) {
-        const message: string = await this.i18n.t('auth.idToken.invalid', {
-          lang,
-        });
-
-        throw new NotAcceptableException(message);
-      }
-      const phone: string = registerDto.username.replace('+', '');
-      const existed = await this.userService
-        .findOne({ username: phone } as User, lang)
-        .catch((ex) => {
-          console.log(ex);
-        });
-
-      if (existed) {
-        const message: string = await this.i18n.t('user.username.existed', {
-          lang,
-        });
-
-        throw new NotAcceptableException(message);
-      }
+      // try {
+      //   await admin.auth().verifyIdToken(idToken, true);
+      // } catch (error) {
+      //   const message: string = await this.i18n.t('auth.idToken.invalid', {
+      //     lang,
+      //   });
+      //
+      //   throw new NotAcceptableException(message);
+      // }
 
       const user: User = await this.userService.createBySignUp(
         registerDto,

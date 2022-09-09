@@ -27,7 +27,7 @@ export class User {
   @Column({ nullable: true })
   ref_user_id: number;
 
-  @Column()
+  @Column({ default: false })
   is_kyc_verified: boolean;
 
   @Column({ nullable: true })
