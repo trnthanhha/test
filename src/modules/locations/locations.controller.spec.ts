@@ -64,7 +64,7 @@ describe('LocationsController', () => {
       expect(
         controller.findOne('1', { type: UserType.CUSTOMER } as User),
       ).rejects.toEqual(new NotFoundException()),
-      expect(controller.findOne('1', { id: 2 } as User)).rejects.toEqual(
+      expect(controller.findOne('1', { id: 2 } as User)).resolves.toEqual(
         model,
       ),
     ]);
