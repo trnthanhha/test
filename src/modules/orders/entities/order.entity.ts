@@ -1,27 +1,30 @@
 import {
-    Column, CreateDateColumn,
-    Entity, PrimaryGeneratedColumn, UpdateDateColumn,
+  Column,
+  CreateDateColumn,
+  Entity,
+  PrimaryGeneratedColumn,
+  UpdateDateColumn,
 } from 'typeorm';
-import {PaymentStatus} from "../orders.constants";
+import { PaymentStatus } from '../orders.constants';
 
 @Entity()
 export class Order {
-    @PrimaryGeneratedColumn()
-    id: number;
+  @PrimaryGeneratedColumn()
+  id: number;
 
-    @Column({ type: 'enum', enum: PaymentStatus, default: PaymentStatus.PENDING })
-    payment_status: PaymentStatus
+  @Column({ type: 'enum', enum: PaymentStatus, default: PaymentStatus.PENDING })
+  payment_status: PaymentStatus;
 
-    @Column({ type: 'double precision'})
-    price: number
+  @Column({ type: 'double precision' })
+  price: number;
 
-    @Column()
-    location_id: number;
+  @Column()
+  location_id: number;
 
-    @Column()
-    created_by_id: number;
-    @CreateDateColumn()
-    created_at: Date;
-    @UpdateDateColumn()
-    updated_at: Date;
+  @Column()
+  created_by_id: number;
+  @CreateDateColumn()
+  created_at: Date;
+  @UpdateDateColumn()
+  updated_at: Date;
 }
