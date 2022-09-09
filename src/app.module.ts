@@ -54,14 +54,14 @@ export class AppModule implements OnModuleInit {
   constructor(private readonly locationsService: LocationsService) {}
 
   public async onModuleInit(): Promise<void> {
-    const filePath = 'src/data.csv'
+    const filePath = 'src/data.csv';
     const existed = await this.locationsService.existAny();
     if (existed) {
       return;
     }
 
     if (!fs.existsSync(filePath)) {
-      return
+      return;
     }
     const stream = fs.createReadStream(filePath);
     const rl = readline.createInterface({ input: stream });
@@ -79,7 +79,7 @@ export class AppModule implements OnModuleInit {
     });
 
     rl.on('error', (ex) => {
-      console.error(ex)
-    })
+      console.error(ex);
+    });
   }
 }

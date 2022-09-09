@@ -34,6 +34,7 @@ jobs:
             cd /home/ubuntu/locamos
             ${{ secrets.GHP }}
             sudo npm install
+            sudo npm run test
             sudo npm run build
             sudo PM2_HOME=/root/.pm2 pm2 restart 0
             

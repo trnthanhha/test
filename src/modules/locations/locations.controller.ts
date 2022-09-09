@@ -1,8 +1,16 @@
-import { Controller, Get, Param, Query } from '@nestjs/common';
+import {
+  ClassSerializerInterceptor,
+  Controller,
+  Get,
+  NotFoundException,
+  Param,
+  Query,
+  UseInterceptors,
+} from '@nestjs/common';
 import { ApiOperation, ApiTags } from '@nestjs/swagger';
 import { ApiImplicitQuery } from '@nestjs/swagger/dist/decorators/api-implicit-query.decorator';
-import { GetAuthUser } from 'src/decorators/user.decorator';
-import { User } from 'src/modules/users/entities/user.entity';
+import { GetAuthUser } from '../../decorators/user.decorator';
+import { User } from '../users/entities/user.entity';
 import { LocationsService } from './locations.service';
 import { LocationStatus } from './locations.contants';
 import { Location } from './entities/location.entity';
@@ -13,6 +21,8 @@ import { UserType } from '../users/users.constants';
 export class LocationsController {
   constructor(private readonly locationsService: LocationsService) {}
 
+  @Get()
+  @UseInterceptors(ClassSerializerInterceptor)
   @ApiOperation({
     summary: 'Get all locations by page',
   })
@@ -46,7 +56,6 @@ export class LocationsController {
     type: Boolean,
     description: 'Filter locations which are being owned by someone',
   })
-  @Get()
   findAll(
     @GetAuthUser() user: User,
     @Query('page') page?: string,
@@ -85,7 +94,22 @@ export class LocationsController {
   }
 
   @Get(':id')
-  findOne(@Param('id') id: string) {
-    return this.locationsService.findOne(+id);
+  @UseInterceptors(ClassSerializerInterceptor)
+  async findOne(@Param('id') id: string, @GetAuthUser() user: User) {
+    const item = await this.locationsService.findOne(+id);
+    if (user?.type === UserType.ADMIN) {
+      return item;
+    }
+
+    if (item.is_blacklist) {
+      throw new NotFoundException();
+    }
+
+    if (item.status !== LocationStatus.APPROVED && item.user_id !== user?.id) {
+      // if item pending or rejected, only requests' owner can see the location
+      throw new NotFoundException();
+    }
+
+    return item;
   }
 }

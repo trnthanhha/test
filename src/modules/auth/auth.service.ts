@@ -60,16 +60,6 @@ export class AuthService {
     lang: string,
   ): Promise<LoginResponse> {
     try {
-      // try {
-      //   await admin.auth().verifyIdToken(idToken, true);
-      // } catch (error) {
-      //   const message: string = await this.i18n.t('auth.idToken.invalid', {
-      //     lang,
-      //   });
-      //
-      //   throw new NotAcceptableException(message);
-      // }
-
       const user: User = await this.userService.createBySignUp(
         registerDto,
         lang,

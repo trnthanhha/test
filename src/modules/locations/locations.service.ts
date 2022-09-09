@@ -40,8 +40,8 @@ export class LocationsService {
     return this.locationRepository.find(options);
   }
 
-  findOne(id: number) {
-    return `This action returns a #${id} location`;
+  async findOne(id: number) {
+    return this.locationRepository.findOneBy({ id });
   }
 
   async existAny(): Promise<boolean> {
