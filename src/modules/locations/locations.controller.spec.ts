@@ -21,7 +21,7 @@ describe('LocationsController', () => {
     );
     const controller = await getControllerWithMockUserBlacklist(repoMock);
 
-    expect(
+    await expect(
       controller.findOne('1', { type: UserType.ADMIN } as User),
     ).resolves.toEqual(model);
   });
@@ -36,10 +36,10 @@ describe('LocationsController', () => {
       }),
     );
     const controller = await getControllerWithMockUserBlacklist(repoMock);
-    expect(controller.findOne('1', undefined)).rejects.toEqual(
+    await expect(controller.findOne('1', undefined)).rejects.toEqual(
       new NotFoundException(),
     );
-    expect(
+    await expect(
       controller.findOne('1', { type: UserType.CUSTOMER } as User),
     ).rejects.toEqual(new NotFoundException());
   });
@@ -57,14 +57,17 @@ describe('LocationsController', () => {
     const controller = await getControllerWithMockUserBlacklist(repoMock);
 
     //not valid
-    expect(controller.findOne('1', undefined)).rejects.toEqual(
-      new NotFoundException(),
-    );
-    expect(
-      controller.findOne('1', { type: UserType.CUSTOMER } as User),
-    ).rejects.toEqual(new NotFoundException());
-    //valid
-    expect(controller.findOne('1', { id: 2 } as User)).resolves.toEqual(model);
+    await Promise.all([
+      expect(controller.findOne('1', undefined)).rejects.toEqual(
+        new NotFoundException(),
+      ),
+      expect(
+        controller.findOne('1', { type: UserType.CUSTOMER } as User),
+      ).rejects.toEqual(new NotFoundException()),
+      expect(controller.findOne('1', { id: 2 } as User)).resolves.toEqual(
+        model,
+      ),
+    ]);
   });
 });
 
