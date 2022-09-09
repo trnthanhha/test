@@ -18,7 +18,7 @@ export class JwtStrategy extends PassportStrategy(Strategy) {
   }
 
   validate(payload: any, done: (error: Error, user: any) => void): boolean {
-    const { iat, exp, id } = payload;
+    const { iat, exp, id, type, username } = payload;
 
     const timeDiff: number = exp / 1000 - iat;
 
@@ -26,7 +26,7 @@ export class JwtStrategy extends PassportStrategy(Strategy) {
       throw new UnauthorizedException();
     }
 
-    done(null, { id });
+    done(null, { id, type, username });
     return true;
   }
 }

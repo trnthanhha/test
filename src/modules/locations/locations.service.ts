@@ -1,8 +1,7 @@
 import { Injectable, Logger } from '@nestjs/common';
 import { CreateLocationDto } from './dto/create-location.dto';
-import { UpdateLocationDto } from './dto/update-location.dto';
 import { InjectRepository } from '@nestjs/typeorm';
-import { Repository } from 'typeorm';
+import { FindManyOptions, MoreThan, Repository } from 'typeorm';
 import { Location } from './entities/location.entity';
 import {
   LocationNFTStatus,
@@ -22,11 +21,23 @@ export class LocationsService {
     return 'This action adds a new location';
   }
 
-  findAll(page: number, limit: number) {
-    return this.locationRepository.find({
+  findAll(
+    page: number,
+    limit: number,
+    whereCondition: Location,
+    owned = false,
+  ) {
+    const options = {
+      where: { ...whereCondition },
       skip: (page - 1) * limit,
       take: limit,
-    });
+    } as FindManyOptions<Location>;
+    if (owned) {
+      options.where = Object.assign(options.where, {
+        user_id: MoreThan(0),
+      });
+    }
+    return this.locationRepository.find(options);
   }
 
   findOne(id: number) {
@@ -39,7 +50,7 @@ export class LocationsService {
 
   async createMany(req: Array<Location>): Promise<Array<Location>> {
     if (!req.length) {
-      return
+      return;
     }
 
     return new Promise((resolve) => {

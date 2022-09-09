@@ -7,18 +7,14 @@ import {
 } from '@nestjs/common';
 import { UserType } from '../modules/users/users.constants';
 import { JwtService } from '@nestjs/jwt';
+import { decodeUserFromHeader } from '../helper/authorization';
 
 @Injectable()
 export class RolesGuard implements CanActivate {
   async canActivate(context: ExecutionContext): Promise<boolean> {
     const requiredRoles = [UserType.ADMIN, UserType.CUSTOMER];
     const request = context.switchToHttp().getRequest();
-    const bearer = request.headers?.authorization;
-    if (!bearer) {
-      throw new ForbiddenException();
-    }
-    const payload = bearer.substring('Bearer '.length);
-    const user = new JwtService().decode(payload, { json: true });
+    const user = decodeUserFromHeader(request.headers);
     if (!user || typeof user === 'string') {
       throw new ForbiddenException();
     }

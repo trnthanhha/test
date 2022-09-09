@@ -65,7 +65,7 @@ export class AppModule implements OnModuleInit {
 
     rl.on('line', (row) => {
       if (!row) {
-        console.error("empty line")
+        console.error('empty line');
       }
       data.push(this.locationsService.transformRawData(row.split(',')));
     });

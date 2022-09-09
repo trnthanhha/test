@@ -3,8 +3,8 @@ import { Cron } from '@nestjs/schedule';
 
 @Injectable()
 export class PaymentService {
-    @Cron('*/30 * * * * *')
-    syncPaymentStatus() {
-
-    }
+  @Cron('*/30 * * * * *')
+  syncPaymentStatus() {
+    console.log('sync payment status each 30s');
+  }
 }
