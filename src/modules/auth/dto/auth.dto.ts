@@ -11,12 +11,12 @@ export interface LoginResponse {
 export class LoginDto {
   @IsString({
     message: i18nValidationMessage('validation.isString', {
-      name: 'usernameOrPhone',
+      name: 'username',
     }),
   })
   @IsNotEmpty({
     message: i18nValidationMessage('validation.isRequired', {
-      name: 'usernameOrPhone',
+      name: 'username',
     }),
   })
   @ApiPropertyOptional({

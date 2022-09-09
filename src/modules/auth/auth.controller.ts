@@ -1,4 +1,10 @@
-import { Body, Controller, Post } from '@nestjs/common';
+import {
+  BadRequestException,
+  Body,
+  Controller,
+  Post,
+  UnauthorizedException,
+} from '@nestjs/common';
 import { ApiOperation, ApiTags } from '@nestjs/swagger';
 import { I18n, I18nContext } from 'nestjs-i18n';
 import { UpdateResult } from 'typeorm';
@@ -10,11 +16,15 @@ import { LoginDto, LoginResponse } from './dto/auth.dto';
 import { RefreshTokenDto } from './dto/refresh-token.dto';
 import { RegisterDto } from './dto/register.dto';
 import { ResetPasswordDto } from './dto/reset-password.dto';
+import { ConfigService } from '@nestjs/config';
 
 @ApiTags('auth')
 @Controller('auth')
 export class AuthController {
-  constructor(private readonly authService: AuthService) {}
+  private configService: ConfigService;
+  constructor(private readonly authService: AuthService) {
+    this.configService = new ConfigService();
+  }
 
   @ApiOperation({ summary: 'Login to service' })
   @Post('login')
@@ -40,6 +50,9 @@ export class AuthController {
     @Body() registerDto: RegisterDto,
     @I18n() i18n: I18nContext,
   ): Promise<LoginResponse> {
+    if (this.configService.get<string>('ENV') === 'PRODUCTION') {
+      throw new BadRequestException();
+    }
     return this.authService.register(registerDto, i18n.lang);
   }
 

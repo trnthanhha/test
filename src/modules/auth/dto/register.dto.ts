@@ -1,5 +1,5 @@
 import { ApiProperty } from '@nestjs/swagger';
-import { IsEmail, IsNotEmpty, IsPhoneNumber, IsString } from 'class-validator';
+import { IsNotEmpty, IsString } from 'class-validator';
 import { i18nValidationMessage } from 'nestjs-i18n';
 import { IsPhoneOrEmail } from '../auth.validator.decorator';
 
