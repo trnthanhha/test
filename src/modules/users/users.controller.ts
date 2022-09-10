@@ -1,5 +1,4 @@
 import {
-  BadRequestException,
   ClassSerializerInterceptor,
   Controller,
   Get,
@@ -11,7 +10,7 @@ import {
   UseInterceptors,
 } from '@nestjs/common';
 import { UsersService } from './users.service';
-import { ApiTags, ApiTooManyRequestsResponse } from '@nestjs/swagger';
+import { ApiOperation, ApiTags } from '@nestjs/swagger';
 import { Auth } from '../../decorators/roles.decorator';
 import { ApiImplicitQuery } from '@nestjs/swagger/dist/decorators/api-implicit-query.decorator';
 import { getObjectExcludedFields } from '../../utils/response_wrapper';
@@ -55,6 +54,9 @@ export class UsersController {
   }
 
   @Get('/customers')
+  @ApiOperation({
+    summary: 'Searching customer with username to buy for',
+  })
   @UseInterceptors(ClassSerializerInterceptor)
   @ApiImplicitQuery({
     name: 'page',
