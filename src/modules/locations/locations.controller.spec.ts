@@ -13,12 +13,10 @@ describe('LocationsController', () => {
     const model = new Location();
     model.is_blacklist = true;
     model.status = LocationStatus.PENDING;
-    // @ts-ignore
-    const repoMock: jest.Mock<{ findOne: jest.Mock<any, []> }, []> = jest.fn(
-      () => ({
+    const repoMock: jest.Mock<{ findOneBy: jest.Mock<Location, []> }, []> =
+      jest.fn(() => ({
         findOneBy: jest.fn(() => model),
-      }),
-    );
+      }));
     const controller = await getControllerWithMockUserBlacklist(repoMock);
 
     await expect(
@@ -29,12 +27,10 @@ describe('LocationsController', () => {
   it('not found, location is blacklist but user not admin', async () => {
     const model = new Location();
     model.is_blacklist = true;
-    // @ts-ignore
-    const repoMock: jest.Mock<{ findOne: jest.Mock<any, []> }, []> = jest.fn(
-      () => ({
+    const repoMock: jest.Mock<{ findOneBy: jest.Mock<Location, []> }, []> =
+      jest.fn(() => ({
         findOneBy: jest.fn(() => model),
-      }),
-    );
+      }));
     const controller = await getControllerWithMockUserBlacklist(repoMock);
     await expect(controller.findOne('1', undefined)).rejects.toEqual(
       new NotFoundException(),
@@ -48,12 +44,10 @@ describe('LocationsController', () => {
     const model = new Location();
     model.status = LocationStatus.PENDING;
     model.user_id = 2;
-    // @ts-ignore
-    const repoMock: jest.Mock<{ findOne: jest.Mock<any, []> }, []> = jest.fn(
-      () => ({
+    const repoMock: jest.Mock<{ findOneBy: jest.Mock<Location, []> }, []> =
+      jest.fn(() => ({
         findOneBy: jest.fn(() => model),
-      }),
-    );
+      }));
     const controller = await getControllerWithMockUserBlacklist(repoMock);
 
     //not valid

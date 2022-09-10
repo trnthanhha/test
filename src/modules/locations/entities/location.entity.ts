@@ -92,6 +92,9 @@ export class Location {
   @Column({ nullable: true })
   paid_at: Date;
 
+  @Column({ default: 1 })
+  version: number;
+
   @Exclude()
   @Column()
   created_by_id: number;

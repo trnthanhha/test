@@ -15,6 +15,7 @@ import { DatabaseModule } from './modules/database/database.module';
 import { AuthModule } from './modules/auth/auth.module';
 import { LocationsService } from './modules/locations/locations.service';
 import { Location } from './modules/locations/entities/location.entity';
+import { RedisModule } from './modules/redis/redis.module';
 
 @Module({
   imports: [
@@ -37,6 +38,8 @@ import { Location } from './modules/locations/entities/location.entity';
     ScheduleModule.forRoot(),
     // db connection
     DatabaseModule,
+    //Microservices modules
+    RedisModule,
     // API Middlewares, auth modules
     AuthModule,
 

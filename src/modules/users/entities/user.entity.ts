@@ -6,6 +6,7 @@ import {
   UpdateDateColumn,
 } from 'typeorm';
 import { UserType } from '../users.constants';
+import { Exclude } from 'class-transformer';
 
 @Entity()
 export class User {
@@ -16,11 +17,28 @@ export class User {
   username: string;
 
   @Column()
+  first_name: string;
+
+  @Column()
+  last_name: string;
+
+  @Exclude()
+  @Column()
   password: string;
 
+  @Exclude()
+  @Column({ nullable: true })
+  identification_number: string;
+
+  @Exclude()
+  @Column({ nullable: true })
+  identification_created_at: Date;
+
+  @Exclude()
   @Column({ type: 'enum', enum: UserType })
   type: UserType;
 
+  @Exclude()
   @Column({ nullable: true })
   refresh_token: string;
 
@@ -30,6 +48,7 @@ export class User {
   @Column({ default: false })
   is_kyc_verified: boolean;
 
+  @Exclude()
   @Column({ nullable: true })
   created_by_id: number;
   @CreateDateColumn()
