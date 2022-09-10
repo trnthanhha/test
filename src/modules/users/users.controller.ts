@@ -1,29 +1,40 @@
 import {
+  BadRequestException,
   ClassSerializerInterceptor,
   Controller,
   Get,
+  Inject,
   NotFoundException,
   Param,
   Query,
+  UnauthorizedException,
   UseInterceptors,
 } from '@nestjs/common';
 import { UsersService } from './users.service';
-import { ApiTags } from '@nestjs/swagger';
+import { ApiTags, ApiTooManyRequestsResponse } from '@nestjs/swagger';
 import { Auth } from '../../decorators/roles.decorator';
 import { ApiImplicitQuery } from '@nestjs/swagger/dist/decorators/api-implicit-query.decorator';
 import { getObjectExcludedFields } from '../../utils/response_wrapper';
 import { GetAuthUser } from '../../decorators/user.decorator';
 import { User } from './entities/user.entity';
-import { UserType } from './users.constants';
+import { LimitSearchProfilePerMin, UserType } from './users.constants';
+import Redis from 'ioredis';
+import { REDIS_CLIENT_PROVIDER } from '../redis/redis.constants';
+import { generateRedisKey } from '../redis/redis.keys.pattern';
 
 @ApiTags('users')
 @Controller('users')
 export class UsersController {
-  constructor(private readonly usersService: UsersService) {}
+  constructor(
+    private readonly usersService: UsersService,
+    @Inject(REDIS_CLIENT_PROVIDER) private readonly redis: Redis,
+  ) {}
 
   @Auth()
   @Get(':id')
   async getProfile(@Param('id') id: string, @GetAuthUser() user: User) {
+    await checkRateLimit(this.redis, user);
+
     const customer = await this.usersService.findByID(+id);
     if (!customer) {
       return;
@@ -64,4 +75,20 @@ export class UsersController {
   ) {
     return this.usersService.searchCustomers(username, +page, +limit);
   }
+}
+
+async function checkRateLimit(redis: Redis, user: User) {
+  if (!user?.id) {
+    throw new UnauthorizedException();
+  }
+
+  const limitKey = generateRedisKey(UsersService.name, 'getProfile', user.id);
+  const newValue = await redis.incr(limitKey);
+  if (newValue === 1) {
+    redis.expire(limitKey, 60);
+  } else if (newValue > LimitSearchProfilePerMin) {
+    throw new Error('Too many requests');
+  }
+
+  return;
 }
