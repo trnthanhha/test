@@ -6,9 +6,17 @@ import { User } from './entities/user.entity';
 import { AcceptLanguageResolver, I18nModule, QueryResolver } from 'nestjs-i18n';
 import { UserType } from './users.constants';
 import { NotFoundException } from '@nestjs/common';
+import {
+  REDIS_CLIENT_PROVIDER,
+  REDIS_TOKEN_PROVIDER,
+} from '../redis/redis.constants';
 
 describe('UsersController', () => {
   it('get profile, hidden password, ignore find admin if customer', async () => {
+    const redisMock = jest.fn(() => ({
+      incr: jest.fn(() => 1),
+      expire: jest.fn(() => true),
+    }));
     const model = getExampleUser();
 
     const censored = {
@@ -20,23 +28,41 @@ describe('UsersController', () => {
     const repoMock: jest.Mock<any, []> = jest.fn(() => ({
       findOneBy: jest.fn(() => model),
     }));
-    const controller = await getController(repoMock);
+    const controller = await getController(repoMock, redisMock);
 
-    await expect(controller.getProfile('1', {} as User)).resolves.toEqual(
-      censored,
-    );
+    await expect(
+      controller.getProfile('1', { id: 1 } as User),
+    ).resolves.toEqual(censored);
 
     model.type = UserType.ADMIN;
     await expect(
-      controller.getProfile('1', { type: UserType.CUSTOMER } as User),
+      controller.getProfile('1', { id: 1, type: UserType.CUSTOMER } as User),
     ).rejects.toEqual(new NotFoundException());
     await expect(
-      controller.getProfile('1', { type: UserType.ADMIN } as User),
+      controller.getProfile('1', { id: 1, type: UserType.ADMIN } as User),
     ).resolves.toEqual(censored);
+  });
+
+  it('get profile, reach limited access', async () => {
+    const redisMock = jest.fn(() => ({
+      incr: jest.fn(() => 11),
+      expire: jest.fn(() => true),
+    }));
+    const controller = await getController(
+      jest.fn(() => ({
+        findOneBy: jest.fn(() => {
+          return;
+        }),
+      })),
+      redisMock,
+    );
+    await expect(controller.getProfile('1', { id: 1 } as User)).rejects.toEqual(
+      new Error('Too many requests'),
+    );
   });
 });
 
-async function getController(mockRepo) {
+async function getController(mockRepo, mockRedis = jest.fn(() => ({}))) {
   const module: TestingModule = await Test.createTestingModule({
     imports: [
       I18nModule.forRoot({
@@ -57,6 +83,14 @@ async function getController(mockRepo) {
       {
         provide: getRepositoryToken(User),
         useFactory: mockRepo,
+      },
+      {
+        provide: REDIS_TOKEN_PROVIDER,
+        useFactory: mockRedis,
+      },
+      {
+        provide: REDIS_CLIENT_PROVIDER,
+        useFactory: mockRedis,
       },
     ],
   }).compile();
