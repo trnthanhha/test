@@ -6,12 +6,13 @@ import {
 } from '@nestjs/common';
 import { UpdateUserDto } from './dto/update-user.dto';
 import { InjectRepository } from '@nestjs/typeorm';
-import { Repository, UpdateResult } from 'typeorm';
+import { FindManyOptions, Like, Repository, UpdateResult } from 'typeorm';
 import { I18nService } from 'nestjs-i18n';
 import { User } from './entities/user.entity';
 import { hashPassword } from '../../utils/password';
 import { RegisterDto } from '../auth/dto/register.dto';
 import { UserType } from './users.constants';
+import { DefaultMaxLimit } from '../../constants/db';
 
 @Injectable()
 export class UsersService {
@@ -36,6 +37,31 @@ export class UsersService {
 
   findByID(id: number) {
     return this.userRepository.findOneBy({ id });
+  }
+
+  searchCustomers(username: string, page?: number, limit?: number) {
+    if (!username) {
+      throw new BadRequestException();
+    }
+    const options = {
+      order: {
+        id: 'ASC',
+      },
+      where: {
+        type: UserType.CUSTOMER,
+        username: Like(`%${username}%`),
+      },
+    } as FindManyOptions<User>;
+
+    if (!limit || limit > DefaultMaxLimit) {
+      limit = DefaultMaxLimit;
+    }
+
+    if (page > 0) {
+      options.skip = (page - 1) * limit;
+    }
+
+    return this.userRepository.find(options);
   }
 
   update(id: number, updateUserDto: UpdateUserDto) {
