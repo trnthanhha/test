@@ -36,7 +36,6 @@ jobs:
             sudo npm install
             sudo npm run test
             sudo npm run build
-            docker-compose up -d
             sudo PM2_HOME=/root/.pm2 pm2 restart 0
             
       - name: On Failure
