@@ -20,6 +20,9 @@ export class Location {
   @Column()
   name: string;
 
+  @Column({ nullable: true })
+  handle: string;
+
   @Column()
   map_captured: string;
 

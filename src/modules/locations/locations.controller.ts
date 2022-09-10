@@ -1,9 +1,11 @@
 import {
+  Body,
   ClassSerializerInterceptor,
   Controller,
   Get,
   NotFoundException,
   Param,
+  Post,
   Query,
   UseInterceptors,
 } from '@nestjs/common';
@@ -12,14 +14,24 @@ import { ApiImplicitQuery } from '@nestjs/swagger/dist/decorators/api-implicit-q
 import { GetAuthUser } from '../../decorators/user.decorator';
 import { User } from '../users/entities/user.entity';
 import { LocationsService } from './locations.service';
-import { LocationStatus } from './locations.contants';
+import { LocationStatus, LocationType } from './locations.contants';
 import { Location } from './entities/location.entity';
 import { UserType } from '../users/users.constants';
+import { Auth } from '../../decorators/roles.decorator';
+import { CreateLocationDto } from './dto/create-location.dto';
+import { LocationHandleService } from '../location-handle/location-handle.service';
+import { Repository } from 'typeorm';
+import { InjectRepository } from '@nestjs/typeorm';
 
 @ApiTags('locations')
 @Controller('locations')
 export class LocationsController {
-  constructor(private readonly locationsService: LocationsService) {}
+  constructor(
+    private readonly locationsService: LocationsService,
+    private readonly locationHandleService: LocationHandleService,
+    @InjectRepository(Location)
+    private readonly locationRepository: Repository<Location>,
+  ) {}
 
   @Get()
   @UseInterceptors(ClassSerializerInterceptor)
@@ -111,5 +123,35 @@ export class LocationsController {
     }
 
     return item;
+  }
+
+  @Auth()
+  @ApiOperation({
+    summary: 'Create a custom location',
+  })
+  @Post()
+  async create(
+    @Body() createLocationDto: CreateLocationDto,
+    @GetAuthUser() user: User,
+  ): Promise<Location> {
+    const newLocation = new Location();
+    Object.assign(newLocation, createLocationDto);
+
+    //biz
+    newLocation.status = LocationStatus.PENDING;
+    newLocation.type = LocationType.CUSTOMER;
+    newLocation.block_radius = 50;
+    //sys
+    newLocation.user_id = user.id;
+    newLocation.created_by_id = user.id;
+
+    const dbManager = this.locationRepository.manager;
+    dbManager.transaction((entityManager) => {});
+    const locationHandle = await this.locationHandleService.createHandle(
+      newLocation.name,
+      dbManager,
+    );
+    newLocation.handle = `${locationHandle.raw['name']}-${locationHandle.raw['total']}`;
+    return this.locationsService.create(newLocation, dbManager);
   }
 }

@@ -16,6 +16,7 @@ import { AuthModule } from './modules/auth/auth.module';
 import { LocationsService } from './modules/locations/locations.service';
 import { Location } from './modules/locations/entities/location.entity';
 import { RedisModule } from './modules/redis/redis.module';
+import { LocationHandleModule } from './modules/location-handle/location-handle.module';
 
 @Module({
   imports: [
@@ -48,6 +49,9 @@ import { RedisModule } from './modules/redis/redis.module';
     LocationsModule,
     OrdersModule,
     BillsModule,
+    LocationHandleModule,
+
+    //3rd modules
     PaymentModule,
   ],
   controllers: [AppController],
