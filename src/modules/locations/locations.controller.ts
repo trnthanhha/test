@@ -3,6 +3,7 @@ import {
   ClassSerializerInterceptor,
   Controller,
   Get,
+  Logger,
   NotFoundException,
   Param,
   Post,
@@ -14,7 +15,11 @@ import { ApiImplicitQuery } from '@nestjs/swagger/dist/decorators/api-implicit-q
 import { GetAuthUser } from '../../decorators/user.decorator';
 import { User } from '../users/entities/user.entity';
 import { LocationsService } from './locations.service';
-import { LocationStatus, LocationType } from './locations.contants';
+import {
+  LocationNFTStatus,
+  LocationStatus,
+  LocationType,
+} from './locations.contants';
 import { Location } from './entities/location.entity';
 import { UserType } from '../users/users.constants';
 import { Auth } from '../../decorators/roles.decorator';
@@ -26,6 +31,7 @@ import { InjectRepository } from '@nestjs/typeorm';
 @ApiTags('locations')
 @Controller('locations')
 export class LocationsController {
+  private readonly logger = new Logger(LocationsController.name);
   constructor(
     private readonly locationsService: LocationsService,
     private readonly locationHandleService: LocationHandleService,
@@ -139,8 +145,10 @@ export class LocationsController {
 
     //biz
     newLocation.status = LocationStatus.PENDING;
+    newLocation.nft_status = LocationNFTStatus.PENDING;
     newLocation.type = LocationType.CUSTOMER;
     newLocation.block_radius = 50;
+    newLocation.country = 'VN';
     //sys
     newLocation.user_id = user.id;
     newLocation.created_by_id = user.id;
@@ -148,12 +156,12 @@ export class LocationsController {
     const dbManager = this.locationRepository.manager;
     return await dbManager.transaction(
       async (entityManager): Promise<Location> => {
-        const locationHandle = await this.locationHandleService.createHandle(
-          newLocation.name,
-          entityManager,
-        );
-
-        newLocation.handle = `${locationHandle.raw['name']}-${locationHandle.raw['total']}`;
+        newLocation.handle = await this.locationHandleService
+          .createHandle(newLocation.name, entityManager)
+          .catch((ex) => {
+            this.logger.error('exception create handle', ex.message);
+            throw ex;
+          });
         return this.locationsService.create(newLocation, dbManager);
       },
     );

@@ -82,7 +82,7 @@ export class UsersService {
   }
 
   async createBySignUp(registerDto: RegisterDto, lang: string): Promise<User> {
-    const { password } = registerDto;
+    const { password, first_name, last_name } = registerDto;
     const username: string = registerDto.username.replace('+', '');
 
     const findUserByPhone: User = await this.userRepository.findOne({
@@ -100,6 +100,8 @@ export class UsersService {
 
     const hashedPwd = hashPassword(password);
     nUser.username = username;
+    nUser.first_name = first_name;
+    nUser.last_name = last_name;
     nUser.password = hashedPwd;
     nUser.type = UserType.CUSTOMER;
 

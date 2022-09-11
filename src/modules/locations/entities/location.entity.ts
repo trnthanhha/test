@@ -41,7 +41,11 @@ export class Location {
   status: LocationStatus;
 
   @Exclude()
-  @Column({ type: 'enum', enum: LocationNFTStatus })
+  @Column({
+    type: 'enum',
+    enum: LocationNFTStatus,
+    default: LocationNFTStatus.PENDING,
+  })
   nft_status: LocationNFTStatus;
 
   @Exclude()
@@ -52,19 +56,19 @@ export class Location {
   @Column({ type: 'int' })
   block_radius: number;
 
-  @Column()
+  @Column({ default: 'VN' })
   country: string;
 
-  @Column()
+  @Column({ nullable: true })
   province: string;
 
-  @Column()
+  @Column({ nullable: true })
   district: string;
 
-  @Column()
+  @Column({ nullable: true })
   commune: string;
 
-  @Column()
+  @Column({ nullable: true })
   street: string;
 
   @Exclude()
@@ -84,11 +88,11 @@ export class Location {
   user_id: number;
 
   @Exclude()
-  @Column()
+  @Column({ nullable: true })
   approved_by_id: number;
 
   @Exclude()
-  @CreateDateColumn()
+  @CreateDateColumn({ nullable: true })
   approved_at: Date;
 
   @Exclude()

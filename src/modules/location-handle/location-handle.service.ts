@@ -10,20 +10,35 @@ export class LocationHandleService {
     private locationHandleRepo: Repository<LocationHandle>,
   ) {}
 
-  createHandle(name: string, dbManager?: EntityManager): Promise<InsertResult> {
+  async createHandle(name: string, dbManager?: EntityManager): Promise<string> {
     if (!dbManager) {
       dbManager = this.locationHandleRepo.manager;
     }
-    const handle = new LocationHandle();
-    handle.name = this.convertViToEn(name);
-    handle.name = handle.name.replace(new RegExp(' ', 'g'), '-');
-    return dbManager
-      .createQueryBuilder()
-      .insert()
-      .into(LocationHandle)
-      .values(handle)
-      .orUpdate(['total'], ['name'])
-      .execute();
+
+    name = this.convertViToEn(name);
+    name = name.replace(new RegExp(' ', 'g'), '-');
+
+    let total = 0;
+    const existed = await dbManager.findOneBy(LocationHandle, { name });
+    if (!existed) {
+      await dbManager.insert(LocationHandle, { name, total });
+    } else {
+      total = existed.total;
+      const rs = await dbManager.update(
+        LocationHandle,
+        { name, total },
+        { total: total + 1 },
+      );
+      if (!rs.affected) {
+        throw new Error('update handle failed, criteria not match');
+      }
+      total++;
+    }
+
+    if (total > 0) {
+      name = `${name}-${total}`;
+    }
+    return name;
   }
 
   //@Author: https://gist.github.com/hu2di/e80d99051529dbaa7252922baafd40e3?permalink_comment_id=3431660#gistcomment-3431660
