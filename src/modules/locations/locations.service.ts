@@ -1,7 +1,7 @@
 import { Injectable, Logger } from '@nestjs/common';
 import { CreateLocationDto } from './dto/create-location.dto';
 import { InjectRepository } from '@nestjs/typeorm';
-import { FindManyOptions, MoreThan, Repository } from 'typeorm';
+import { EntityManager, FindManyOptions, MoreThan, Repository } from 'typeorm';
 import { Location } from './entities/location.entity';
 import {
   LocationNFTStatus,
@@ -17,8 +17,14 @@ export class LocationsService {
     private locationRepository: Repository<Location>,
   ) {}
 
-  create(createLocationDto: CreateLocationDto) {
-    return 'This action adds a new location';
+  async create(
+    location: Location,
+    dbManager?: EntityManager,
+  ): Promise<Location> {
+    if (!dbManager) {
+      dbManager = this.locationRepository.manager;
+    }
+    return dbManager.save(location);
   }
 
   findAll(

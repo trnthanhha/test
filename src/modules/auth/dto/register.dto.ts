@@ -1,26 +1,43 @@
 import { ApiProperty } from '@nestjs/swagger';
-import { IsNotEmpty, IsString } from 'class-validator';
+import { IsNotEmpty, IsString, MaxLength, MinLength } from 'class-validator';
 import { i18nValidationMessage } from 'nestjs-i18n';
-import { IsPhoneOrEmail } from '../auth.validator.decorator';
+import { IsPhoneOrEmail, Match } from '../auth.validator.decorator';
 
 export class RegisterDto {
   @IsPhoneOrEmail()
   @ApiProperty({ required: true, example: '+84947754271 | customer@gmail.com' })
   username: string;
 
+  @MaxLength(256)
   @IsString({
     message: i18nValidationMessage('validation.isString', {
-      name: 'idToken',
+      name: 'first_name',
     }),
   })
   @IsNotEmpty({
     message: i18nValidationMessage('validation.isRequired', {
-      name: 'idToken',
+      name: 'first_name',
     }),
   })
-  @ApiProperty({ required: true, example: '123' })
-  idToken: string;
+  @ApiProperty({ required: true, example: 'A' })
+  first_name: string;
 
+  @MaxLength(256)
+  @IsString({
+    message: i18nValidationMessage('validation.isString', {
+      name: 'last_name',
+    }),
+  })
+  @IsNotEmpty({
+    message: i18nValidationMessage('validation.isRequired', {
+      name: 'last_name',
+    }),
+  })
+  @ApiProperty({ required: true, example: 'Nguyen Van' })
+  last_name: string;
+
+  @MinLength(8)
+  @MaxLength(32)
   @IsString({
     message: i18nValidationMessage('validation.isString', { name: 'password' }),
   })
@@ -29,6 +46,13 @@ export class RegisterDto {
       name: 'password',
     }),
   })
-  @ApiProperty({ required: true, example: '123' })
+  @ApiProperty({ required: true, example: '12345678' })
   password: string;
+
+  @ApiProperty({ required: true, example: '12345678' })
+  @IsString()
+  @MinLength(8)
+  @MaxLength(32)
+  @Match('password')
+  password_confirm: string;
 }
