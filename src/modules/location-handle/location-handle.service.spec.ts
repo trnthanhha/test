@@ -2,7 +2,7 @@ import { Test, TestingModule } from '@nestjs/testing';
 import { LocationHandleService } from './location-handle.service';
 import { getRepositoryToken } from '@nestjs/typeorm';
 import { LocationHandle } from './entities/location-handle.entity';
-import { EntityManager } from 'typeorm';
+import { EntityManager, UpdateResult } from 'typeorm';
 
 describe('LocationHandleService', () => {
   let service: LocationHandleService;
@@ -32,23 +32,36 @@ describe('LocationHandleService', () => {
   });
 
   it('create handle: convert to ascii, replace space to squash', async () => {
-    const queryBuilder = function () {
-      return this;
-    };
-    let item;
     const repoMock = jest.fn(() => ({
       manager: {
-        createQueryBuilder: queryBuilder,
-        insert: queryBuilder,
-        into: queryBuilder,
-        values: function (model) {
-          item = model;
-          return this;
+        findOneBy: () => undefined,
+        insert: () => {},
+      } as unknown as EntityManager,
+    }));
+
+    const controller = await getController(repoMock);
+    await expect(
+      controller.createHandle(
+        'Công ty cổ phần Agiletech Việt Nam - Số 82 ngõ 116 Nhân Hòa, q.Thanh Xuân, Hà Nội',
+        repoMock().manager,
+      ),
+    ).resolves.toEqual(
+      'cong-ty-co-phan-agiletech-viet-nam---so-82-ngo-116-nhan-hoa,-q.thanh-xuan,-ha-noi',
+    );
+  });
+
+  it('update handle: convert to ascii, replace space to squash', async () => {
+    const repoMock = jest.fn(() => ({
+      manager: {
+        findOneBy: () => {
+          return {
+            total: 2,
+          };
         },
-        orUpdate: queryBuilder,
-        setParameter: queryBuilder,
-        execute: async () => {
-          return item;
+        update: () => {
+          const rs = new UpdateResult();
+          rs.affected = 1;
+          return rs;
         },
       } as unknown as EntityManager,
     }));
@@ -56,12 +69,12 @@ describe('LocationHandleService', () => {
     const controller = await getController(repoMock);
     await expect(
       controller.createHandle(
-        'Khu vực Vincom Trần Duy Hưng',
+        'Công ty cổ phần Agiletech Việt Nam - Số 82 ngõ 116 Nhân Hòa, q.Thanh Xuân, Hà Nội',
         repoMock().manager,
       ),
-    ).resolves.toEqual({
-      name: 'khu-vuc-vincom-tran-duy-hung',
-    });
+    ).resolves.toEqual(
+      'cong-ty-co-phan-agiletech-viet-nam---so-82-ngo-116-nhan-hoa,-q.thanh-xuan,-ha-noi-3',
+    );
   });
 });
 
