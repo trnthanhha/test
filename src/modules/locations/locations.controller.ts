@@ -146,12 +146,16 @@ export class LocationsController {
     newLocation.created_by_id = user.id;
 
     const dbManager = this.locationRepository.manager;
-    dbManager.transaction((entityManager) => {});
-    const locationHandle = await this.locationHandleService.createHandle(
-      newLocation.name,
-      dbManager,
+    return await dbManager.transaction(
+      async (entityManager): Promise<Location> => {
+        const locationHandle = await this.locationHandleService.createHandle(
+          newLocation.name,
+          entityManager,
+        );
+
+        newLocation.handle = `${locationHandle.raw['name']}-${locationHandle.raw['total']}`;
+        return this.locationsService.create(newLocation, dbManager);
+      },
     );
-    newLocation.handle = `${locationHandle.raw['name']}-${locationHandle.raw['total']}`;
-    return this.locationsService.create(newLocation, dbManager);
   }
 }

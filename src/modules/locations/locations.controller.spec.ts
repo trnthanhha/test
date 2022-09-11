@@ -7,6 +7,8 @@ import { NotFoundException } from '@nestjs/common';
 import { UserType } from '../users/users.constants';
 import { User } from '../users/entities/user.entity';
 import { LocationStatus } from './locations.contants';
+import { LocationHandleService } from '../location-handle/location-handle.service';
+import { LocationHandle } from '../location-handle/entities/location-handle.entity';
 
 describe('LocationsController', () => {
   it('user admin, allow blacklist, status <> approved', async () => {
@@ -65,17 +67,41 @@ describe('LocationsController', () => {
   });
 });
 
-async function getControllerWithMockUserBlacklist(repoMock) {
+async function getControllerWithMockUserBlacklist(
+  repoMock,
+  locationHandleMockService?,
+) {
+  if (!locationHandleMockService) {
+    locationHandleMockService = await getTestingService();
+  }
   const module: TestingModule = await Test.createTestingModule({
     controllers: [LocationsController],
     providers: [
       LocationsService,
+      LocationHandleService,
       {
         provide: getRepositoryToken(Location),
         useFactory: repoMock,
       },
     ],
-  }).compile();
+  })
+    .overrideProvider(LocationHandleService)
+    .useValue(locationHandleMockService)
+    .compile();
 
   return module.get<LocationsController>(LocationsController);
+}
+
+async function getTestingService() {
+  const module: TestingModule = await Test.createTestingModule({
+    providers: [
+      LocationHandleService,
+      {
+        provide: getRepositoryToken(LocationHandle),
+        useFactory: jest.fn(() => ({})),
+      },
+    ],
+  }).compile();
+
+  return module.get<LocationHandleService>(LocationHandleService);
 }

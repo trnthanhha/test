@@ -56,8 +56,8 @@ describe('LocationHandleService', () => {
     const controller = await getController(repoMock);
     await expect(
       controller.createHandle(
-        repoMock().manager,
         'Khu vực Vincom Trần Duy Hưng',
+        repoMock().manager,
       ),
     ).resolves.toEqual({
       name: 'khu-vuc-vincom-tran-duy-hung',

@@ -45,11 +45,11 @@ import { LocationHandleModule } from './modules/location-handle/location-handle.
     AuthModule,
 
     // Business module
+    LocationHandleModule,
     UsersModule,
     LocationsModule,
     OrdersModule,
     BillsModule,
-    LocationHandleModule,
 
     //3rd modules
     PaymentModule,
