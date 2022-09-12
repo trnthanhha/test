@@ -2,12 +2,15 @@ import {
   Body,
   ClassSerializerInterceptor,
   Controller,
+  Delete,
   Get,
   Logger,
   NotFoundException,
   Param,
+  Patch,
   Post,
   Query,
+  UseGuards,
   UseInterceptors,
 } from '@nestjs/common';
 import { ApiOperation, ApiTags } from '@nestjs/swagger';
@@ -28,6 +31,7 @@ import { LocationHandleService } from '../location-handle/location-handle.servic
 import { Like, Repository, FindManyOptions } from 'typeorm';
 import { InjectRepository } from '@nestjs/typeorm';
 import { ListLocationDto } from './dto/list-location-dto';
+import { UpdateLocationDto } from './dto/update-location.dto';
 
 @ApiTags('locations')
 @Controller('locations')
@@ -178,4 +182,25 @@ export class LocationsController {
       },
     );
   }
+
+  @Auth(UserType.ADMIN)ß
+  @ApiOperation({
+    summary: 'Update a location',
+    
+  })
+  @Patch(':id')
+  update(@Param('id') id: string, @Body() updateOrderDto: UpdateLocationDto) {
+    return this.locationsService.update(+id, updateOrderDto);
+  }
+
+  @Auth(UserType.ADMIN)
+  @ApiOperation({
+    summary: 'Delete a location'
+  })
+  @Delete(':id')
+  delete(@Param('id') id: string) {
+    return this.locationsService.delete(+id);
+  }
+
+
 }

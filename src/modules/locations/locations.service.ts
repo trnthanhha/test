@@ -1,5 +1,4 @@
 import { Injectable, Logger } from '@nestjs/common';
-import { CreateLocationDto } from './dto/create-location.dto';
 import { InjectRepository } from '@nestjs/typeorm';
 import {
   EntityManager,
@@ -15,6 +14,7 @@ import {
   LocationType,
 } from './locations.contants';
 import { ListLocationDto } from './dto/list-location-dto';
+import { UpdateLocationDto } from './dto/update-location.dto';
 
 @Injectable()
 export class LocationsService {
@@ -129,5 +129,13 @@ export class LocationsService {
       commune: row[12],
       street: row[13],
     } as Location;
+  }
+
+  async update(id: number, updateOrderDto: UpdateLocationDto) {
+    return await this.locationRepository.update(id, updateOrderDto);
+  }
+
+  async delete(id: number) {
+    return await this.locationRepository.delete(id); 
   }
 }
