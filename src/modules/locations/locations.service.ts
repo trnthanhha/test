@@ -1,13 +1,20 @@
 import { Injectable, Logger } from '@nestjs/common';
 import { CreateLocationDto } from './dto/create-location.dto';
 import { InjectRepository } from '@nestjs/typeorm';
-import { EntityManager, FindManyOptions, MoreThan, Repository } from 'typeorm';
+import {
+  EntityManager,
+  FindManyOptions,
+  FindOptionsWhere,
+  MoreThan,
+  Repository,
+} from 'typeorm';
 import { Location } from './entities/location.entity';
 import {
   LocationNFTStatus,
   LocationStatus,
   LocationType,
 } from './locations.contants';
+import { ListLocationDto } from './dto/list-location-dto';
 
 @Injectable()
 export class LocationsService {
@@ -27,14 +34,14 @@ export class LocationsService {
     return dbManager.save(location);
   }
 
-  findAll(
+  async findAll(
     page: number,
     limit: number,
-    whereCondition: Location,
+    whereCondition: FindOptionsWhere<Location>,
     owned = false,
-  ) {
+  ): Promise<ListLocationDto> {
     const options = {
-      where: { ...whereCondition },
+      where: whereCondition,
       skip: (page - 1) * limit,
       take: limit,
     } as FindManyOptions<Location>;
@@ -43,7 +50,16 @@ export class LocationsService {
         user_id: MoreThan(0),
       });
     }
-    return this.locationRepository.find(options);
+    const [data, total] = await this.locationRepository.findAndCount(options);
+    const resp = new ListLocationDto();
+    resp.data = data;
+    resp.meta = {
+      page_size: limit,
+      total_page: Math.ceil(total / limit),
+      total_records: total,
+    };
+
+    return resp;
   }
 
   async findOne(id: number) {

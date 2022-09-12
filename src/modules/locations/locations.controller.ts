@@ -25,8 +25,9 @@ import { UserType } from '../users/users.constants';
 import { Auth } from '../../decorators/roles.decorator';
 import { CreateLocationDto } from './dto/create-location.dto';
 import { LocationHandleService } from '../location-handle/location-handle.service';
-import { Repository } from 'typeorm';
+import { Like, Repository, FindManyOptions } from 'typeorm';
 import { InjectRepository } from '@nestjs/typeorm';
+import { ListLocationDto } from './dto/list-location-dto';
 
 @ApiTags('locations')
 @Controller('locations')
@@ -57,6 +58,12 @@ export class LocationsController {
     description: 'Page size | Limit per page',
   })
   @ApiImplicitQuery({
+    name: 'name',
+    required: false,
+    type: String,
+    description: 'Location name',
+  })
+  @ApiImplicitQuery({
     name: 'status',
     required: false,
     type: String,
@@ -78,10 +85,11 @@ export class LocationsController {
     @GetAuthUser() user: User,
     @Query('page') page?: string,
     @Query('limit') limit?: string,
+    @Query('name') name?: string,
     @Query('status') status?: string,
     @Query('blacklist') blacklist?: boolean,
     @Query('owned') owned?: boolean,
-  ) {
+  ): Promise<ListLocationDto> {
     let nLimit = +limit;
     if (!nLimit || nLimit > 200) {
       nLimit = 50;
@@ -92,7 +100,7 @@ export class LocationsController {
       nPage = 1;
     }
 
-    const whereCondition = new Location();
+    const { where: whereCondition }: FindManyOptions<Location> = { where: {} };
     if (status && user) {
       whereCondition.status = status as LocationStatus;
       if (user.type === UserType.CUSTOMER) {
@@ -106,6 +114,10 @@ export class LocationsController {
 
     if (blacklist && user?.type === UserType.ADMIN) {
       whereCondition.is_blacklist = true;
+    }
+
+    if (name) {
+      whereCondition.name = Like(`%${name}%`);
     }
 
     return this.locationsService.findAll(nPage, nLimit, whereCondition, owned);
