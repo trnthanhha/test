@@ -19,6 +19,9 @@ export class Order {
   price: number;
 
   @Column()
+  note: string;
+
+  @Column()
   location_id: number;
 
   @Column()
