@@ -3,6 +3,7 @@ import {
   CreateDateColumn,
   Entity,
   PrimaryGeneratedColumn,
+  Unique,
   UpdateDateColumn,
 } from 'typeorm';
 import {
@@ -20,7 +21,7 @@ export class Location {
   @Column()
   name: string;
 
-  @Column({ nullable: true })
+  @Column({ unique: true })
   handle: string;
 
   @Column()
@@ -86,6 +87,10 @@ export class Location {
   @Exclude()
   @Column({ nullable: true })
   user_id: number;
+
+  @Exclude()
+  @Column({ nullable: true })
+  user_full_name: string;
 
   @Exclude()
   @Column({ nullable: true })

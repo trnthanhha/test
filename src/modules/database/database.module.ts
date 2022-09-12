@@ -17,6 +17,10 @@ import { ConfigService } from '@nestjs/config';
         password: config.get<string>('POSTGRES_PASSWORD'),
         database: config.get<string>('POSTGRES_DB'),
         entities: [__dirname + '/../**/*.entity.ts'],
+        migrations: ['dist/migrations/*{.ts,.js}'],
+        cli: {
+          migrationsDir: 'migrations',
+        },
         synchronize: true,
         autoLoadEntities: true,
       }),
