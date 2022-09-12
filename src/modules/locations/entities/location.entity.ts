@@ -2,6 +2,7 @@ import {
   Column,
   CreateDateColumn,
   Entity,
+  Index,
   PrimaryGeneratedColumn,
   UpdateDateColumn,
 } from 'typeorm';
@@ -33,15 +34,19 @@ export class Location {
   @Column({ type: 'double precision' })
   lat: number;
 
+  @Index()
   @Column({ type: 'double precision' })
   safe_zone_top: number;
 
+  @Index()
   @Column({ type: 'double precision' })
   safe_zone_bot: number;
 
+  @Index()
   @Column({ type: 'double precision' })
   safe_zone_left: number;
 
+  @Index()
   @Column({ type: 'double precision' })
   safe_zone_right: number;
 
@@ -50,6 +55,7 @@ export class Location {
   type: LocationType;
 
   @Exclude()
+  @Index()
   @Column({ type: 'enum', enum: LocationStatus })
   status: LocationStatus;
 
