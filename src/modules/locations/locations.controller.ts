@@ -25,7 +25,7 @@ import { UserType } from '../users/users.constants';
 import { Auth } from '../../decorators/roles.decorator';
 import { CreateLocationDto } from './dto/create-location.dto';
 import { LocationHandleService } from '../location-handle/location-handle.service';
-import { Like, Repository, FindManyOptions } from 'typeorm';
+import { Repository, FindManyOptions, Like } from 'typeorm';
 import { InjectRepository } from '@nestjs/typeorm';
 import { ListLocationDto } from './dto/list-location-dto';
 
@@ -117,7 +117,10 @@ export class LocationsController {
     }
 
     if (name) {
-      whereCondition.name = Like(`%${name}%`);
+      const handle = this.locationHandleService
+        .convertViToEn(name)
+        .replace(new RegExp(' ', 'g'), '-');
+      whereCondition.handle = Like(`%${handle}%`);
     }
 
     return this.locationsService.findAll(nPage, nLimit, whereCondition, owned);

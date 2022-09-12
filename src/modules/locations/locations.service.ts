@@ -1,5 +1,4 @@
 import { Injectable, Logger } from '@nestjs/common';
-import { CreateLocationDto } from './dto/create-location.dto';
 import { InjectRepository } from '@nestjs/typeorm';
 import {
   EntityManager,
@@ -122,6 +121,7 @@ export class LocationsService {
       name: row[2],
       lat: +row[5],
       long: +row[6],
+      user_full_name: row[7],
       map_captured: row[8],
       token_id: +row[9],
       province: row[10],

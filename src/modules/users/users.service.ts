@@ -6,7 +6,7 @@ import {
 } from '@nestjs/common';
 import { UpdateUserDto } from './dto/update-user.dto';
 import { InjectRepository } from '@nestjs/typeorm';
-import { FindManyOptions, Like, Repository, UpdateResult } from 'typeorm';
+import { FindManyOptions, ILike, Repository, UpdateResult } from 'typeorm';
 import { I18nService } from 'nestjs-i18n';
 import { User } from './entities/user.entity';
 import { hashPassword } from '../../utils/password';
@@ -49,7 +49,7 @@ export class UsersService {
       },
       where: {
         type: UserType.CUSTOMER,
-        username: Like(`%${username}%`),
+        username: ILike(`%${username}%`),
       },
     } as FindManyOptions<User>;
 
