@@ -16,6 +16,7 @@ import { GetAuthUser } from '../../decorators/user.decorator';
 import { User } from '../users/entities/user.entity';
 import { LocationsService } from './locations.service';
 import {
+  DefaultSafeZoneRadius,
   LocationNFTStatus,
   LocationStatus,
   LocationType,
@@ -25,9 +26,10 @@ import { UserType } from '../users/users.constants';
 import { Auth } from '../../decorators/roles.decorator';
 import { CreateLocationDto } from './dto/create-location.dto';
 import { LocationHandleService } from '../location-handle/location-handle.service';
-import { Repository, FindManyOptions, Like } from 'typeorm';
+import { FindManyOptions, Like, Repository } from 'typeorm';
 import { InjectRepository } from '@nestjs/typeorm';
 import { ListLocationDto } from './dto/list-location-dto';
+import { ValidateDistanceDto } from './dto/validate-distance-dto';
 
 @ApiTags('locations')
 @Controller('locations')
@@ -157,13 +159,23 @@ export class LocationsController {
   ): Promise<Location> {
     const newLocation = new Location();
     Object.assign(newLocation, createLocationDto);
+    const validDistance = await this.locationsService.isValidDistance(
+      newLocation,
+    );
+    newLocation.calculateBounds();
 
     //biz
-    newLocation.status = LocationStatus.PENDING;
     newLocation.nft_status = LocationNFTStatus.PENDING;
     newLocation.type = LocationType.CUSTOMER;
-    newLocation.block_radius = 50;
+    newLocation.block_radius = DefaultSafeZoneRadius;
     newLocation.country = 'VN';
+    if (validDistance) {
+      newLocation.status = LocationStatus.APPROVED;
+      newLocation.approved_by_id = -1; // System
+      newLocation.approved_at = new Date();
+    } else {
+      newLocation.status = LocationStatus.PENDING;
+    }
     //sys
     newLocation.user_id = user.id;
     newLocation.created_by_id = user.id;
@@ -180,5 +192,17 @@ export class LocationsController {
         return this.locationsService.create(newLocation, dbManager);
       },
     );
+  }
+
+  @ApiOperation({
+    summary: 'Validate distance of custom location',
+  })
+  @Post('/validate')
+  async validateDistance(
+    @Body() validateDistanceDto: ValidateDistanceDto,
+  ): Promise<boolean> {
+    const newLocation = new Location();
+    Object.assign(newLocation, validateDistanceDto);
+    return this.locationsService.isValidDistance(newLocation);
   }
 }

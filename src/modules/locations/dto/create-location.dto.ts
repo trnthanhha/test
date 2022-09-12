@@ -5,6 +5,8 @@ import {
   IsNumber,
   IsString,
   IsUrl,
+  Max,
+  Min,
 } from 'class-validator';
 import { i18nValidationMessage } from 'nestjs-i18n';
 
@@ -38,6 +40,8 @@ export class CreateLocationDto {
   })
   map_captured: string;
 
+  @Max(180)
+  @Min(-180)
   @IsNumber(
     {},
     {
@@ -49,6 +53,8 @@ export class CreateLocationDto {
   @ApiProperty({ required: true, example: '105.89999534892816' })
   long: number;
 
+  @Max(90)
+  @Min(-90)
   @IsNumber(
     {},
     {

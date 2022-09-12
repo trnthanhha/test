@@ -15,3 +15,6 @@ export enum LocationNFTStatus {
   APPROVED = 'approved',
   MINTED = 'minted',
 }
+
+export const DefaultSafeZoneRadius = 50;
+export const MinimumDistanceConflict = 100;
