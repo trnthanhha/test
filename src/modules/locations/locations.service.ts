@@ -4,16 +4,25 @@ import {
   EntityManager,
   FindManyOptions,
   FindOptionsWhere,
+  LessThanOrEqual,
   MoreThan,
+  MoreThanOrEqual,
   Repository,
 } from 'typeorm';
 import { Location } from './entities/location.entity';
 import {
+  DefaultSafeZoneRadius,
   LocationNFTStatus,
   LocationStatus,
   LocationType,
+  MinimumDistanceConflict,
 } from './locations.contants';
 import { ListLocationDto } from './dto/list-location-dto';
+import {
+  getBoundsByRadius,
+  getDistanceBetween,
+  MeterPerDegree,
+} from './locations.calculator';
 
 @Injectable()
 export class LocationsService {
@@ -92,12 +101,13 @@ export class LocationsService {
             instance.approved_at = new Date();
             instance.approved_by_id = -1;
             instance.created_by_id = -1;
-            instance.block_radius = 100;
             instance.status = LocationStatus.APPROVED;
             instance.nft_status = instance.token_id
               ? LocationNFTStatus.MINTED
               : LocationNFTStatus.PENDING;
 
+            instance.block_radius = DefaultSafeZoneRadius;
+            instance.calculateBounds();
             return instance;
           });
           await entityManager.save(inserts);
@@ -108,6 +118,29 @@ export class LocationsService {
         resolve(inserted);
       });
     });
+  }
+
+  async isValidDistance(location: Location): Promise<boolean> {
+    const delta =
+      (DefaultSafeZoneRadius + MinimumDistanceConflict) / MeterPerDegree;
+
+    const nearLocations = await this.locationRepository.findBy({
+      status: LocationStatus.APPROVED,
+      safe_zone_bot: LessThanOrEqual(location.lat + delta),
+      safe_zone_top: MoreThanOrEqual(location.lat - delta),
+      safe_zone_left: LessThanOrEqual(location.long + delta),
+      safe_zone_right: MoreThanOrEqual(location.long - delta),
+    });
+
+    if (!nearLocations.length) {
+      return true;
+    }
+
+    return !nearLocations.find(
+      (loc) =>
+        getDistanceBetween(loc, location) <
+        DefaultSafeZoneRadius + MinimumDistanceConflict + loc.block_radius,
+    );
   }
 
   transformRawData(row: Array<string>): Location {

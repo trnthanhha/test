@@ -3,7 +3,6 @@ import {
   CreateDateColumn,
   Entity,
   PrimaryGeneratedColumn,
-  Unique,
   UpdateDateColumn,
 } from 'typeorm';
 import {
@@ -12,6 +11,7 @@ import {
   LocationType,
 } from '../locations.contants';
 import { Exclude } from 'class-transformer';
+import { getBoundsByRadius } from '../locations.calculator';
 
 @Entity()
 export class Location {
@@ -32,6 +32,18 @@ export class Location {
 
   @Column({ type: 'double precision' })
   lat: number;
+
+  @Column({ type: 'double precision' })
+  safe_zone_top: number;
+
+  @Column({ type: 'double precision' })
+  safe_zone_bot: number;
+
+  @Column({ type: 'double precision' })
+  safe_zone_left: number;
+
+  @Column({ type: 'double precision' })
+  safe_zone_right: number;
 
   @Exclude()
   @Column({ type: 'enum', enum: LocationType })
@@ -117,4 +129,11 @@ export class Location {
   @Exclude()
   @UpdateDateColumn()
   updated_at: Date;
+
+  calculateBounds() {
+    Object.assign(
+      this,
+      getBoundsByRadius(this.lat, this.long, this.block_radius),
+    );
+  }
 }
