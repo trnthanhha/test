@@ -17,6 +17,7 @@ import { LocationsService } from './modules/locations/locations.service';
 import { Location } from './modules/locations/entities/location.entity';
 import { RedisModule } from './modules/redis/redis.module';
 import { LocationHandleModule } from './modules/location-handle/location-handle.module';
+import { LocationHandleService } from './modules/location-handle/location-handle.service';
 
 @Module({
   imports: [
@@ -58,7 +59,10 @@ import { LocationHandleModule } from './modules/location-handle/location-handle.
   providers: [AppService],
 })
 export class AppModule implements OnModuleInit {
-  constructor(private readonly locationsService: LocationsService) {}
+  constructor(
+    private readonly locationsService: LocationsService,
+    private readonly locationsHandleService: LocationHandleService,
+  ) {}
 
   public async onModuleInit(): Promise<void> {
     const filePath = 'src/data.csv';
@@ -72,17 +76,24 @@ export class AppModule implements OnModuleInit {
     }
     const stream = fs.createReadStream(filePath);
     const rl = readline.createInterface({ input: stream });
-    const data = [] as Array<Location>;
+    const jobs = [];
 
-    rl.on('line', (row) => {
+    rl.on('line', async (row) => {
       if (!row) {
         console.error('empty line');
       }
-      data.push(this.locationsService.transformRawData(row.split(',')));
+      const item = this.locationsService.transformRawData(row.split(','));
+      jobs.push(
+        this.locationsHandleService.createHandle(item.name).then((handle) => {
+          item.handle = handle;
+          return item;
+        }),
+      );
     });
 
-    rl.on('close', () => {
-      this.locationsService.createMany(data);
+    rl.on('close', async () => {
+      const data = await Promise.all(jobs);
+      return this.locationsService.createMany(data);
     });
 
     rl.on('error', (ex) => {
