@@ -88,7 +88,6 @@ export class Location {
   @Column({ nullable: true })
   user_id: number;
 
-  @Exclude()
   @Column({ nullable: true })
   user_full_name: string;
 
