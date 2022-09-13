@@ -195,7 +195,7 @@ export class LocationsController {
     );
   }
 
-  @Auth(UserType.ADMIN)
+  @Auth()
   @ApiOperation({
     summary: 'Update a location',
   })
@@ -204,7 +204,7 @@ export class LocationsController {
     return this.locationsService.update(+id, updateOrderDto);
   }
 
-  @Auth(UserType.ADMIN)
+  @Auth()
   @ApiOperation({
     summary: 'Delete a location'
   })
