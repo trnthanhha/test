@@ -162,17 +162,17 @@ export class LocationsController {
     const validDistance = await this.locationsService.isValidDistance(
       newLocation,
     );
+    newLocation.block_radius = DefaultSafeZoneRadius;
     newLocation.calculateBounds();
 
     //biz
     newLocation.nft_status = LocationNFTStatus.PENDING;
     newLocation.type = LocationType.CUSTOMER;
-    newLocation.block_radius = DefaultSafeZoneRadius;
     newLocation.country = 'VN';
     if (validDistance) {
       newLocation.status = LocationStatus.APPROVED;
       newLocation.approved_by_id = -1; // System
-      newLocation.approved_at = new Date();
+      newLocation.approved_at = createLocationDto.requestedAt || new Date();
     } else {
       newLocation.status = LocationStatus.PENDING;
     }

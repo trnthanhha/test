@@ -65,4 +65,6 @@ export class CreateLocationDto {
   )
   @ApiProperty({ required: true, example: '21.02744419441864' })
   lat: number;
+
+  requestedAt: Date;
 }

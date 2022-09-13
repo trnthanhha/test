@@ -10,8 +10,14 @@ import {
 
 @ValidatorConstraint()
 export class IsPhoneOrEmailConstraint implements ValidatorConstraintInterface {
-  validate(userName: any, args: ValidationArguments) {
-    return isPhoneNumber(userName, 'VN') || isEmail(userName);
+  validate(userName: string) {
+    const text = userName.trim().replace(new RegExp(' ', 'g'), '');
+    const validCharsPhone = text.match(/[0-9+-]/g)?.join('');
+    const validCharsEmail = text.match(/[0-9a-zA-Z.@]/g)?.join('');
+    return (
+      (isPhoneNumber(text, 'VN') && validCharsPhone == text) ||
+      (isEmail(text) && text === validCharsEmail)
+    );
   }
 }
 
