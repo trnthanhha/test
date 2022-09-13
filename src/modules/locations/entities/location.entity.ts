@@ -67,7 +67,6 @@ export class Location {
   })
   nft_status: LocationNFTStatus;
 
-  @Exclude()
   @Column({ default: false })
   is_blacklist: boolean;
 
