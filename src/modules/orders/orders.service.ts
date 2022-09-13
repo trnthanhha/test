@@ -75,6 +75,6 @@ export class OrdersService {
   }
 
   async remove(id: number) {
-    return await this.orderRepository.delete(id);
+    return this.orderRepository.delete(id);
   }
 }

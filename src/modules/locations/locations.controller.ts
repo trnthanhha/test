@@ -25,13 +25,14 @@ import {
 } from './locations.contants';
 import { Location } from './entities/location.entity';
 import { UserType } from '../users/users.constants';
-import { Auth } from '../../decorators/roles.decorator';
+import { Auth, AuthAnonymous } from '../../decorators/roles.decorator';
 import { CreateLocationDto } from './dto/create-location.dto';
 import { LocationHandleService } from '../location-handle/location-handle.service';
 import { Like, Repository, FindManyOptions } from 'typeorm';
 import { InjectRepository } from '@nestjs/typeorm';
 import { ListLocationDto } from './dto/list-location-dto';
 import { UpdateLocationDto } from './dto/update-location.dto';
+import { RolesGuard } from 'src/guards/roles.guard';
 
 @ApiTags('locations')
 @Controller('locations')
@@ -44,6 +45,7 @@ export class LocationsController {
     private readonly locationRepository: Repository<Location>,
   ) {}
 
+  @Auth()
   @Get()
   @UseInterceptors(ClassSerializerInterceptor)
   @ApiOperation({
@@ -127,6 +129,16 @@ export class LocationsController {
     return this.locationsService.findAll(nPage, nLimit, whereCondition, owned);
   }
 
+  @Auth()
+  @ApiOperation({
+    summary: 'Overall location info'
+  })
+  @Get('/overall')
+  overall() {
+    return this.locationsService.getOverallLocationInfo();
+  } 
+
+  @Auth()
   @Get(':id')
   @UseInterceptors(ClassSerializerInterceptor)
   async findOne(@Param('id') id: string, @GetAuthUser() user: User) {
@@ -183,10 +195,9 @@ export class LocationsController {
     );
   }
 
-  @Auth(UserType.ADMIN)ß
+  @Auth(UserType.ADMIN)
   @ApiOperation({
     summary: 'Update a location',
-    
   })
   @Patch(':id')
   update(@Param('id') id: string, @Body() updateOrderDto: UpdateLocationDto) {
@@ -201,6 +212,5 @@ export class LocationsController {
   delete(@Param('id') id: string) {
     return this.locationsService.delete(+id);
   }
-
 
 }
