@@ -17,6 +17,7 @@ export class LocationHandleService {
 
     name = this.convertViToEn(name);
     name = name.replace(new RegExp(' ', 'g'), '-');
+    name = name.match(/[0-9a-zA-Z-_]/g)?.join('');
 
     let total = 0;
     const existed = await dbManager.findOneBy(LocationHandle, { name });
