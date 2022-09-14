@@ -93,7 +93,7 @@ export class LocationsController {
     @Query('owned') owned?: boolean,
   ): Promise<ListLocationDto> {
     let nLimit = +limit;
-    if (!nLimit || nLimit > 200) {
+    if (!nLimit || nLimit > 500) {
       nLimit = 50;
     }
 
