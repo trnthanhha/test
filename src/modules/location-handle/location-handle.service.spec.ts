@@ -73,7 +73,7 @@ describe('LocationHandleService', () => {
         repoMock().manager,
       ),
     ).resolves.toEqual(
-      'cong-ty-co-phan-agiletech-viet-nam---so-82-ngo-116-nhan-hoa-qthanh-xuan-ha-noi-3',
+      'cong-ty-co-phan-agiletech-viet-nam---so-82-ngo-116-nhan-hoa-qthanh-xuan-ha-noi-2',
     );
   });
 });

@@ -86,7 +86,7 @@ export class LocationsService {
     return new Promise((resolve) => {
       let inserted = [] as Array<Location>;
       this.locationRepository.manager.transaction(async (entityManager) => {
-        const batchSize = 3;
+        const batchSize = 100;
         let start = 0;
         while (start < req.length) {
           let inserts = req.slice(start, start + batchSize);
@@ -147,9 +147,10 @@ export class LocationsService {
     //1
     const dateNMonth = row[1].split('/');
     const paid_at = new Date(
-      new Date().setMonth(+dateNMonth[1] - 1, +dateNMonth[0]),
+        new Date().setMonth(+dateNMonth[0] - 1, +dateNMonth[1]),
     );
-    return {
+    const loc = new Location();
+    return Object.assign(loc, {
       paid_at,
       name: row[2],
       lat: +row[5],
@@ -161,6 +162,6 @@ export class LocationsService {
       district: row[11],
       commune: row[12],
       street: row[13],
-    } as Location;
+    });
   }
 }

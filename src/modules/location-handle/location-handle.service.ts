@@ -19,7 +19,7 @@ export class LocationHandleService {
     name = name.replace(new RegExp(' ', 'g'), '-');
     name = name.match(/[0-9a-zA-Z-_]/g)?.join('');
 
-    let total = 0;
+    let total = 1;
     const existed = await dbManager.findOneBy(LocationHandle, { name });
     if (!existed) {
       await dbManager.insert(LocationHandle, { name, total });
@@ -36,8 +36,8 @@ export class LocationHandleService {
       total++;
     }
 
-    if (total > 0) {
-      name = `${name}-${total}`;
+    if (total > 1) {
+      name = `${name}-${total - 1}`;
     }
     return name;
   }

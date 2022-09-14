@@ -6,6 +6,5 @@ export class LocationHandle {
   name: string;
 
   @Column()
-  @Generated('increment')
   total: number;
 }
