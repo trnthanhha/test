@@ -93,7 +93,12 @@ export class AppModule implements OnModuleInit {
 
     rl.on('close', async () => {
       const data = await Promise.all(jobs);
-      return this.locationsService.createMany(data);
+      this.locationsService.createMany(data).then((rs) => {
+        console.log('create many location succeeded');
+      }).catch((ex) => {
+        console.error('create many locations failed, err: ', ex);
+        throw ex;
+      })
     });
 
     rl.on('error', (ex) => {
