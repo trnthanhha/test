@@ -99,6 +99,8 @@ export class AppModule implements OnModuleInit {
         console.error('create many locations failed, err: ', ex);
         throw ex;
       })
+
+      console.log('close file');
     });
 
     rl.on('error', (ex) => {

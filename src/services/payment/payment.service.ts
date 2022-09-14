@@ -5,6 +5,6 @@ import { Cron } from '@nestjs/schedule';
 export class PaymentService {
   @Cron('*/30 * * * * *')
   syncPaymentStatus() {
-    console.log('sync payment status each 30s');
+    // console.log('sync payment status each 30s');
   }
 }

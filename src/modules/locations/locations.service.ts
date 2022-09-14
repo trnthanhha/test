@@ -80,6 +80,7 @@ export class LocationsService {
 
   async createMany(req: Array<Location>): Promise<Array<Location>> {
     if (!req.length) {
+      this.logger.log('no record to insert');
       return;
     }
 
@@ -110,11 +111,14 @@ export class LocationsService {
             instance.calculateBounds();
             return instance;
           });
+          this.logger.log('before insert records, total: ', inserts.length);
           await entityManager.save(inserts);
+          this.logger.log('after insert records, total: ', inserts.length);
           inserted = inserted.concat(inserts);
           start += batchSize;
         }
 
+        this.logger.log('end while loop, total: ', inserted.length);
         resolve(inserted);
       });
     });
