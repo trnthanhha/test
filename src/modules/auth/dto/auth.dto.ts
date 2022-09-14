@@ -3,6 +3,7 @@ import { IsNotEmpty, IsString } from 'class-validator';
 import { i18nValidationMessage } from 'nestjs-i18n';
 
 export interface LoginResponse {
+  id: number;
   token: string;
   refreshToken: string;
   expiredTime: number;
