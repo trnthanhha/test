@@ -76,31 +76,50 @@ export class AppModule implements OnModuleInit {
     }
     const stream = fs.createReadStream(filePath);
     const rl = readline.createInterface({ input: stream });
-    const jobs = [];
+    const records = [];
+    const rawData = [];
 
-    rl.on('line', async (row) => {
+    rl.on('line', (row) => {
       if (!row) {
         console.error('empty line');
       }
-      const item = this.locationsService.transformRawData(row.split(','));
-      jobs.push(
-        this.locationsHandleService.createHandle(item.name).then((handle) => {
-          item.handle = handle;
-          return item;
-        }),
-      );
+
+      let hardcodeRow = row.split(',"');
+      //first item will be STT + DATE
+      let splitData = [];
+      try {
+        splitData = splitData.concat(hardcodeRow[0].split(','))
+        splitData.push(hardcodeRow[1])
+        splitData = splitData.concat(hardcodeRow[2].split(','))
+      } catch (ex) {
+        splitData = row.split(',');
+      }
+      const item = this.locationsService.transformRawData(splitData);
+      rawData.push(item);
     });
 
+
+
     rl.on('close', async () => {
-      const data = await Promise.all(jobs);
-      this.locationsService.createMany(data).then((rs) => {
+      console.log('close file');
+
+      for (const item of rawData) {
+        const refined = await this.locationsHandleService.createHandle(item.name).then((handle) => {
+          item.handle = handle;
+          return item;
+        }).catch(ex => {
+          console.log(ex, 'handle: ', item.name);
+        })
+
+        records.push(refined);
+      }
+
+      this.locationsService.createMany(records).then((rs) => {
         console.log('create many location succeeded');
       }).catch((ex) => {
         console.error('create many locations failed, err: ', ex);
         throw ex;
       })
-
-      console.log('close file');
     });
 
     rl.on('error', (ex) => {

@@ -87,7 +87,7 @@ export class LocationsService {
     return new Promise((resolve) => {
       let inserted = [] as Array<Location>;
       this.locationRepository.manager.transaction(async (entityManager) => {
-        const batchSize = 100;
+        const batchSize = 5;
         let start = 0;
         while (start < req.length) {
           let inserts = req.slice(start, start + batchSize);
@@ -112,7 +112,11 @@ export class LocationsService {
             return instance;
           });
           this.logger.log('before insert records, total: ', inserts.length);
-          await entityManager.save(inserts);
+          await entityManager.save(inserts).catch((ex) => {
+            console.error(ex);
+            console.log(inserts);
+            throw ex;
+          });
           this.logger.log('after insert records, total: ', inserts.length);
           inserted = inserted.concat(inserts);
           start += batchSize;
@@ -156,7 +160,7 @@ export class LocationsService {
     const loc = new Location();
     return Object.assign(loc, {
       paid_at,
-      name: row[2],
+      name: row[2].replace(new RegExp('"', 'g'), ''),
       lat: +row[5],
       long: +row[6],
       user_full_name: row[7],
