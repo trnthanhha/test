@@ -29,30 +29,6 @@ export class UsersController {
     @Inject(REDIS_CLIENT_PROVIDER) private readonly redis: Redis,
   ) {}
 
-  @Auth()
-  @Get(':id')
-  async getProfile(@Param('id') id: string, @GetAuthUser() user: User) {
-    await checkRateLimit(this.redis, user);
-
-    const customer = await this.usersService.findByID(+id);
-    if (!customer) {
-      return;
-    }
-
-    if (user.type === UserType.CUSTOMER) {
-      // block data if;
-      switch (true) {
-        case customer.type === UserType.ADMIN:
-          throw new NotFoundException();
-      }
-    }
-
-    return getObjectExcludedFields(customer, [
-      'identification_number',
-      'identification_created_at',
-    ]);
-  }
-
   @Get('/customers')
   @ApiOperation({
     summary: 'Searching customer with username to buy for',
@@ -76,6 +52,30 @@ export class UsersController {
     @Query('limit') limit?: string,
   ) {
     return this.usersService.searchCustomers(username, +page, +limit);
+  }
+
+  @Auth()
+  @Get(':id')
+  async getProfile(@Param('id') id: string, @GetAuthUser() user: User) {
+    await checkRateLimit(this.redis, user);
+
+    const customer = await this.usersService.findByID(+id);
+    if (!customer) {
+      return;
+    }
+
+    if (user.type === UserType.CUSTOMER) {
+      // block data if;
+      switch (true) {
+        case customer.type === UserType.ADMIN:
+          throw new NotFoundException();
+      }
+    }
+
+    return getObjectExcludedFields(customer, [
+      'identification_number',
+      'identification_created_at',
+    ]);
   }
 }
 
