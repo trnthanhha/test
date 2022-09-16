@@ -34,7 +34,6 @@ import { InjectRepository } from '@nestjs/typeorm';
 import { ListLocationDto } from './dto/list-location-dto';
 import { ValidateDistanceDto } from './dto/validate-distance-dto';
 import { UpdateLocationDto } from './dto/update-location.dto';
-import { RolesGuard } from 'src/guards/roles.guard';
 
 @ApiTags('locations')
 @Controller('locations')
@@ -47,7 +46,6 @@ export class LocationsController {
     private readonly locationRepository: Repository<Location>,
   ) {}
 
-  @Auth()
   @Get()
   @UseInterceptors(ClassSerializerInterceptor)
   @ApiOperation({
@@ -143,7 +141,6 @@ export class LocationsController {
     return this.locationsService.getOverallLocationInfo();
   } 
 
-  @Auth()
   @Get(':id')
   @UseInterceptors(ClassSerializerInterceptor)
   async findOne(@Param('id') id: string, @GetAuthUser() user: User) {
