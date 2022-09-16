@@ -62,8 +62,8 @@ export class OrdersService {
       }
     });
 
-    if (order.version !== updateOrderDto.version) throw new Error();
-    if (!PaymentStatus[order.payment_status]) throw new Error()
+    if (order.version !== updateOrderDto.version) throw new Error('Update fail please try again');
+    if (!PaymentStatus[order.payment_status]) throw new Error('Payment status not found')
 
     if (!order) throw new Error('Not Found Order');
 
