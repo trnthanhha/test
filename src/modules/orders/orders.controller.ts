@@ -14,10 +14,10 @@ import { UpdateOrderDto } from './dto/update-order.dto';
 import { ApiNotFoundResponse, ApiOkResponse, ApiOperation, ApiParam, ApiTags } from '@nestjs/swagger';
 import { ListOrderDto } from './dto/list-order.dto';
 import { ApiImplicitQuery } from '@nestjs/swagger/dist/decorators/api-implicit-query.decorator';
-import { GetAuthUser } from 'src/decorators/user.decorator';
 import { User } from '../users/entities/user.entity';
-import { Auth } from 'src/decorators/roles.decorator';
+import { Auth } from '../../decorators/roles.decorator';
 import { UserType } from '../users/users.constants';
+import { GetAuthUser } from '../../decorators/user.decorator';
 
 @ApiTags('orders')
 @Controller('orders')
