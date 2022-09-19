@@ -35,5 +35,4 @@ export class Order {
 
   @UpdateDateColumn()
   updated_at: Date;
-
 }
