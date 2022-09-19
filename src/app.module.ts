@@ -18,6 +18,7 @@ import { Location } from './modules/locations/entities/location.entity';
 import { RedisModule } from './modules/redis/redis.module';
 import { LocationHandleModule } from './modules/location-handle/location-handle.module';
 import { LocationHandleService } from './modules/location-handle/location-handle.service';
+import { StandardPriceModule } from './modules/standard-price/standard-price.module';
 
 @Module({
   imports: [
@@ -51,6 +52,7 @@ import { LocationHandleService } from './modules/location-handle/location-handle
     LocationsModule,
     OrdersModule,
     BillsModule,
+    StandardPriceModule,
 
     //3rd modules
     PaymentModule,
@@ -84,13 +86,13 @@ export class AppModule implements OnModuleInit {
         console.error('empty line');
       }
 
-      let hardcodeRow = row.split(',"');
+      const hardcodeRow = row.split(',"');
       //first item will be STT + DATE
       let splitData = [];
       try {
-        splitData = splitData.concat(hardcodeRow[0].split(','))
-        splitData.push(hardcodeRow[1])
-        splitData = splitData.concat(hardcodeRow[2].split(','))
+        splitData = splitData.concat(hardcodeRow[0].split(','));
+        splitData.push(hardcodeRow[1]);
+        splitData = splitData.concat(hardcodeRow[2].split(','));
       } catch (ex) {
         splitData = row.split(',');
       }
@@ -98,28 +100,32 @@ export class AppModule implements OnModuleInit {
       rawData.push(item);
     });
 
-
-
     rl.on('close', async () => {
       console.log('close file');
 
       for (const item of rawData) {
-        const refined = await this.locationsHandleService.createHandle(item.name).then((handle) => {
-          item.handle = handle;
-          return item;
-        }).catch(ex => {
-          console.log(ex, 'handle: ', item.name);
-        })
+        const refined = await this.locationsHandleService
+          .createHandle(item.name)
+          .then((handle) => {
+            item.handle = handle;
+            return item;
+          })
+          .catch((ex) => {
+            console.log(ex, 'handle: ', item.name);
+          });
 
         records.push(refined);
       }
 
-      this.locationsService.createMany(records).then((rs) => {
-        console.log('create many location succeeded');
-      }).catch((ex) => {
-        console.error('create many locations failed, err: ', ex);
-        throw ex;
-      })
+      this.locationsService
+        .createMany(records)
+        .then((rs) => {
+          console.log('create many location succeeded');
+        })
+        .catch((ex) => {
+          console.error('create many locations failed, err: ', ex);
+          throw ex;
+        });
     });
 
     rl.on('error', (ex) => {

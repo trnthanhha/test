@@ -2,11 +2,13 @@ import {
   Column,
   CreateDateColumn,
   Entity,
+  OneToMany,
   PrimaryGeneratedColumn,
   UpdateDateColumn,
 } from 'typeorm';
 import { UserType } from '../users.constants';
 import { Exclude } from 'class-transformer';
+import { StandardPriceHistory } from 'src/modules/standard-price/entities/standard-price-history.entity';
 
 @Entity()
 export class User {
@@ -55,4 +57,7 @@ export class User {
   created_at: Date;
   @UpdateDateColumn()
   updated_at: Date;
+
+  @OneToMany(() => StandardPriceHistory, (s) => s.user)
+  standard_price_historys?: StandardPriceHistory[];
 }

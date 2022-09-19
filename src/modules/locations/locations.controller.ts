@@ -134,12 +134,12 @@ export class LocationsController {
 
   @Auth()
   @ApiOperation({
-    summary: 'Overall location info'
+    summary: 'Overall location info',
   })
   @Get('/overall')
   overall() {
     return this.locationsService.getOverallLocationInfo();
-  } 
+  }
 
   @Get(':id')
   @UseInterceptors(ClassSerializerInterceptor)
@@ -229,7 +229,7 @@ export class LocationsController {
 
   @Auth()
   @ApiOperation({
-    summary: 'Delete a location'
+    summary: 'Delete a location',
   })
   @Delete(':id')
   delete(@Param('id') id: string) {
