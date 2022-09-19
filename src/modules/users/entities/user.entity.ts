@@ -8,7 +8,7 @@ import {
 } from 'typeorm';
 import { UserType } from '../users.constants';
 import { Exclude } from 'class-transformer';
-import { StandardPriceHistory } from 'src/modules/standard-price/entities/standard-price-history.entity';
+import { StandardPriceHistory } from '../../../modules/standard-price/entities/standard-price-history.entity';
 
 @Entity()
 export class User {
