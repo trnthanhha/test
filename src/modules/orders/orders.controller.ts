@@ -11,7 +11,13 @@ import {
 import { OrdersService } from './orders.service';
 import { CreateOrderDto } from './dto/create-order.dto';
 import { UpdateOrderDto } from './dto/update-order.dto';
-import { ApiNotFoundResponse, ApiOkResponse, ApiOperation, ApiParam, ApiTags } from '@nestjs/swagger';
+import {
+  ApiNotFoundResponse,
+  ApiOkResponse,
+  ApiOperation,
+  ApiParam,
+  ApiTags,
+} from '@nestjs/swagger';
 import { ListOrderDto } from './dto/list-order.dto';
 import { ApiImplicitQuery } from '@nestjs/swagger/dist/decorators/api-implicit-query.decorator';
 import { User } from '../users/entities/user.entity';
@@ -26,21 +32,24 @@ export class OrdersController {
 
   @Auth()
   @ApiOperation({
-    summary: 'Create a order'
+    summary: 'Create a order',
   })
   @ApiOkResponse({
     type: CreateOrderDto,
     status: 201,
   })
   @Post()
-  create(@Body() createOrderDto: CreateOrderDto, @GetAuthUser() currentUser: User) {
+  create(
+    @Body() createOrderDto: CreateOrderDto,
+    @GetAuthUser() currentUser: User,
+  ) {
     return this.ordersService.create(createOrderDto, currentUser);
   }
 
   @Auth()
   @Get()
   @ApiOperation({
-    summary: 'Find all orders'
+    summary: 'Find all orders',
   })
   @ApiOkResponse({
     type: ListOrderDto,
@@ -67,9 +76,9 @@ export class OrdersController {
     required: false,
   })
   findAll(
-    @Query('page') page?: string, 
-    @Query('limit') limit?: string, 
-    @Query('payment_status') payment_status?: string
+    @Query('page') page?: string,
+    @Query('limit') limit?: string,
+    @Query('payment_status') payment_status?: string,
   ) {
     return this.ordersService.findAll({ limit, page, payment_status });
   }
@@ -99,7 +108,7 @@ export class OrdersController {
   @ApiOperation({ summary: 'Delete a order' })
   @ApiOkResponse({
     status: 200,
-    description: 'Delete success'
+    description: 'Delete success',
   })
   @Delete(':id')
   remove(@Param('id') id: string) {

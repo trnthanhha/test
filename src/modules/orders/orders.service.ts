@@ -17,23 +17,27 @@ export class OrdersService {
   ) {}
 
   async create(createOrderDto: CreateOrderDto, currentUser: User) {
-    createOrderDto.created_by_id = currentUser.id
+    createOrderDto.created_by_id = currentUser.id;
 
     const order = await this.orderRepository.create(createOrderDto);
 
     return order;
   }
 
-  async findAll(query: { page?: string, limit?: string, payment_status: string}) {
+  async findAll(query: {
+    page?: string;
+    limit?: string;
+    payment_status: string;
+  }) {
     const page = +query.page || 1;
     const limit = +query.limit || 10;
     const paymentStatus = query.payment_status as PaymentStatus;
 
     const options: FindManyOptions<Order> = {
-      where: paymentStatus ? { payment_status: paymentStatus }: {},
+      where: paymentStatus ? { payment_status: paymentStatus } : {},
       skip: (page - 1) * limit,
       take: limit,
-    }
+    };
 
     const [orders, total] = await this.orderRepository.findAndCount(options);
 
@@ -42,16 +46,16 @@ export class OrdersService {
       meta: {
         page_size: limit,
         total_page: Math.ceil(total / limit),
-        total_records: total
-      }
-    }
+        total_records: total,
+      },
+    };
   }
 
   async findOne(id: number): Promise<Order> {
     return await this.orderRepository.findOne({
       where: {
         id: id,
-      }
+      },
     });
   }
 
@@ -59,15 +63,17 @@ export class OrdersService {
     const order = await this.orderRepository.findOne({
       where: {
         id: id,
-      }
+      },
     });
 
-    if (order.version !== updateOrderDto.version) throw new Error('Update fail please try again');
-    if (!PaymentStatus[order.payment_status]) throw new Error('Payment status not found')
+    if (order.version !== updateOrderDto.version)
+      throw new Error('Update fail please try again');
+    if (!PaymentStatus[order.payment_status])
+      throw new Error('Payment status not found');
 
     if (!order) throw new Error('Not Found Order');
 
-    Object.keys(updateOrderDto).forEach(v => order[v] = updateOrderDto[v]);
+    Object.keys(updateOrderDto).forEach((v) => (order[v] = updateOrderDto[v]));
     order.version = order.version + 1;
     await this.orderRepository.save(order);
 
