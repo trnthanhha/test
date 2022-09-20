@@ -16,7 +16,14 @@ export class PaymentVNPayImplementor implements PaymentVendorAdapters {
     const returnUrl = config.get<string>('VNP_ReturnUrl');
 
     const localTime = new Date();
-    const date = Date.UTC(localTime.getFullYear(), localTime.getMonth(), localTime.getDate(), localTime.getHours(), localTime.getMinutes(), localTime.getSeconds());
+    const date = Date.UTC(
+      localTime.getFullYear(),
+      localTime.getMonth(),
+      localTime.getDate(),
+      localTime.getHours(),
+      localTime.getMinutes(),
+      localTime.getSeconds(),
+    );
     const createDate = getDateTimeFormat(new Date(date));
     const amount = order.price;
 

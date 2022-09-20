@@ -14,11 +14,11 @@ import { PaymentModule } from './services/payment/payment.module';
 import { DatabaseModule } from './modules/database/database.module';
 import { AuthModule } from './modules/auth/auth.module';
 import { LocationsService } from './modules/locations/locations.service';
-import { Location } from './modules/locations/entities/location.entity';
 import { RedisModule } from './modules/redis/redis.module';
 import { LocationHandleModule } from './modules/location-handle/location-handle.module';
 import { LocationHandleService } from './modules/location-handle/location-handle.service';
 import { WebhookModule } from './modules/webhook/webhook.module';
+import { StandardPriceModule } from './modules/standard-price/standard-price.module';
 
 @Module({
   imports: [
@@ -52,6 +52,7 @@ import { WebhookModule } from './modules/webhook/webhook.module';
     LocationsModule,
     OrdersModule,
     BillsModule,
+    StandardPriceModule,
 
     //3rd modules
     PaymentModule,

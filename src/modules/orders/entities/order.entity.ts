@@ -24,10 +24,15 @@ export class Order {
   @Column()
   location_id: number;
 
+  @Column({ default: 1 })
+  version: number;
+
   @Column()
   created_by_id: number;
+
   @CreateDateColumn()
   created_at: Date;
+
   @UpdateDateColumn()
   updated_at: Date;
 }

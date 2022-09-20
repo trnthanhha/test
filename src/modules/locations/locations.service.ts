@@ -8,6 +8,8 @@ import {
   MoreThan,
   MoreThanOrEqual,
   Repository,
+  Not,
+  IsNull,
 } from 'typeorm';
 import { Location } from './entities/location.entity';
 import {
@@ -23,6 +25,7 @@ import {
   getDistanceBetween,
   MeterPerDegree,
 } from './locations.calculator';
+import { UpdateLocationDto } from './dto/update-location.dto';
 
 @Injectable()
 export class LocationsService {
@@ -58,6 +61,7 @@ export class LocationsService {
         user_id: MoreThan(0),
       });
     }
+
     const [data, total] = await this.locationRepository.findAndCount(options);
     const resp = new ListLocationDto();
     resp.data = data;
@@ -171,5 +175,47 @@ export class LocationsService {
       commune: row[12],
       street: row[13],
     });
+  }
+
+  async update(id: number, updateOrderDto: UpdateLocationDto) {
+    const location = await this.locationRepository.findOne({
+      where: { id: id },
+    });
+
+    if (!location) throw new Error('Location does not exist');
+    Object.keys(updateOrderDto).forEach(
+      (value) => (location[value] = updateOrderDto[value]),
+    );
+
+    const updateLocation = await this.locationRepository.save(location);
+    return updateLocation;
+  }
+
+  async delete(id: number) {
+    return this.locationRepository.delete(id);
+  }
+
+  async getOverallLocationInfo() {
+    console.log('asdas');
+    const [
+      totalBlackListLocations,
+      totalOwnedLocations,
+      totalApproveLocations,
+      totalCustomLocations,
+    ] = await Promise.all([
+      this.locationRepository.count({ where: { is_blacklist: true } }),
+      this.locationRepository.count({ where: { user_id: MoreThan(0) } }),
+      this.locationRepository.count({
+        where: { status: LocationStatus.APPROVED },
+      }),
+      this.locationRepository.count({ where: { type: LocationType.CUSTOMER } }),
+    ]);
+
+    return {
+      owned_locations: totalOwnedLocations,
+      approve_locations: totalApproveLocations,
+      custom_locations: totalCustomLocations,
+      backlist_locations: totalBlackListLocations,
+    };
   }
 }
