@@ -70,6 +70,10 @@ export class OrdersService {
     return await this.orderRepository.update(id, updateOrderDto);
   }
 
+  async create(order: Order) {
+    return this.orderRepository.save(order);
+  }
+
   async remove(id: number) {
     return this.orderRepository.delete(id);
   }

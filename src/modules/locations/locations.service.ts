@@ -13,6 +13,7 @@ import { Location } from './entities/location.entity';
 import {
   DefaultSafeZoneRadius,
   LocationNFTStatus,
+  LocationPurchaseStatus,
   LocationStatus,
   LocationType,
   MinimumDistanceConflict,
@@ -70,6 +71,14 @@ export class LocationsService {
 
   async findOne(id: number) {
     return this.locationRepository.findOneBy({ id });
+  }
+
+  async checkout(id: number, version: number, dbManager: EntityManager) {
+    return dbManager.update(
+      Location,
+      { purchase_status: LocationPurchaseStatus.Unauthorized },
+      { id, version },
+    );
   }
 
   async existAny(): Promise<boolean> {

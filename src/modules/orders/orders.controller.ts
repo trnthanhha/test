@@ -1,15 +1,16 @@
 import {
-  Controller,
-  Get,
-  Post,
+  BadRequestException,
   Body,
-  Param,
+  Controller,
   Delete,
+  Get,
+  InternalServerErrorException,
+  NotFoundException,
+  Param,
+  Patch,
+  Post,
   Query,
   Req,
-  NotFoundException,
-  BadRequestException,
-  Patch,
 } from '@nestjs/common';
 import { OrdersService } from './orders.service';
 import { CreateOrderDto } from './dto/create-order.dto';
@@ -30,6 +31,11 @@ import { Order } from './entities/order.entity';
 import { OrderStatusDto } from './dto/order-status-dto';
 import { randomUUID } from 'crypto';
 import { LocationsService } from '../locations/locations.service';
+import { StandardPriceService } from '../standard-price/standard-price.service';
+import { PaymentStatus } from './orders.constants';
+import { InjectRepository } from '@nestjs/typeorm';
+import { Repository, UpdateResult } from 'typeorm';
+import { CheckoutDto } from './dto/checkout-dto';
 
 @ApiTags('orders')
 @Controller('orders')
@@ -37,6 +43,9 @@ export class OrdersController {
   constructor(
     private readonly ordersService: OrdersService,
     private readonly locationsService: LocationsService,
+    private readonly standardPriceService: StandardPriceService,
+    @InjectRepository(Order)
+    private repository: Repository<Order>,
   ) {}
 
   @Auth()
@@ -47,21 +56,52 @@ export class OrdersController {
     type: CreateOrderDto,
     status: 201,
   })
-  @Post()
-  async create(@Body() createOrderDto: CreateOrderDto, @Req() req) {
+  @Post('/checkout')
+  async create(
+    @Body() createOrderDto: CreateOrderDto,
+    @Req() req,
+  ): Promise<CheckoutDto> {
     const loc = await this.locationsService.findOne(createOrderDto.location_id);
     if (!loc) {
-      throw new NotFoundException();
+      return new CheckoutDto(new NotFoundException(), 'Location not existed');
     }
 
     if (!loc.canPurchased()) {
-      throw new BadRequestException();
+      return new CheckoutDto(
+        new BadRequestException(),
+        'Location is unable to purchase',
+      );
     }
+
+    const stdPrice = await this.standardPriceService.getStandardPrice();
+    if (!stdPrice) {
+      return new CheckoutDto(
+        new InternalServerErrorException(),
+        'Cant get price to purchase',
+      );
+    }
+
     const pmGateway = PaymentGatewayFactory.Build();
     const order = new Order();
     Object.assign(order, createOrderDto);
     order.ref_uid = randomUUID();
-    order.price = 50000000;
+    order.price = stdPrice.price;
+    order.payment_status = PaymentStatus.UNAUTHORIZED;
+
+    const rs = await this.repository.manager.transaction(
+      async (entityManager): Promise<[UpdateResult, Order]> => {
+        return await Promise.all([
+          this.locationsService.checkout(loc.id, loc.version, entityManager),
+          this.ordersService.create(order),
+        ]);
+      },
+    );
+    if (!rs[0].affected || !rs[1].id) {
+      return new CheckoutDto(
+        new InternalServerErrorException(),
+        'No rows affected',
+      );
+    }
 
     const ipAddr =
       req.headers['x-forwarded-for'] ||
@@ -97,7 +137,7 @@ export class OrdersController {
   @ApiImplicitQuery({
     name: 'payment_status',
     description: 'The status of order',
-    example: 'PENDING',
+    example: 'unauthorized',
     required: false,
   })
   findAll(
@@ -109,6 +149,12 @@ export class OrdersController {
   }
 
   @Auth()
+  @Get('/status')
+  validateStatus(@Req() req): OrderStatusDto {
+    return PaymentGatewayFactory.Build().decodeResponse(req);
+  }
+
+  @Auth()
   @ApiOperation({
     summary: 'Find order by Id',
   })
@@ -117,11 +163,6 @@ export class OrdersController {
     description: 'The id of order',
     example: 1,
   })
-  @Get('/status')
-  validateStatus(@Req() req): OrderStatusDto {
-    return PaymentGatewayFactory.Build().decodeResponse(req);
-  }
-
   @Get(':id')
   findOne(@Param('id') id: string) {
     return this.ordersService.findOne(+id);

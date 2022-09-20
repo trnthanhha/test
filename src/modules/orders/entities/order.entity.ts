@@ -14,7 +14,11 @@ export class Order {
 
   ref_uid: string;
 
-  @Column({ type: 'enum', enum: PaymentStatus, default: PaymentStatus.PENDING })
+  @Column({
+    type: 'enum',
+    enum: PaymentStatus,
+    default: PaymentStatus.UNAUTHORIZED,
+  })
   payment_status: PaymentStatus;
 
   @Column({ type: 'double precision' })
