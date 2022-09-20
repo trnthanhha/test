@@ -66,11 +66,14 @@ export class StandardPriceService {
     return standardPrice;
   }
 
-  async getStandardPriceHistory(query: { page: string; limit: string }) {
+  getStandardPriceHistory(query: {
+    page: string;
+    limit: string;
+  }): Promise<StandardPriceHistory[]> {
     const page = +query.page || 1;
     const limit = +query.limit || 10;
 
-    return await this.standardPriceHistory.find({
+    return this.standardPriceHistory.find({
       skip: (page - 1) * limit,
       take: limit,
       relations: ['user'],
