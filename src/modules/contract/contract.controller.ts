@@ -23,6 +23,7 @@ export class ContractController {
   @ApiOkResponse({
     type: Contract,
   })
+  @Auth()
   @Get()
   getContract(@Query('id') id: string) {
     return this.contractService.getContractById(+id);
@@ -32,6 +33,7 @@ export class ContractController {
   @ApiOkResponse({
     type: Contract,
   })
+  @Auth()
   @Post()
   create(@Body() data: CreateContractDto) {
     return this.contractService.createContract(data);
@@ -41,6 +43,7 @@ export class ContractController {
   @ApiOkResponse({
     type: Contract,
   })
+  @Auth()
   @Patch('/:id')
   update(@Param('id') id: string, @Body() data: UpdateContractDto) {
     return this.contractService.updateContract(+id, data);
