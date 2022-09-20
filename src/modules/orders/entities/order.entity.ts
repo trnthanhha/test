@@ -12,6 +12,8 @@ export class Order {
   @PrimaryGeneratedColumn()
   id: number;
 
+  ref_uid: string;
+
   @Column({ type: 'enum', enum: PaymentStatus, default: PaymentStatus.PENDING })
   payment_status: PaymentStatus;
 

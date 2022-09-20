@@ -1,11 +1,9 @@
 import { Injectable, Logger } from '@nestjs/common';
-import { CreateOrderDto } from './dto/create-order.dto';
 import { UpdateOrderDto } from './dto/update-order.dto';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Order } from './entities/order.entity';
 import { FindManyOptions, Repository } from 'typeorm';
 import { PaymentStatus } from './orders.constants';
-import { User } from '../users/entities/user.entity';
 
 @Injectable()
 export class OrdersService {
@@ -15,14 +13,6 @@ export class OrdersService {
     @InjectRepository(Order)
     private orderRepository: Repository<Order>,
   ) {}
-
-  async create(createOrderDto: CreateOrderDto, currentUser: User) {
-    createOrderDto.created_by_id = currentUser.id;
-
-    const order = await this.orderRepository.create(createOrderDto);
-
-    return order;
-  }
 
   async findAll(query: {
     page?: string;

@@ -16,5 +16,9 @@ export enum LocationNFTStatus {
   MINTED = 'minted',
 }
 
+export enum LocationPurchaseStatus {
+  Unauthorized = 'unauthorized',
+}
+
 export const DefaultSafeZoneRadius = 50;
 export const MinimumDistanceConflict = 100;

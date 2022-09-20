@@ -8,6 +8,7 @@ import {
 } from 'typeorm';
 import {
   LocationNFTStatus,
+  LocationPurchaseStatus,
   LocationStatus,
   LocationType,
 } from '../locations.contants';
@@ -58,6 +59,9 @@ export class Location {
   @Index()
   @Column({ type: 'enum', enum: LocationStatus })
   status: LocationStatus;
+
+  @Column({ type: 'enum', enum: LocationPurchaseStatus, nullable: true })
+  purchase_status: LocationPurchaseStatus;
 
   @Exclude()
   @Column({
@@ -139,6 +143,15 @@ export class Location {
     Object.assign(
       this,
       getBoundsByRadius(this.lat, this.long, this.block_radius),
+    );
+  }
+
+  canPurchased(): boolean {
+    return (
+      !this.is_blacklist &&
+      !this.user_id &&
+      this.status === LocationStatus.APPROVED &&
+      this.purchase_status !== LocationPurchaseStatus.Unauthorized
     );
   }
 }

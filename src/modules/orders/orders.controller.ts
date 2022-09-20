@@ -3,10 +3,13 @@ import {
   Get,
   Post,
   Body,
-  Patch,
   Param,
   Delete,
   Query,
+  Req,
+  NotFoundException,
+  BadRequestException,
+  Patch,
 } from '@nestjs/common';
 import { OrdersService } from './orders.service';
 import { CreateOrderDto } from './dto/create-order.dto';
@@ -20,15 +23,21 @@ import {
 } from '@nestjs/swagger';
 import { ListOrderDto } from './dto/list-order.dto';
 import { ApiImplicitQuery } from '@nestjs/swagger/dist/decorators/api-implicit-query.decorator';
-import { User } from '../users/entities/user.entity';
 import { Auth } from '../../decorators/roles.decorator';
 import { UserType } from '../users/users.constants';
-import { GetAuthUser } from '../../decorators/user.decorator';
+import { PaymentGatewayFactory } from './vendor_adapters/payment.vendor.adapters';
+import { Order } from './entities/order.entity';
+import { OrderStatusDto } from './dto/order-status-dto';
+import { randomUUID } from 'crypto';
+import { LocationsService } from '../locations/locations.service';
 
 @ApiTags('orders')
 @Controller('orders')
 export class OrdersController {
-  constructor(private readonly ordersService: OrdersService) {}
+  constructor(
+    private readonly ordersService: OrdersService,
+    private readonly locationsService: LocationsService,
+  ) {}
 
   @Auth()
   @ApiOperation({
@@ -39,11 +48,27 @@ export class OrdersController {
     status: 201,
   })
   @Post()
-  create(
-    @Body() createOrderDto: CreateOrderDto,
-    @GetAuthUser() currentUser: User,
-  ) {
-    return this.ordersService.create(createOrderDto, currentUser);
+  async create(@Body() createOrderDto: CreateOrderDto, @Req() req) {
+    const loc = await this.locationsService.findOne(createOrderDto.location_id);
+    if (!loc) {
+      throw new NotFoundException();
+    }
+
+    if (!loc.canPurchased()) {
+      throw new BadRequestException();
+    }
+    const pmGateway = PaymentGatewayFactory.Build();
+    const order = new Order();
+    Object.assign(order, createOrderDto);
+    order.ref_uid = randomUUID();
+    order.price = 50000000;
+
+    const ipAddr =
+      req.headers['x-forwarded-for'] ||
+      req.connection.remoteAddress ||
+      req.socket.remoteAddress ||
+      req.connection.socket.remoteAddress;
+    return pmGateway.generateURLRedirect(order, ipAddr);
   }
 
   @Auth()
@@ -92,6 +117,11 @@ export class OrdersController {
     description: 'The id of order',
     example: 1,
   })
+  @Get('/status')
+  validateStatus(@Req() req): OrderStatusDto {
+    return PaymentGatewayFactory.Build().decodeResponse(req);
+  }
+
   @Get(':id')
   findOne(@Param('id') id: string) {
     return this.ordersService.findOne(+id);

@@ -8,8 +8,6 @@ import {
   MoreThan,
   MoreThanOrEqual,
   Repository,
-  Not,
-  IsNull,
 } from 'typeorm';
 import { Location } from './entities/location.entity';
 import {
@@ -20,11 +18,7 @@ import {
   MinimumDistanceConflict,
 } from './locations.contants';
 import { ListLocationDto } from './dto/list-location-dto';
-import {
-  getBoundsByRadius,
-  getDistanceBetween,
-  MeterPerDegree,
-} from './locations.calculator';
+import { getDistanceBetween, MeterPerDegree } from './locations.calculator';
 import { UpdateLocationDto } from './dto/update-location.dto';
 
 @Injectable()
