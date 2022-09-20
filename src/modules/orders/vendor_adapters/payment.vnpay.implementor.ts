@@ -2,30 +2,27 @@ import { PaymentVendorAdapters } from './payment.vendor.adapters';
 import { ConfigService } from '@nestjs/config';
 import crypto from 'crypto';
 import querystring from 'qs';
-import dateFormat from 'dateformat';
 import { Order } from '../entities/order.entity';
 
 const config = new ConfigService();
 
-// Docs: https://sandbox.vnpayment.vn/apis/docs/huong-dan-tich-hop/
-// All testcase: https://viblo.asia/p/tich-hop-vnpay-vao-rails-924lJ2A8lPM
 export class PaymentVNPayImplementor implements PaymentVendorAdapters {
   generateURLRedirect(order: Order, clientUnique: string): string {
-    const ipAddr = clientUnique;
+    const ipAddr = clientUnique || '192.168.1.232';
 
     const tmnCode = config.get<string>('VNP_TmnCode');
     const secretKey = config.get<string>('VNP_HashSecret');
     let vnpUrl = config.get<string>('VNP_Url');
     const returnUrl = config.get<string>('VNP_ReturnUrl');
 
-    const date = new Date();
-
-    const createDate = dateFormat(date, 'yyyymmddHHmmss');
+    const localTime = new Date();
+    const date = Date.UTC(localTime.getFullYear(), localTime.getMonth(), localTime.getDate(), localTime.getHours(), localTime.getMinutes(), localTime.getSeconds());
+    const createDate = getDateTimeFormat(new Date(date));
     const amount = order.price;
 
     const orderInfo = order.note;
     const orderType = 'billpayment';
-    let locale = 'vn';
+    const locale = 'vn';
     const currCode = 'VND';
     let vnp_Params = {};
     vnp_Params['vnp_Version'] = '2.1.0';
@@ -47,7 +44,7 @@ export class PaymentVNPayImplementor implements PaymentVendorAdapters {
     const signData = querystring.stringify(vnp_Params, { encode: false });
     const hmac = crypto.createHmac('sha512', secretKey);
     vnp_Params['vnp_SecureHash'] = hmac
-      .update(new Buffer(signData, 'utf-8'))
+      .update(Buffer.from(signData, 'utf-8'))
       .digest('hex');
     vnpUrl += '?' + querystring.stringify(vnp_Params, { encode: false });
 
@@ -69,4 +66,12 @@ function sortObject(obj) {
     sorted[str[key]] = encodeURIComponent(obj[str[key]]).replace(/%20/g, '+');
   }
   return sorted;
+}
+
+export function getDateTimeFormat(date: Date): string {
+  const isoParts = date.toISOString().split('T');
+  const dateParts = isoParts[0].split('-');
+  const timeParts = isoParts[1].split('.')[0].split(':');
+
+  return dateParts.join('') + timeParts.join('');
 }
