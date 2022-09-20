@@ -30,6 +30,12 @@ export class StandardPriceService {
 
     let newStandardPrice: StandardPrice;
 
+    await this.standardPriceHistory.save({
+      price_after: price,
+      price_before: standardPrice ? standardPrice.price : null,
+      user: currentUser,
+    } as StandardPriceHistory);
+
     if (standardPrice) {
       standardPrice.price = price;
       newStandardPrice = await this.repo.save(standardPrice);
@@ -40,12 +46,6 @@ export class StandardPriceService {
         price: price,
       } as StandardPrice);
     }
-
-    await this.standardPriceHistory.save({
-      price_after: price,
-      price_before: standardPrice ? standardPrice.price : null,
-      user: currentUser,
-    } as StandardPriceHistory);
 
     return newStandardPrice;
   }
