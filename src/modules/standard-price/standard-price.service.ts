@@ -38,12 +38,16 @@ export class StandardPriceService {
 
     if (standardPrice) {
       standardPrice.price = price;
-      newStandardPrice = await this.repo.save(standardPrice);
+      newStandardPrice = await this.repo.save({
+        ...standardPrice,
+        user: currentUser,
+      });
 
       await this.redis.del(this.standardPriceCacheKey);
     } else {
       newStandardPrice = await this.repo.save({
         price: price,
+        user: currentUser,
       } as StandardPrice);
     }
 
@@ -54,18 +58,38 @@ export class StandardPriceService {
     const cacheStandardPrice = await this.redis.get(this.standardPriceCacheKey);
 
     if (cacheStandardPrice) {
-      return JSON.parse(cacheStandardPrice);
+      try {
+        return JSON.parse(cacheStandardPrice);
+      } catch (error) {
+        const standardPrice = await this.repo.findOne({
+          where: { id: Not(IsNull()) },
+        });
+
+        this.redis.set(
+          this.standardPriceCacheKey,
+          JSON.stringify(standardPrice),
+        );
+
+        return standardPrice;
+      }
     }
 
     const standardPrice = await this.repo.findOne({
       where: { id: Not(IsNull()) },
-      order: { created_at: 'DESC' },
+      relations: ['user'],
+      select: {
+        id: true,
+        price: true,
+        user: {
+          type: true,
+          last_name: true,
+          first_name: true,
+        },
+        created_at: true,
+      },
     });
 
-    await this.redis.set(
-      this.standardPriceCacheKey,
-      JSON.stringify(standardPrice),
-    );
+    this.redis.set(this.standardPriceCacheKey, JSON.stringify(standardPrice));
 
     return standardPrice;
   }
@@ -74,24 +98,32 @@ export class StandardPriceService {
     const page = +query.page || 1;
     const limit = +query.limit || 10;
 
-    const standardPriceHistorys = await this.standardPriceHistory.find({
-      skip: (page - 1) * limit,
-      take: limit,
-      relations: ['user'],
-      select: {
-        id: true,
-        price_after: true,
-        price_before: true,
-        user: {
-          type: true,
-          last_name: true,
-          first_name: true,
+    const [standardPriceHistorys, total] =
+      await this.standardPriceHistory.findAndCount({
+        skip: (page - 1) * limit,
+        take: limit,
+        relations: ['user'],
+        select: {
+          id: true,
+          price_after: true,
+          price_before: true,
+          user: {
+            type: true,
+            last_name: true,
+            first_name: true,
+          },
+          created_at: true,
         },
-        created_at: true,
-      },
-      order: { created_at: 'DESC' },
-    });
+        order: { created_at: 'DESC' },
+      });
 
-    return standardPriceHistorys;
+    return {
+      data: standardPriceHistorys,
+      meta: {
+        page_size: limit,
+        total_page: Math.ceil(total / limit),
+        total_records: total,
+      },
+    };
   }
 }
