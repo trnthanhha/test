@@ -59,6 +59,7 @@ export class StandardPriceService {
 
     const standardPrice = await this.repo.findOne({
       where: { id: Not(IsNull()) },
+      order: { created_at: 'DESC' },
     });
 
     await this.redis.set(
