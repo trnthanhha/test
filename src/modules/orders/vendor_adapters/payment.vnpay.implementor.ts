@@ -150,11 +150,11 @@ export function getDateTimeFormat(date: Date): string {
 
 export function forceToGMT7DateTime(localTime: Date): number {
   const offsetZone = localTime.getTimezoneOffset() / 60;
-  let diff = 0;
+  let bonus = 0;
   if (offsetZone !== -7) {
-    diff = 1000 * 60 * 60 * (offsetZone + 7);
+    bonus = 1000 * 60 * 60 * (offsetZone + 7);
   }
-  localTime = new Date(localTime.getTime() - diff);
+  localTime = new Date(localTime.getTime() + bonus);
   return Date.UTC(
     localTime.getFullYear(),
     localTime.getMonth(),

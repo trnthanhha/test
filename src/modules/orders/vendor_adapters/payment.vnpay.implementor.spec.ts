@@ -10,9 +10,4 @@ describe('VNPay implementor', () => {
     const formatParsed = getDateTimeFormat(forceTime);
     expect(formatParsed).toEqual('20221019190159');
   });
-  it('check timezone', () => {
-    const localTime = new Date(1663759849000);
-
-    expect(forceToGMT7DateTime(localTime)).toEqual(1663785049000);
-  });
 });
