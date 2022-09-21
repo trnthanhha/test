@@ -17,6 +17,7 @@ import { LocationsService } from './modules/locations/locations.service';
 import { RedisModule } from './modules/redis/redis.module';
 import { LocationHandleModule } from './modules/location-handle/location-handle.module';
 import { LocationHandleService } from './modules/location-handle/location-handle.service';
+import { ContractModule } from './modules/contract/contract.module';
 import { WebhookModule } from './modules/webhook/webhook.module';
 import { StandardPriceModule } from './modules/standard-price/standard-price.module';
 import { ClientsModule, Transport } from '@nestjs/microservices';
@@ -66,6 +67,7 @@ import { ClientsModule, Transport } from '@nestjs/microservices';
     LocationsModule,
     OrdersModule,
     BillsModule,
+    ContractModule,
     StandardPriceModule,
 
     //3rd modules
