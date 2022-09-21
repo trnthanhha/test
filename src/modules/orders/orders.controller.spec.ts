@@ -12,23 +12,51 @@ import {
 } from '../redis/redis.constants';
 import { StandardPrice } from '../standard-price/entities/standard-price.entity';
 import { StandardPriceHistory } from '../standard-price/entities/standard-price-history.entity';
+import { LocationHandleService } from '../location-handle/location-handle.service';
+import { LocationHandle } from '../location-handle/entities/location-handle.entity';
+import { UsersService } from '../users/users.service';
+import { User } from '../users/entities/user.entity';
+import { AcceptLanguageResolver, I18nModule, QueryResolver } from 'nestjs-i18n';
 
 describe('OrdersController', () => {
   let controller: OrdersController;
 
   beforeEach(async () => {
     const module: TestingModule = await Test.createTestingModule({
+      imports: [
+        I18nModule.forRoot({
+          fallbackLanguage: 'en',
+          loaderOptions: {
+            path: 'src/i18n',
+            watch: true,
+          },
+          resolvers: [
+            { use: QueryResolver, options: ['lang'] },
+            AcceptLanguageResolver,
+          ],
+        }),
+      ],
       controllers: [OrdersController],
       providers: [
         OrdersService,
+        UsersService,
         LocationsService,
+        LocationHandleService,
         StandardPriceService,
+        {
+          provide: getRepositoryToken(User),
+          useFactory: jest.fn(() => ({})),
+        },
         {
           provide: getRepositoryToken(Order),
           useFactory: jest.fn(() => ({})),
         },
         {
           provide: getRepositoryToken(Location),
+          useFactory: jest.fn(() => ({})),
+        },
+        {
+          provide: getRepositoryToken(LocationHandle),
           useFactory: jest.fn(() => ({})),
         },
         {

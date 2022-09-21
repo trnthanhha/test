@@ -63,6 +63,10 @@ export class Location {
   @Column({ type: 'enum', enum: LocationPurchaseStatus, nullable: true })
   purchase_status: LocationPurchaseStatus;
 
+  @Index()
+  @Column({ nullable: true })
+  required_order_id: number;
+
   @Exclude()
   @Column({
     type: 'enum',

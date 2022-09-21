@@ -21,6 +21,9 @@ import {
 import { ListLocationDto } from './dto/list-location-dto';
 import { getDistanceBetween, MeterPerDegree } from './locations.calculator';
 import { UpdateLocationDto } from './dto/update-location.dto';
+import { LocationHandleService } from '../location-handle/location-handle.service';
+import { CreateLocationDto } from './dto/create-location.dto';
+import { User } from '../users/entities/user.entity';
 
 @Injectable()
 export class LocationsService {
@@ -28,16 +31,46 @@ export class LocationsService {
   constructor(
     @InjectRepository(Location)
     private locationRepository: Repository<Location>,
+    private readonly locationHandleService: LocationHandleService,
   ) {}
 
   async create(
-    location: Location,
+    createLocationDto: CreateLocationDto,
+    user: User,
     dbManager?: EntityManager,
   ): Promise<Location> {
-    if (!dbManager) {
-      dbManager = this.locationRepository.manager;
+    const newLocation = new Location();
+    Object.assign(newLocation, createLocationDto);
+    const validDistance = await this.isValidDistance(newLocation);
+    newLocation.block_radius = DefaultSafeZoneRadius;
+    newLocation.calculateBounds();
+
+    //biz
+    newLocation.nft_status = LocationNFTStatus.PENDING;
+    newLocation.type = LocationType.CUSTOMER;
+    newLocation.country = 'VN';
+    if (validDistance) {
+      newLocation.status = LocationStatus.APPROVED;
+      newLocation.approved_by_id = -1; // System
+      newLocation.approved_at = createLocationDto.requestedAt || new Date();
+    } else {
+      newLocation.status = LocationStatus.PENDING;
     }
-    return dbManager.save(location);
+    //sys
+    newLocation.user_id = user.id;
+    newLocation.created_by_id = user.id;
+    newLocation.user_full_name = `${user.last_name} ${user.first_name}`;
+
+    dbManager = dbManager || this.locationRepository.manager;
+    return dbManager.transaction(async (entityManager): Promise<Location> => {
+      newLocation.handle = await this.locationHandleService
+        .createHandle(newLocation.name, entityManager)
+        .catch((ex) => {
+          this.logger.error('exception create handle', ex.message);
+          throw ex;
+        });
+      return entityManager.save(newLocation);
+    });
   }
 
   async findAll(
@@ -73,11 +106,23 @@ export class LocationsService {
     return this.locationRepository.findOneBy({ id });
   }
 
-  async checkout(id: number, version: number, dbManager: EntityManager) {
+  async checkout(
+    dbManager: EntityManager,
+    id: number,
+    version: number,
+    order_id?: number,
+  ) {
     return dbManager.update(
       Location,
-      { purchase_status: LocationPurchaseStatus.Unauthorized },
-      { id, version },
+      {
+        id,
+        version,
+      },
+      {
+        purchase_status: LocationPurchaseStatus.Unauthorized,
+        version: version + 1,
+        required_order_id: order_id,
+      },
     );
   }
 
@@ -199,7 +244,6 @@ export class LocationsService {
   }
 
   async getOverallLocationInfo() {
-    console.log('asdas');
     const [
       totalBlackListLocations,
       totalOwnedLocations,
