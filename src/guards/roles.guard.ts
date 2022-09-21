@@ -1,4 +1,3 @@
-import { User } from 'src/modules/users/entities/user.entity';
 import {
   CanActivate,
   ExecutionContext,
@@ -6,7 +5,6 @@ import {
   Injectable,
 } from '@nestjs/common';
 import { UserType } from '../modules/users/users.constants';
-import { JwtService } from '@nestjs/jwt';
 import { decodeUserFromHeader } from '../helper/authorization';
 import { Reflector } from '@nestjs/core';
 
@@ -15,10 +13,12 @@ export class RolesGuard implements CanActivate {
   constructor(private reflector: Reflector) {}
 
   async canActivate(context: ExecutionContext): Promise<boolean> {
-    const rolesMeta = this.reflector.get<string[]>('roles', context.getHandler());
-    const requiredRoles = rolesMeta.length > 0 ? 
-      rolesMeta:
-      [UserType.ADMIN, UserType.CUSTOMER];
+    const rolesMeta = this.reflector.get<string[]>(
+      'roles',
+      context.getHandler(),
+    );
+    const requiredRoles =
+      rolesMeta.length > 0 ? rolesMeta : [UserType.ADMIN, UserType.CUSTOMER];
 
     const request = context.switchToHttp().getRequest();
     const user = decodeUserFromHeader(request.headers);

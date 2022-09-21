@@ -1,14 +1,17 @@
-import { PartialType } from "@nestjs/mapped-types";
-import { ApiProperty } from "@nestjs/swagger";
-import {  IsNumber, IsString } from "class-validator";
-import { Order } from "../entities/order.entity";
+import { IsNumber, Min } from 'class-validator';
+import { i18nValidationMessage } from 'nestjs-i18n';
+import { ApiProperty } from '@nestjs/swagger';
 
-export class CreateOrderDto extends PartialType(Order) {
-    @ApiProperty({ description: 'price of order', required: true, example: 20000 })
-    @IsNumber()
-    price: number;
-
-    @ApiProperty({ required: true, example: 123 })
-    @IsString()
-    location_id: number;
+export class CreateOrderDto {
+  @Min(1)
+  @IsNumber(
+    {},
+    {
+      message: i18nValidationMessage('validation.isNumber', {
+        name: 'location_id',
+      }),
+    },
+  )
+  @ApiProperty({ required: true, example: 123 })
+  location_id: number;
 }

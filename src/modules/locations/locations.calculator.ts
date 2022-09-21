@@ -1,5 +1,4 @@
 import { Location } from './entities/location.entity';
-import { distinct } from 'rxjs';
 
 export const MeterPerDegree = 111045;
 

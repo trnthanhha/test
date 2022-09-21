@@ -5,6 +5,7 @@ import { UpdateBillDto } from './dto/update-bill.dto';
 @Injectable()
 export class BillsService {
   create(createBillDto: CreateBillDto) {
+    console.log(createBillDto);
     return 'This action adds a new bill';
   }
 
@@ -17,6 +18,7 @@ export class BillsService {
   }
 
   update(id: number, updateBillDto: UpdateBillDto) {
+    console.log(updateBillDto);
     return `This action updates a #${id} bill`;
   }
 

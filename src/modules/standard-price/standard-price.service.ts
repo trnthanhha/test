@@ -98,7 +98,7 @@ export class StandardPriceService {
     const page = +query.page || 1;
     const limit = +query.limit || 10;
 
-    const [standardPriceHistorys, total] =
+    const [standardPriceHistories, total] =
       await this.standardPriceHistory.findAndCount({
         skip: (page - 1) * limit,
         take: limit,
@@ -118,7 +118,7 @@ export class StandardPriceService {
       });
 
     return {
-      data: standardPriceHistorys,
+      data: standardPriceHistories,
       meta: {
         page_size: limit,
         total_page: Math.ceil(total / limit),

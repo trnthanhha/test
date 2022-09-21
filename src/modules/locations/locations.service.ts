@@ -8,23 +8,18 @@ import {
   MoreThan,
   MoreThanOrEqual,
   Repository,
-  Not,
-  IsNull,
 } from 'typeorm';
 import { Location } from './entities/location.entity';
 import {
   DefaultSafeZoneRadius,
   LocationNFTStatus,
+  LocationPurchaseStatus,
   LocationStatus,
   LocationType,
   MinimumDistanceConflict,
 } from './locations.contants';
 import { ListLocationDto } from './dto/list-location-dto';
-import {
-  getBoundsByRadius,
-  getDistanceBetween,
-  MeterPerDegree,
-} from './locations.calculator';
+import { getDistanceBetween, MeterPerDegree } from './locations.calculator';
 import { UpdateLocationDto } from './dto/update-location.dto';
 
 @Injectable()
@@ -76,6 +71,14 @@ export class LocationsService {
 
   async findOne(id: number) {
     return this.locationRepository.findOneBy({ id });
+  }
+
+  async checkout(id: number, version: number, dbManager: EntityManager) {
+    return dbManager.update(
+      Location,
+      { purchase_status: LocationPurchaseStatus.Unauthorized },
+      { id, version },
+    );
   }
 
   async existAny(): Promise<boolean> {

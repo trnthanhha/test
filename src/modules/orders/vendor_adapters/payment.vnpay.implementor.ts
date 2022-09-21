@@ -2,56 +2,133 @@ import { PaymentVendorAdapters } from './payment.vendor.adapters';
 import { ConfigService } from '@nestjs/config';
 import crypto from 'crypto';
 import querystring from 'qs';
-import dateFormat from 'dateformat';
 import { Order } from '../entities/order.entity';
+import { OrderStatusDto } from '../dto/order-status-dto';
 
 const config = new ConfigService();
 
-// Docs: https://sandbox.vnpayment.vn/apis/docs/huong-dan-tich-hop/
-// All testcase: https://viblo.asia/p/tich-hop-vnpay-vao-rails-924lJ2A8lPM
+type VNPayConfig = {
+  APP_DOMAIN: string;
+  VNP_TmnCode: string;
+  VNP_HashSecret: string;
+  VNP_Url: string;
+  VNP_ReturnRoute: string;
+};
+
 export class PaymentVNPayImplementor implements PaymentVendorAdapters {
-  generateURLRedirect(order: Order, clientUnique: string): string {
-    const ipAddr = clientUnique;
+  private cf: VNPayConfig;
+  constructor() {
+    this.cf = {
+      APP_DOMAIN: config.get<string>('APP_DOMAIN'),
+      VNP_HashSecret: config.get<string>('VNP_HashSecret'),
+      VNP_ReturnRoute: config.get<string>('VNP_ReturnRoute'),
+      VNP_TmnCode: config.get<string>('VNP_TmnCode'),
+      VNP_Url: config.get<string>('VNP_Url'),
+    };
+  }
 
-    const tmnCode = config.get<string>('VNP_TmnCode');
-    const secretKey = config.get<string>('VNP_HashSecret');
-    let vnpUrl = config.get<string>('VNP_Url');
-    const returnUrl = config.get<string>('VNP_ReturnUrl');
+  generateURLRedirect(order: Order, ipAddr: string): string {
+    let vnpUrl = this.cf.VNP_Url;
 
-    const date = new Date();
-
-    const createDate = dateFormat(date, 'yyyymmddHHmmss');
+    const localTime = new Date();
+    const date = Date.UTC(
+      localTime.getFullYear(),
+      localTime.getMonth(),
+      localTime.getDate(),
+      localTime.getHours(),
+      localTime.getMinutes(),
+      localTime.getSeconds(),
+    );
+    const createDate = getDateTimeFormat(new Date(date));
     const amount = order.price;
 
     const orderInfo = order.note;
     const orderType = 'billpayment';
-    let locale = 'vn';
+    const locale = 'vn';
     const currCode = 'VND';
     let vnp_Params = {};
     vnp_Params['vnp_Version'] = '2.1.0';
     vnp_Params['vnp_Command'] = 'pay';
-    vnp_Params['vnp_TmnCode'] = tmnCode;
-    // vnp_Params['vnp_Merchant'] = ''
+    vnp_Params['vnp_TmnCode'] = this.cf.VNP_TmnCode;
     vnp_Params['vnp_Locale'] = locale;
     vnp_Params['vnp_CurrCode'] = currCode;
-    vnp_Params['vnp_TxnRef'] = order.id;
+    vnp_Params['vnp_TxnRef'] = order.ref_uid;
     vnp_Params['vnp_OrderInfo'] = orderInfo;
     vnp_Params['vnp_OrderType'] = orderType;
     vnp_Params['vnp_Amount'] = amount * 100;
-    vnp_Params['vnp_ReturnUrl'] = returnUrl;
+    vnp_Params[
+      'vnp_ReturnUrl'
+    ] = `${this.cf.APP_DOMAIN}${this.cf.VNP_ReturnRoute}`;
     vnp_Params['vnp_IpAddr'] = ipAddr;
     vnp_Params['vnp_CreateDate'] = createDate;
 
     vnp_Params = sortObject(vnp_Params);
 
     const signData = querystring.stringify(vnp_Params, { encode: false });
-    const hmac = crypto.createHmac('sha512', secretKey);
+    const hmac = crypto.createHmac('sha512', this.cf.VNP_HashSecret);
     vnp_Params['vnp_SecureHash'] = hmac
-      .update(new Buffer(signData, 'utf-8'))
+      .update(Buffer.from(signData, 'utf-8'))
       .digest('hex');
     vnpUrl += '?' + querystring.stringify(vnp_Params, { encode: false });
 
     return vnpUrl;
+  }
+
+  decodeResponse(req: any): OrderStatusDto {
+    let vnp_Params = req.query;
+
+    const secureHash = vnp_Params['vnp_SecureHash'];
+
+    delete vnp_Params['vnp_SecureHash'];
+    delete vnp_Params['vnp_SecureHashType'];
+
+    vnp_Params = sortObject(vnp_Params);
+
+    const signData = querystring.stringify(vnp_Params, { encode: false });
+    const hmac = crypto.createHmac('sha512', this.cf.VNP_HashSecret);
+    const signed = hmac.update(Buffer.from(signData, 'utf-8')).digest('hex');
+
+    if (secureHash !== signed) {
+      return {
+        status_code: '97',
+        message: 'Kiểm tra GD thất bại',
+      } as OrderStatusDto;
+    }
+
+    const dto = new OrderStatusDto();
+    dto.status_code = vnp_Params['vnp_ResponseCode'];
+    switch (vnp_Params['vnp_ResponseCode']) {
+      case '00':
+        dto.message = 'Giao dịch thành công';
+        break;
+      case '01':
+        dto.message = 'Giao dịch chưa hoàn tất';
+        break;
+      case '02':
+        dto.message = 'Giao dịch bị lỗi';
+        break;
+      case '04':
+        dto.message =
+          'Giao dịch đảo (Khách hàng đã bị trừ tiền tại Ngân hàng nhưng GD chưa thành công ở VNPAY)';
+        break;
+      case '05':
+        dto.message = 'VNPAY đang xử lý giao dịch này (GD hoàn tiền)';
+        break;
+      case '06':
+        dto.message =
+          'VNPAY đã gửi yêu cầu hoàn tiền sang Ngân hàng (GD hoàn tiền)';
+        break;
+      case '07':
+        dto.message = 'Giao dịch bị nghi ngờ gian lận';
+        break;
+      case '09':
+        dto.message = 'GD Hoàn trả bị từ chối';
+        break;
+      default:
+        dto.message = 'GD không xác định';
+    }
+
+    return dto;
   }
 }
 
@@ -69,4 +146,12 @@ function sortObject(obj) {
     sorted[str[key]] = encodeURIComponent(obj[str[key]]).replace(/%20/g, '+');
   }
   return sorted;
+}
+
+export function getDateTimeFormat(date: Date): string {
+  const isoParts = date.toISOString().split('T');
+  const dateParts = isoParts[0].split('-');
+  const timeParts = isoParts[1].split('.')[0].split(':');
+
+  return dateParts.join('') + timeParts.join('');
 }

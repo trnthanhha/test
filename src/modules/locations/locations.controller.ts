@@ -10,7 +10,6 @@ import {
   Patch,
   Post,
   Query,
-  UseGuards,
   UseInterceptors,
 } from '@nestjs/common';
 import { ApiOperation, ApiTags } from '@nestjs/swagger';
@@ -26,7 +25,7 @@ import {
 } from './locations.contants';
 import { Location } from './entities/location.entity';
 import { UserType } from '../users/users.constants';
-import { Auth, AuthAnonymous } from '../../decorators/roles.decorator';
+import { Auth } from '../../decorators/roles.decorator';
 import { CreateLocationDto } from './dto/create-location.dto';
 import { LocationHandleService } from '../location-handle/location-handle.service';
 import { FindManyOptions, Like, Repository } from 'typeorm';

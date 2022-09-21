@@ -1,6 +1,6 @@
 import { NestFactory } from '@nestjs/core';
 import { Logger, ValidationPipe } from '@nestjs/common';
-import { Transport } from '@nestjs/microservices';
+import { MicroserviceOptions, Transport } from '@nestjs/microservices';
 import { NestExpressApplication } from '@nestjs/platform-express';
 import { DocumentBuilder, OpenAPIObject, SwaggerModule } from '@nestjs/swagger';
 import {
@@ -9,11 +9,12 @@ import {
 } from 'nestjs-i18n';
 import { AppModule } from './app.module';
 import { HttpExceptionFilter } from './utils/https.exception.filter';
+import { ConfigService } from '@nestjs/config';
 
 async function bootstrap() {
   const app = await NestFactory.create<NestExpressApplication>(AppModule);
   // --- PREPARE Micro serivices
-  await initRedis(app);
+  await Promise.all([initRedis(app), initRabbitMQ(app)]);
   await app.startAllMicroservices();
 
   // --- PREPARE API
@@ -61,6 +62,27 @@ async function initRedis(app: NestExpressApplication) {
     options: {
       host: 'localhost',
       port: 6379,
+    },
+  });
+}
+
+async function initRabbitMQ(app: NestExpressApplication) {
+  const config: ConfigService<unknown, boolean> = app.get(ConfigService);
+  const rbUser: string = config.get<string>('RABBITMQ_DEFAULT_USER');
+  const rbPass: string = config.get<string>('RABBITMQ_DEFAULT_PASS');
+  const rbHost: string = config.get<string>('RABBITMQ_HOST');
+  const rbPort: string = config.get<string>('RABBITMQ_PORT');
+  const rbQueueName: string = config.get<string>('RABBITMQ_QUEUE_NAME');
+
+  app.connectMicroservice<MicroserviceOptions>({
+    transport: Transport.RMQ,
+    options: {
+      urls: [`amqp://${rbUser}:${rbPass}@${rbHost}:${rbPort}`],
+      queue: rbQueueName,
+      queueOptions: {
+        durable: true,
+        persistent: true,
+      },
     },
   });
 }
