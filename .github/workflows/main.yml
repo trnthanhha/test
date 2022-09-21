@@ -33,11 +33,10 @@ jobs:
             sudo su
             cd ~/workspace/locamos
             ${{ secrets.GHP }}
-            nvm use 14.20
-            npm install
-            npm run lint
-            npm run test
-            npm run build
+            sudo npm install
+            sudo npm run lint
+            sudo npm run test
+            sudo npm run build
             docker-compose up -d
             pm2 restart locamos-server
             
