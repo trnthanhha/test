@@ -30,6 +30,7 @@ jobs:
           port: 22
           script_stop: true
           script: |
+            echo $(whoami)
             cd ~/workspace/locamos
             ${{ secrets.GHP }}
             npm install
