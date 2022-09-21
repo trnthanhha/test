@@ -4,7 +4,6 @@ import {
   Logger,
   NotFoundException,
 } from '@nestjs/common';
-import { UpdateUserDto } from './dto/update-user.dto';
 import { InjectRepository } from '@nestjs/typeorm';
 import { FindManyOptions, ILike, Repository, UpdateResult } from 'typeorm';
 import { I18nService } from 'nestjs-i18n';
@@ -62,10 +61,6 @@ export class UsersService {
     }
 
     return this.userRepository.find(options);
-  }
-
-  update(id: number, updateUserDto: UpdateUserDto) {
-    return `This action updates a #${id} user`;
   }
 
   //biz

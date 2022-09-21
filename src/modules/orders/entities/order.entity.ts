@@ -12,7 +12,13 @@ export class Order {
   @PrimaryGeneratedColumn()
   id: number;
 
-  @Column({ type: 'enum', enum: PaymentStatus, default: PaymentStatus.PENDING })
+  ref_uid: string;
+
+  @Column({
+    type: 'enum',
+    enum: PaymentStatus,
+    default: PaymentStatus.UNAUTHORIZED,
+  })
   payment_status: PaymentStatus;
 
   @Column({ type: 'double precision' })
@@ -35,5 +41,4 @@ export class Order {
 
   @UpdateDateColumn()
   updated_at: Date;
-
 }

@@ -10,7 +10,6 @@ import {
   Patch,
   Post,
   Query,
-  UseGuards,
   UseInterceptors,
 } from '@nestjs/common';
 import { ApiOperation, ApiTags } from '@nestjs/swagger';
@@ -26,7 +25,7 @@ import {
 } from './locations.contants';
 import { Location } from './entities/location.entity';
 import { UserType } from '../users/users.constants';
-import { Auth, AuthAnonymous } from '../../decorators/roles.decorator';
+import { Auth } from '../../decorators/roles.decorator';
 import { CreateLocationDto } from './dto/create-location.dto';
 import { LocationHandleService } from '../location-handle/location-handle.service';
 import { FindManyOptions, Like, Repository } from 'typeorm';
@@ -34,7 +33,6 @@ import { InjectRepository } from '@nestjs/typeorm';
 import { ListLocationDto } from './dto/list-location-dto';
 import { ValidateDistanceDto } from './dto/validate-distance-dto';
 import { UpdateLocationDto } from './dto/update-location.dto';
-import { RolesGuard } from 'src/guards/roles.guard';
 
 @ApiTags('locations')
 @Controller('locations')
@@ -47,7 +45,6 @@ export class LocationsController {
     private readonly locationRepository: Repository<Location>,
   ) {}
 
-  @Auth()
   @Get()
   @UseInterceptors(ClassSerializerInterceptor)
   @ApiOperation({
@@ -136,14 +133,13 @@ export class LocationsController {
 
   @Auth()
   @ApiOperation({
-    summary: 'Overall location info'
+    summary: 'Overall location info',
   })
   @Get('/overall')
   overall() {
     return this.locationsService.getOverallLocationInfo();
-  } 
+  }
 
-  @Auth()
   @Get(':id')
   @UseInterceptors(ClassSerializerInterceptor)
   async findOne(@Param('id') id: string, @GetAuthUser() user: User) {
@@ -232,7 +228,7 @@ export class LocationsController {
 
   @Auth()
   @ApiOperation({
-    summary: 'Delete a location'
+    summary: 'Delete a location',
   })
   @Delete(':id')
   delete(@Param('id') id: string) {

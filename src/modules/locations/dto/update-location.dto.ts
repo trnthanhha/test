@@ -4,6 +4,10 @@ import { LocationStatus } from '../locations.contants';
 import { CreateLocationDto } from './create-location.dto';
 
 export class UpdateLocationDto extends PartialType(CreateLocationDto) {
-    @ApiProperty({ name: 'status', description: 'The status of location', example: 'APPROVE' })
-    status: LocationStatus;
+  @ApiProperty({
+    name: 'status',
+    description: 'The status of location',
+    example: 'APPROVE',
+  })
+  status: LocationStatus;
 }

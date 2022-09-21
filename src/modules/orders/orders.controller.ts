@@ -1,12 +1,16 @@
 import {
-  Controller,
-  Get,
-  Post,
+  BadRequestException,
   Body,
-  Patch,
-  Param,
+  Controller,
   Delete,
+  Get,
+  InternalServerErrorException,
+  NotFoundException,
+  Param,
+  Patch,
+  Post,
   Query,
+  Req,
 } from '@nestjs/common';
 import { OrdersService } from './orders.service';
 import { CreateOrderDto } from './dto/create-order.dto';
@@ -20,15 +24,29 @@ import {
 } from '@nestjs/swagger';
 import { ListOrderDto } from './dto/list-order.dto';
 import { ApiImplicitQuery } from '@nestjs/swagger/dist/decorators/api-implicit-query.decorator';
-import { User } from '../users/entities/user.entity';
 import { Auth } from '../../decorators/roles.decorator';
 import { UserType } from '../users/users.constants';
-import { GetAuthUser } from '../../decorators/user.decorator';
+import { PaymentGatewayFactory } from './vendor_adapters/payment.vendor.adapters';
+import { Order } from './entities/order.entity';
+import { OrderStatusDto } from './dto/order-status-dto';
+import { randomUUID } from 'crypto';
+import { LocationsService } from '../locations/locations.service';
+import { StandardPriceService } from '../standard-price/standard-price.service';
+import { PaymentStatus } from './orders.constants';
+import { InjectRepository } from '@nestjs/typeorm';
+import { Repository, UpdateResult } from 'typeorm';
+import { CheckoutDto } from './dto/checkout-dto';
 
 @ApiTags('orders')
 @Controller('orders')
 export class OrdersController {
-  constructor(private readonly ordersService: OrdersService) {}
+  constructor(
+    private readonly ordersService: OrdersService,
+    private readonly locationsService: LocationsService,
+    private readonly standardPriceService: StandardPriceService,
+    @InjectRepository(Order)
+    private repository: Repository<Order>,
+  ) {}
 
   @Auth()
   @ApiOperation({
@@ -38,12 +56,62 @@ export class OrdersController {
     type: CreateOrderDto,
     status: 201,
   })
-  @Post()
-  create(
+  @Post('/checkout')
+  async create(
     @Body() createOrderDto: CreateOrderDto,
-    @GetAuthUser() currentUser: User,
-  ) {
-    return this.ordersService.create(createOrderDto, currentUser);
+    @Req() req,
+  ): Promise<CheckoutDto> {
+    const loc = await this.locationsService.findOne(createOrderDto.location_id);
+    if (!loc) {
+      return CheckoutDto.fail(new NotFoundException(), 'Location not existed');
+    }
+
+    if (!loc.canPurchased()) {
+      return CheckoutDto.fail(
+        new BadRequestException(),
+        'Location is unable to purchase',
+      );
+    }
+
+    const stdPrice = await this.standardPriceService.getStandardPrice();
+    if (!stdPrice) {
+      return CheckoutDto.fail(
+        new InternalServerErrorException(),
+        'Cant get price to purchase',
+      );
+    }
+
+    const pmGateway = PaymentGatewayFactory.Build();
+    const order = new Order();
+    Object.assign(order, createOrderDto);
+    order.ref_uid = randomUUID();
+    order.price = stdPrice.price;
+    order.payment_status = PaymentStatus.UNAUTHORIZED;
+    order.note = order.note || 'Thanh toan mua LocaMos dia diem';
+
+    const rs = await this.repository.manager.transaction(
+      async (entityManager): Promise<[UpdateResult, Order]> => {
+        return await Promise.all([
+          this.locationsService.checkout(loc.id, loc.version, entityManager),
+          this.ordersService.create(order),
+        ]);
+      },
+    );
+    if (!rs[0].affected || !rs[1].id) {
+      return CheckoutDto.fail(
+        new InternalServerErrorException(),
+        'No rows affected',
+      );
+    }
+
+    const ipAddr =
+      req.headers['x-forwarded-for'] ||
+      req.connection.remoteAddress ||
+      req.socket.remoteAddress ||
+      req.connection.socket.remoteAddress;
+
+    const redirectUrl = pmGateway.generateURLRedirect(order, ipAddr);
+    return CheckoutDto.success(redirectUrl, loc);
   }
 
   @Auth()
@@ -72,7 +140,7 @@ export class OrdersController {
   @ApiImplicitQuery({
     name: 'payment_status',
     description: 'The status of order',
-    example: 'PENDING',
+    example: 'unauthorized',
     required: false,
   })
   findAll(
@@ -81,6 +149,12 @@ export class OrdersController {
     @Query('payment_status') payment_status?: string,
   ) {
     return this.ordersService.findAll({ limit, page, payment_status });
+  }
+
+  @Auth()
+  @Get('/status')
+  validateStatus(@Req() req): OrderStatusDto {
+    return PaymentGatewayFactory.Build().decodeResponse(req);
   }
 
   @Auth()
