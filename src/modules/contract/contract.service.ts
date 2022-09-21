@@ -23,7 +23,13 @@ export class ContractService {
 
     if (!location || !buyer || !owner) throw new Error('Bad Request');
 
-    return this.contract.save(data);
+    await this.contract.save(data);
+
+    return {
+      location,
+      buyer,
+      owner,
+    };
   }
 
   async getContractById(id: number) {
@@ -59,6 +65,12 @@ export class ContractService {
 
     Object.keys(data).forEach((v) => (contract[v] = data[v]));
 
-    return this.contract.save(contract);
+    await this.contract.save(contract);
+
+    return {
+      location,
+      buyer,
+      owner,
+    };
   }
 }
