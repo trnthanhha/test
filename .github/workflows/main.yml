@@ -30,13 +30,12 @@ jobs:
           port: 22
           script_stop: true
           script: |
-            sudo su
             cd ~/workspace/locamos
             ${{ secrets.GHP }}
-            sudo npm install
-            sudo npm run lint
-            sudo npm run test
-            sudo npm run build
+            npm install
+            npm run lint
+            npm run test
+            npm run build
             docker-compose up -d
             pm2 restart locamos-server
             
