@@ -63,11 +63,11 @@ export class OrdersController {
   ): Promise<CheckoutDto> {
     const loc = await this.locationsService.findOne(createOrderDto.location_id);
     if (!loc) {
-      return new CheckoutDto(new NotFoundException(), 'Location not existed');
+      return CheckoutDto.fail(new NotFoundException(), 'Location not existed');
     }
 
     if (!loc.canPurchased()) {
-      return new CheckoutDto(
+      return CheckoutDto.fail(
         new BadRequestException(),
         'Location is unable to purchase',
       );
@@ -75,7 +75,7 @@ export class OrdersController {
 
     const stdPrice = await this.standardPriceService.getStandardPrice();
     if (!stdPrice) {
-      return new CheckoutDto(
+      return CheckoutDto.fail(
         new InternalServerErrorException(),
         'Cant get price to purchase',
       );
@@ -97,7 +97,7 @@ export class OrdersController {
       },
     );
     if (!rs[0].affected || !rs[1].id) {
-      return new CheckoutDto(
+      return CheckoutDto.fail(
         new InternalServerErrorException(),
         'No rows affected',
       );
@@ -108,7 +108,9 @@ export class OrdersController {
       req.connection.remoteAddress ||
       req.socket.remoteAddress ||
       req.connection.socket.remoteAddress;
-    return pmGateway.generateURLRedirect(order, ipAddr);
+
+    const redirectUrl = pmGateway.generateURLRedirect(order, ipAddr);
+    return CheckoutDto.success(redirectUrl);
   }
 
   @Auth()
