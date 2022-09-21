@@ -79,6 +79,7 @@ async function initRabbitMQ(app: NestExpressApplication) {
     options: {
       urls: [`amqp://${rbUser}:${rbPass}@${rbHost}:${rbPort}`],
       queue: rbQueueName,
+      noAck: false,
       queueOptions: {
         durable: true,
         persistent: true,

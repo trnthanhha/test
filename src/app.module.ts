@@ -19,6 +19,7 @@ import { LocationHandleModule } from './modules/location-handle/location-handle.
 import { LocationHandleService } from './modules/location-handle/location-handle.service';
 import { WebhookModule } from './modules/webhook/webhook.module';
 import { StandardPriceModule } from './modules/standard-price/standard-price.module';
+import { ClientsModule, Transport } from '@nestjs/microservices';
 
 @Module({
   imports: [
@@ -43,6 +44,19 @@ import { StandardPriceModule } from './modules/standard-price/standard-price.mod
     DatabaseModule,
     //Microservices modules
     RedisModule,
+    ClientsModule.register([
+      {
+        name: 'WEBHOOK_SERVICE',
+        transport: Transport.RMQ,
+        options: {
+          urls: ['amqp://localhost:5672'],
+          queue: 'books_queue',
+          queueOptions: {
+            durable: false,
+          },
+        },
+      },
+    ]),
     // API Middlewares, auth modules
     AuthModule,
 
@@ -56,7 +70,6 @@ import { StandardPriceModule } from './modules/standard-price/standard-price.mod
 
     //3rd modules
     PaymentModule,
-
     WebhookModule,
   ],
   controllers: [AppController],

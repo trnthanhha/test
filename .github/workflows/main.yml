@@ -31,14 +31,14 @@ jobs:
           script_stop: true
           script: |
             sudo su
-            cd /home/ubuntu/locamos
+            cd ~/workspace/locamos
             ${{ secrets.GHP }}
-            sudo npm install
-            sudo npm run lint
-            sudo npm run test
-            sudo npm run build
-            sudo docker-compose up -d
-            sudo PM2_HOME=/root/.pm2 pm2 restart 0
+            npm install
+            npm run lint
+            npm run test
+            npm run build
+            docker-compose up -d
+            pm2 restart locamos-server
             
       - name: On Failure
         if: failure()
