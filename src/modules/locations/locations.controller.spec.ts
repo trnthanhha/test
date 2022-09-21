@@ -21,6 +21,8 @@ import {
   MoreThanOrEqual,
 } from 'typeorm';
 import { CreateLocationDto } from './dto/create-location.dto';
+import { UsersService } from '../users/users.service';
+import { AcceptLanguageResolver, I18nModule, QueryResolver } from 'nestjs-i18n';
 
 describe('LocationsController', () => {
   it('FindOneLocation: user admin, allow blacklist, status <> approved', async () => {
@@ -154,6 +156,7 @@ describe('LocationsController', () => {
     //sys
     response.user_id = 1;
     response.created_by_id = 1;
+    response.user_full_name = 'System Admin';
 
     const created = await controller.create(model, { id: 1 } as User);
     expect(created).toEqual(response);
@@ -241,6 +244,7 @@ describe('LocationsController', () => {
     //sys
     response.user_id = 1;
     response.created_by_id = 1;
+    response.user_full_name = 'System Admin';
 
     const created = await controller.create(model, { id: 1 } as User);
     expect(created).toEqual(response);
@@ -255,13 +259,39 @@ async function getControllerWithMockUserBlacklist(
     locationHandleMockService = await getTestingService();
   }
   const module: TestingModule = await Test.createTestingModule({
+    imports: [
+      I18nModule.forRoot({
+        fallbackLanguage: 'en',
+        loaderOptions: {
+          path: 'src/i18n',
+          watch: true,
+        },
+        resolvers: [
+          { use: QueryResolver, options: ['lang'] },
+          AcceptLanguageResolver,
+        ],
+      }),
+    ],
     controllers: [LocationsController],
     providers: [
+      UsersService,
       LocationsService,
       LocationHandleService,
       {
         provide: getRepositoryToken(Location),
         useFactory: repoMock,
+      },
+      {
+        provide: getRepositoryToken(User),
+        useFactory: jest.fn(() => ({
+          findOneBy: () => {
+            const user = new User();
+            user.id = 1;
+            user.first_name = 'Admin';
+            user.last_name = 'System';
+            return user;
+          },
+        })),
       },
     ],
   })

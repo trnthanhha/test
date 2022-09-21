@@ -5,6 +5,8 @@ import { Location } from './entities/location.entity';
 import { FindOptionsWhere, LessThanOrEqual, MoreThanOrEqual } from 'typeorm';
 import { LocationStatus } from './locations.contants';
 import { BadRequestException } from '@nestjs/common';
+import { LocationHandleService } from '../location-handle/location-handle.service';
+import { LocationHandle } from '../location-handle/entities/location-handle.entity';
 
 describe('LocationsService', () => {
   it('distance greater than 200m, Vincom Tran Duy Hung', async () => {
@@ -147,8 +149,13 @@ async function getService(mockRepo) {
   const module: TestingModule = await Test.createTestingModule({
     providers: [
       LocationsService,
+      LocationHandleService,
       {
         provide: getRepositoryToken(Location),
+        useFactory: mockRepo,
+      },
+      {
+        provide: getRepositoryToken(LocationHandle),
         useFactory: mockRepo,
       },
     ],

@@ -17,12 +17,7 @@ import { ApiImplicitQuery } from '@nestjs/swagger/dist/decorators/api-implicit-q
 import { GetAuthUser } from '../../decorators/user.decorator';
 import { User } from '../users/entities/user.entity';
 import { LocationsService } from './locations.service';
-import {
-  DefaultSafeZoneRadius,
-  LocationNFTStatus,
-  LocationStatus,
-  LocationType,
-} from './locations.contants';
+import { LocationStatus } from './locations.contants';
 import { Location } from './entities/location.entity';
 import { UserType } from '../users/users.constants';
 import { Auth } from '../../decorators/roles.decorator';
