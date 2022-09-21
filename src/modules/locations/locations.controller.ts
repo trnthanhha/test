@@ -28,11 +28,11 @@ import { UserType } from '../users/users.constants';
 import { Auth } from '../../decorators/roles.decorator';
 import { CreateLocationDto } from './dto/create-location.dto';
 import { LocationHandleService } from '../location-handle/location-handle.service';
-import { FindManyOptions, Like, Repository } from 'typeorm';
-import { InjectRepository } from '@nestjs/typeorm';
+import { FindManyOptions, Like } from 'typeorm';
 import { ListLocationDto } from './dto/list-location-dto';
 import { ValidateDistanceDto } from './dto/validate-distance-dto';
 import { UpdateLocationDto } from './dto/update-location.dto';
+import { UsersService } from '../users/users.service';
 
 @ApiTags('locations')
 @Controller('locations')
@@ -41,8 +41,7 @@ export class LocationsController {
   constructor(
     private readonly locationsService: LocationsService,
     private readonly locationHandleService: LocationHandleService,
-    @InjectRepository(Location)
-    private readonly locationRepository: Repository<Location>,
+    private readonly usersService: UsersService,
   ) {}
 
   @Get()
@@ -169,41 +168,9 @@ export class LocationsController {
     @Body() createLocationDto: CreateLocationDto,
     @GetAuthUser() user: User,
   ): Promise<Location> {
-    const newLocation = new Location();
-    Object.assign(newLocation, createLocationDto);
-    const validDistance = await this.locationsService.isValidDistance(
-      newLocation,
-    );
-    newLocation.block_radius = DefaultSafeZoneRadius;
-    newLocation.calculateBounds();
+    const userDetail = await this.usersService.findByID(user.id);
 
-    //biz
-    newLocation.nft_status = LocationNFTStatus.PENDING;
-    newLocation.type = LocationType.CUSTOMER;
-    newLocation.country = 'VN';
-    if (validDistance) {
-      newLocation.status = LocationStatus.APPROVED;
-      newLocation.approved_by_id = -1; // System
-      newLocation.approved_at = createLocationDto.requestedAt || new Date();
-    } else {
-      newLocation.status = LocationStatus.PENDING;
-    }
-    //sys
-    newLocation.user_id = user.id;
-    newLocation.created_by_id = user.id;
-
-    const dbManager = this.locationRepository.manager;
-    return await dbManager.transaction(
-      async (entityManager): Promise<Location> => {
-        newLocation.handle = await this.locationHandleService
-          .createHandle(newLocation.name, entityManager)
-          .catch((ex) => {
-            this.logger.error('exception create handle', ex.message);
-            throw ex;
-          });
-        return this.locationsService.create(newLocation, dbManager);
-      },
-    );
+    return this.locationsService.create(createLocationDto, userDetail);
   }
 
   @ApiOperation({

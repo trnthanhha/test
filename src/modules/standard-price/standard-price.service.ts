@@ -59,34 +59,14 @@ export class StandardPriceService {
 
     if (cacheStandardPrice) {
       try {
-        return JSON.parse(cacheStandardPrice);
-      } catch (error) {
-        const standardPrice = await this.repo.findOne({
-          where: { id: Not(IsNull()) },
-        });
-
-        this.redis.set(
-          this.standardPriceCacheKey,
-          JSON.stringify(standardPrice),
-        );
-
-        return standardPrice;
-      }
+        const stdPrice = JSON.parse(cacheStandardPrice);
+        if (stdPrice) {
+          return stdPrice;
+        }
+      } catch (_) {}
     }
-
     const standardPrice = await this.repo.findOne({
       where: { id: Not(IsNull()) },
-      relations: ['user'],
-      select: {
-        id: true,
-        price: true,
-        user: {
-          type: true,
-          last_name: true,
-          first_name: true,
-        },
-        created_at: true,
-      },
     });
 
     this.redis.set(this.standardPriceCacheKey, JSON.stringify(standardPrice));

@@ -9,17 +9,29 @@ import { Location } from '../locations/entities/location.entity';
 import { StandardPrice } from '../standard-price/entities/standard-price.entity';
 import { StandardPriceHistory } from '../standard-price/entities/standard-price-history.entity';
 import { RedisModule } from '../redis/redis.module';
+import { LocationHandle } from '../location-handle/entities/location-handle.entity';
+import { LocationHandleService } from '../location-handle/location-handle.service';
+import { UsersService } from '../users/users.service';
+import { User } from '../users/entities/user.entity';
 
 @Module({
   imports: [
     RedisModule,
     TypeOrmModule.forFeature([Order]),
+    TypeOrmModule.forFeature([User]),
     TypeOrmModule.forFeature([Location]),
+    TypeOrmModule.forFeature([LocationHandle]),
     TypeOrmModule.forFeature([StandardPrice]),
     TypeOrmModule.forFeature([StandardPriceHistory]),
   ],
   controllers: [OrdersController],
-  providers: [OrdersService, LocationsService, StandardPriceService],
+  providers: [
+    OrdersService,
+    UsersService,
+    LocationsService,
+    LocationHandleService,
+    StandardPriceService,
+  ],
   exports: [OrdersService],
 })
 export class OrdersModule {}
