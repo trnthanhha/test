@@ -33,6 +33,7 @@ jobs:
             sudo su
             cd ~/workspace/locamos
             ${{ secrets.GHP }}
+            nvm use 14.20
             npm install
             npm run lint
             npm run test
