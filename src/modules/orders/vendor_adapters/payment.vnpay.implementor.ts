@@ -8,18 +8,20 @@ import { OrderStatusDto } from '../dto/order-status-dto';
 const config = new ConfigService();
 
 type VNPayConfig = {
+  APP_DOMAIN: string;
   VNP_TmnCode: string;
   VNP_HashSecret: string;
   VNP_Url: string;
-  VNP_ReturnUrl: string;
+  VNP_ReturnRoute: string;
 };
 
 export class PaymentVNPayImplementor implements PaymentVendorAdapters {
   private cf: VNPayConfig;
   constructor() {
     this.cf = {
+      APP_DOMAIN: config.get<string>('APP_DOMAIN'),
       VNP_HashSecret: config.get<string>('VNP_HashSecret'),
-      VNP_ReturnUrl: config.get<string>('VNP_ReturnUrl'),
+      VNP_ReturnRoute: config.get<string>('VNP_ReturnRoute'),
       VNP_TmnCode: config.get<string>('VNP_TmnCode'),
       VNP_Url: config.get<string>('VNP_Url'),
     };
@@ -54,7 +56,9 @@ export class PaymentVNPayImplementor implements PaymentVendorAdapters {
     vnp_Params['vnp_OrderInfo'] = orderInfo;
     vnp_Params['vnp_OrderType'] = orderType;
     vnp_Params['vnp_Amount'] = amount * 100;
-    vnp_Params['vnp_ReturnUrl'] = this.cf.VNP_ReturnUrl;
+    vnp_Params[
+      'vnp_ReturnUrl'
+    ] = `${this.cf.APP_DOMAIN}${this.cf.VNP_ReturnRoute}`;
     vnp_Params['vnp_IpAddr'] = ipAddr;
     vnp_Params['vnp_CreateDate'] = createDate;
 

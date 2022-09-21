@@ -87,6 +87,7 @@ export class OrdersController {
     order.ref_uid = randomUUID();
     order.price = stdPrice.price;
     order.payment_status = PaymentStatus.UNAUTHORIZED;
+    order.note = order.note || 'Thanh toan mua LocaMos dia diem';
 
     const rs = await this.repository.manager.transaction(
       async (entityManager): Promise<[UpdateResult, Order]> => {
@@ -110,7 +111,7 @@ export class OrdersController {
       req.connection.socket.remoteAddress;
 
     const redirectUrl = pmGateway.generateURLRedirect(order, ipAddr);
-    return CheckoutDto.success(redirectUrl);
+    return CheckoutDto.success(redirectUrl, loc);
   }
 
   @Auth()

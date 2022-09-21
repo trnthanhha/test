@@ -1,8 +1,14 @@
+import { Location } from '../../locations/entities/location.entity';
+
 export class CheckoutDto {
-  public static success = (redirect_url: string): CheckoutDto => {
+  public static success = (
+    redirect_url: string,
+    loc: Location,
+  ): CheckoutDto => {
     const rs = new CheckoutDto();
     rs.redirect_url = redirect_url;
     rs.success = true;
+    rs.location_name = loc.name;
 
     return rs;
   };
@@ -17,7 +23,8 @@ export class CheckoutDto {
   };
 
   success: boolean;
-  error: any;
-  message: string;
-  redirect_url: string;
+  error?: any;
+  message?: string;
+  redirect_url?: string;
+  location_name?: string;
 }
