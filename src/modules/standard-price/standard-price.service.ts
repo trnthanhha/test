@@ -38,12 +38,16 @@ export class StandardPriceService {
 
     if (standardPrice) {
       standardPrice.price = price;
-      newStandardPrice = await this.repo.save(standardPrice);
+      newStandardPrice = await this.repo.save({
+        ...standardPrice,
+        user: currentUser,
+      });
 
       await this.redis.del(this.standardPriceCacheKey);
     } else {
       newStandardPrice = await this.repo.save({
         price: price,
+        user: currentUser,
       } as StandardPrice);
     }
 
@@ -54,33 +58,28 @@ export class StandardPriceService {
     const cacheStandardPrice = await this.redis.get(this.standardPriceCacheKey);
 
     if (cacheStandardPrice) {
-      return JSON.parse(cacheStandardPrice);
+      try {
+        return JSON.parse(cacheStandardPrice);
+      } catch (error) {
+        const standardPrice = await this.repo.findOne({
+          where: { id: Not(IsNull()) },
+        });
+
+        this.redis.set(
+          this.standardPriceCacheKey,
+          JSON.stringify(standardPrice),
+        );
+
+        return standardPrice;
+      }
     }
 
     const standardPrice = await this.repo.findOne({
       where: { id: Not(IsNull()) },
-      order: { created_at: 'DESC' },
-    });
-
-    this.redis.set(this.standardPriceCacheKey, JSON.stringify(standardPrice));
-    return standardPrice;
-  }
-
-  getStandardPriceHistory(query: {
-    page: string;
-    limit: string;
-  }): Promise<StandardPriceHistory[]> {
-    const page = +query.page || 1;
-    const limit = +query.limit || 10;
-
-    return this.standardPriceHistory.find({
-      skip: (page - 1) * limit,
-      take: limit,
       relations: ['user'],
       select: {
         id: true,
-        price_after: true,
-        price_before: true,
+        price: true,
         user: {
           type: true,
           last_name: true,
@@ -88,7 +87,43 @@ export class StandardPriceService {
         },
         created_at: true,
       },
-      order: { created_at: 'DESC' },
     });
+
+    this.redis.set(this.standardPriceCacheKey, JSON.stringify(standardPrice));
+
+    return standardPrice;
+  }
+
+  async getStandardPriceHistory(query: { page: string; limit: string }) {
+    const page = +query.page || 1;
+    const limit = +query.limit || 10;
+
+    const [standardPriceHistories, total] =
+      await this.standardPriceHistory.findAndCount({
+        skip: (page - 1) * limit,
+        take: limit,
+        relations: ['user'],
+        select: {
+          id: true,
+          price_after: true,
+          price_before: true,
+          user: {
+            type: true,
+            last_name: true,
+            first_name: true,
+          },
+          created_at: true,
+        },
+        order: { created_at: 'DESC' },
+      });
+
+    return {
+      data: standardPriceHistories,
+      meta: {
+        page_size: limit,
+        total_page: Math.ceil(total / limit),
+        total_records: total,
+      },
+    };
   }
 }
