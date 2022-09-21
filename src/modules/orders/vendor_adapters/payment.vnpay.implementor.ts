@@ -30,15 +30,7 @@ export class PaymentVNPayImplementor implements PaymentVendorAdapters {
   generateURLRedirect(order: Order, ipAddr: string): string {
     let vnpUrl = this.cf.VNP_Url;
 
-    const localTime = new Date();
-    const date = Date.UTC(
-      localTime.getFullYear(),
-      localTime.getMonth(),
-      localTime.getDate(),
-      localTime.getHours(),
-      localTime.getMinutes(),
-      localTime.getSeconds(),
-    );
+    const date = forceToGMT7DateTime(new Date());
     const createDate = getDateTimeFormat(new Date(date));
     const amount = order.price;
 
@@ -154,4 +146,21 @@ export function getDateTimeFormat(date: Date): string {
   const timeParts = isoParts[1].split('.')[0].split(':');
 
   return dateParts.join('') + timeParts.join('');
+}
+
+export function forceToGMT7DateTime(localTime: Date): number {
+  const offsetZone = localTime.getTimezoneOffset() / 60;
+  let diff = 0;
+  if (offsetZone !== -7) {
+    diff = 1000 * 60 * 60 * (offsetZone + 7);
+  }
+  localTime = new Date(localTime.getTime() - diff);
+  return Date.UTC(
+    localTime.getFullYear(),
+    localTime.getMonth(),
+    localTime.getDate(),
+    localTime.getHours(),
+    localTime.getMinutes(),
+    localTime.getSeconds(),
+  );
 }
