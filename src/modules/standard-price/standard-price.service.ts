@@ -1,4 +1,9 @@
-import { Inject, Injectable } from '@nestjs/common';
+import {
+  ClassSerializerInterceptor,
+  Inject,
+  Injectable,
+  UseInterceptors,
+} from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import Redis from 'ioredis';
 import { IsNull, Not, Repository } from 'typeorm';
@@ -47,7 +52,6 @@ export class StandardPriceService {
     } else {
       newStandardPrice = await this.repo.save({
         price: price,
-        user: currentUser,
       } as StandardPrice);
     }
 
@@ -76,17 +80,6 @@ export class StandardPriceService {
 
     const standardPrice = await this.repo.findOne({
       where: { id: Not(IsNull()) },
-      relations: ['user'],
-      select: {
-        id: true,
-        price: true,
-        user: {
-          type: true,
-          last_name: true,
-          first_name: true,
-        },
-        created_at: true,
-      },
     });
 
     this.redis.set(this.standardPriceCacheKey, JSON.stringify(standardPrice));
@@ -103,17 +96,6 @@ export class StandardPriceService {
         skip: (page - 1) * limit,
         take: limit,
         relations: ['user'],
-        select: {
-          id: true,
-          price_after: true,
-          price_before: true,
-          user: {
-            type: true,
-            last_name: true,
-            first_name: true,
-          },
-          created_at: true,
-        },
         order: { created_at: 'DESC' },
       });
 

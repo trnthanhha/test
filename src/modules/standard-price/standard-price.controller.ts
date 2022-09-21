@@ -1,4 +1,12 @@
-import { Body, Controller, Get, Patch, Query } from '@nestjs/common';
+import {
+  Body,
+  ClassSerializerInterceptor,
+  Controller,
+  Get,
+  Patch,
+  Query,
+  UseInterceptors,
+} from '@nestjs/common';
 import { ApiOkResponse, ApiOperation, ApiTags } from '@nestjs/swagger';
 import { ApiImplicitQuery } from '@nestjs/swagger/dist/decorators/api-implicit-query.decorator';
 import { Auth } from 'src/decorators/roles.decorator';
@@ -9,6 +17,7 @@ import { StandardPriceService } from './standard-price.service';
 
 @ApiTags('standard-price')
 @Controller('standard-price')
+@UseInterceptors(ClassSerializerInterceptor)
 export class StandardPriceController {
   constructor(private readonly standPriceSerivce: StandardPriceService) {}
 

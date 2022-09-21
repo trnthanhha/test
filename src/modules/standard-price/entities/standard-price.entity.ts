@@ -1,10 +1,7 @@
-import { User } from '../../users/entities/user.entity';
 import {
   Column,
   CreateDateColumn,
   Entity,
-  JoinColumn,
-  OneToOne,
   PrimaryGeneratedColumn,
   UpdateDateColumn,
 } from 'typeorm';
@@ -22,8 +19,4 @@ export class StandardPrice {
 
   @UpdateDateColumn()
   updated_at: Date;
-
-  @OneToOne(() => User, (user) => user.id)
-  @JoinColumn({ name: 'id' })
-  user: User;
 }
