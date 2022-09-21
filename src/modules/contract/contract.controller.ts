@@ -2,6 +2,7 @@ import {
   Body,
   ClassSerializerInterceptor,
   Controller,
+  Delete,
   Get,
   Param,
   Patch,
@@ -46,8 +47,18 @@ export class ContractController {
     type: Contract,
   })
   @Auth()
-  @Patch('/:id')
+  @Patch(':id')
   update(@Param('id') id: string, @Body() data: UpdateContractDto) {
     return this.contractService.updateContract(+id, data);
+  }
+
+  @ApiOperation({ summary: 'delete a contract info' })
+  @ApiOkResponse({
+    type: Contract,
+  })
+  @Auth()
+  @Delete(':id')
+  delete(@Param('id') id: string) {
+    return this.contractService.deleteContract(+id);
   }
 }

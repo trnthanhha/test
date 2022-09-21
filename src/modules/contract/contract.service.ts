@@ -73,4 +73,8 @@ export class ContractService {
       owner,
     };
   }
+
+  async deleteContract(id: number) {
+    return this.contract.delete(id);
+  }
 }
