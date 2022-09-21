@@ -1,18 +1,10 @@
 import { Body, Controller, Get, Patch, Query } from '@nestjs/common';
-import {
-  ApiOkResponse,
-  ApiOperation,
-  ApiResponse,
-  ApiTags,
-} from '@nestjs/swagger';
+import { ApiOkResponse, ApiOperation, ApiTags } from '@nestjs/swagger';
 import { ApiImplicitQuery } from '@nestjs/swagger/dist/decorators/api-implicit-query.decorator';
-import { query } from 'express';
 import { Auth } from 'src/decorators/roles.decorator';
 import { GetAuthUser } from 'src/decorators/user.decorator';
 import { User } from '../users/entities/user.entity';
-import { UserType } from '../users/users.constants';
 import { UpdateStandardPriceDto } from './dto/update-standard-price.dto';
-import { StandardPrice } from './entities/standard-price.entity';
 import { StandardPriceService } from './standard-price.service';
 
 @ApiTags('standard-price')

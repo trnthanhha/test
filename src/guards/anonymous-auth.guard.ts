@@ -12,13 +12,13 @@ export class AnonymousAuthGuard extends AuthGuard('jwt') {
   /**
    * Handle error code if canActivate return false
    *
-   * @param {*} errror null
+   * @param {*} error null
    * @param {*} user
-   * @param {*} info | TokenExpiredError | JsonWebTokenError
+   // * @param {*} info | TokenExpiredError | JsonWebTokenError
    * @returns
    * @memberof RolesGuard
    */
-  handleRequest(error, user, info) {
+  handleRequest(error, user) {
     // You can throw an exception based on either "info" or "error" arguments
 
     return user;

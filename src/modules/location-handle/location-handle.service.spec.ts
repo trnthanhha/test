@@ -35,7 +35,9 @@ describe('LocationHandleService', () => {
     const repoMock = jest.fn(() => ({
       manager: {
         findOneBy: () => undefined,
-        insert: () => {},
+        insert: () => {
+          return {};
+        },
       } as unknown as EntityManager,
     }));
 

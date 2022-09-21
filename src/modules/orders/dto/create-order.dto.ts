@@ -1,4 +1,4 @@
-import { IsNumber, IsOptional, Matches, MaxLength, Min } from 'class-validator';
+import { IsNumber, Min } from 'class-validator';
 import { i18nValidationMessage } from 'nestjs-i18n';
 import { ApiProperty } from '@nestjs/swagger';
 

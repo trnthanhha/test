@@ -18,11 +18,11 @@ export class JwtAuthGuard extends AuthGuard('jwt') {
    *
    * @param {*} error null
    * @param {*} user
-   * @param {*} info | TokenExpiredError | JsonWebTokenError
+   // * @param {*} info | TokenExpiredError | JsonWebTokenError
    * @returns
    * @memberof RolesGuard
    */
-  handleRequest(error, user, info) {
+  handleRequest(error, user) {
     // You can throw an exception based on either "info" or "error" arguments
     if (error || !user) {
       throw error || new UnauthorizedException();

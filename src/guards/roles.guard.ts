@@ -1,4 +1,3 @@
-import { User } from 'src/modules/users/entities/user.entity';
 import {
   CanActivate,
   ExecutionContext,
@@ -6,7 +5,6 @@ import {
   Injectable,
 } from '@nestjs/common';
 import { UserType } from '../modules/users/users.constants';
-import { JwtService } from '@nestjs/jwt';
 import { decodeUserFromHeader } from '../helper/authorization';
 import { Reflector } from '@nestjs/core';
 

@@ -121,7 +121,7 @@ export class AppModule implements OnModuleInit {
 
       this.locationsService
         .createMany(records)
-        .then((rs) => {
+        .then(() => {
           console.log('create many location succeeded');
         })
         .catch((ex) => {
