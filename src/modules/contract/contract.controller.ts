@@ -1,11 +1,12 @@
 import {
   Body,
+  ClassSerializerInterceptor,
   Controller,
   Get,
   Param,
   Patch,
   Post,
-  Query,
+  UseInterceptors,
 } from '@nestjs/common';
 import { ApiOkResponse, ApiOperation, ApiTags } from '@nestjs/swagger';
 import { Auth } from 'src/decorators/roles.decorator';
@@ -16,6 +17,7 @@ import { Contract } from './entities/contract.entity';
 
 @ApiTags('contract')
 @Controller('contract')
+@UseInterceptors(ClassSerializerInterceptor)
 export class ContractController {
   constructor(private readonly contractService: ContractService) {}
 
@@ -24,8 +26,8 @@ export class ContractController {
     type: Contract,
   })
   @Auth()
-  @Get()
-  getContract(@Query('id') id: string) {
+  @Get(':id')
+  getContract(@Param('id') id: string) {
     return this.contractService.getContractById(+id);
   }
 
