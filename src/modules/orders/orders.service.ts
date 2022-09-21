@@ -1,10 +1,8 @@
 import {
   BadRequestException,
-  Body,
   Injectable,
   InternalServerErrorException,
   Logger,
-  Req,
 } from '@nestjs/common';
 import { UpdateOrderDto } from './dto/update-order.dto';
 import { InjectRepository } from '@nestjs/typeorm';
