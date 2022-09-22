@@ -65,6 +65,14 @@ export class OrdersService {
     });
   }
 
+  async findOneByRefID(ref_uid: string): Promise<Order> {
+    return await this.orderRepository.findOne({
+      where: {
+        ref_uid,
+      },
+    });
+  }
+
   async update(id: number, updateOrderDto: UpdateOrderDto) {
     const order = await this.orderRepository.findOne({
       where: {

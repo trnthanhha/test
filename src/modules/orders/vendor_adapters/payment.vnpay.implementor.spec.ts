@@ -1,7 +1,4 @@
-import {
-  forceToGMT7DateTime,
-  getDateTimeFormat,
-} from './payment.vnpay.implementor';
+import { getDateTimeFormat } from './payment.vnpay.implementor';
 
 describe('VNPay implementor', () => {
   it('parse Date to format yyyymmddHHmmss', () => {

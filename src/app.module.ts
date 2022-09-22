@@ -21,6 +21,8 @@ import { ContractModule } from './modules/contract/contract.module';
 import { WebhookModule } from './modules/webhook/webhook.module';
 import { StandardPriceModule } from './modules/standard-price/standard-price.module';
 import { ClientsModule, Transport } from '@nestjs/microservices';
+import { PackageModule } from './modules/package/package.module';
+import { UserPackageModule } from './modules/user_package/user_package.module';
 
 @Module({
   imports: [
@@ -73,6 +75,8 @@ import { ClientsModule, Transport } from '@nestjs/microservices';
     //3rd modules
     PaymentModule,
     WebhookModule,
+    PackageModule,
+    UserPackageModule,
   ],
   controllers: [AppController],
   providers: [AppService],
