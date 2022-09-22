@@ -41,10 +41,10 @@ export class Order {
   @Column()
   note: string;
 
-  @Column({ default: 0, nullable: false })
+  @Column({ nullable: true })
   location_id: number;
 
-  @Column({ default: 0, nullable: false })
+  @Column({ nullable: true })
   user_package_id: number;
 
   @Column({ default: 1 })
