@@ -1,12 +1,21 @@
-import { Controller, Get, Req } from '@nestjs/common';
-import { WebhookService } from './webhook.service';
+import {
+  Controller,
+  UseInterceptors,
+  ClassSerializerInterceptor,
+  Inject,
+  Req,
+  Get,
+} from '@nestjs/common';
+import { ClientProxy } from '@nestjs/microservices';
+import { RabbitMQServices } from '../../services/message-broker/webhook.types';
 
 @Controller('webhook')
-export class WebhookController {
-  constructor(private readonly webhookService: WebhookService) {}
+@UseInterceptors(ClassSerializerInterceptor)
+export default class WebhookController {
+  constructor(@Inject(RabbitMQServices.VNPay) private publisher: ClientProxy) {}
 
-  @Get('/vnpay')
-  webhookVNPay(@Req() req): void {
-    console.log('whoami? ', req.query);
+  @Get('vnpay')
+  async storeVNPayMessage(@Req() req) {
+    return this.publisher.emit('vnpay', req.query);
   }
 }

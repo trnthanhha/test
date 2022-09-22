@@ -209,7 +209,7 @@ export class LocationsService {
     //1
     const dateNMonth = row[1].split('/');
     const paid_at = new Date(
-      new Date().setMonth(+dateNMonth[0] - 1, +dateNMonth[1]),
+      new Date().setMonth(+dateNMonth[1] - 1, +dateNMonth[0]),
     );
     const loc = new Location();
     return Object.assign(loc, {

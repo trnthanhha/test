@@ -18,11 +18,12 @@ import { RedisModule } from './modules/redis/redis.module';
 import { LocationHandleModule } from './modules/location-handle/location-handle.module';
 import { LocationHandleService } from './modules/location-handle/location-handle.service';
 import { ContractModule } from './modules/contract/contract.module';
-import { WebhookModule } from './modules/webhook/webhook.module';
 import { StandardPriceModule } from './modules/standard-price/standard-price.module';
 import { ClientsModule, Transport } from '@nestjs/microservices';
 import { PackageModule } from './modules/package/package.module';
 import { UserPackageModule } from './modules/user_package/user_package.module';
+import { WebhookModule } from './modules/webhook/webhook.module';
+import { ConsumersModule } from './modules/consumers/consumers.module';
 
 @Module({
   imports: [
@@ -60,6 +61,8 @@ import { UserPackageModule } from './modules/user_package/user_package.module';
         },
       },
     ]),
+    ConsumersModule,
+    WebhookModule,
     // API Middlewares, auth modules
     AuthModule,
 
@@ -76,7 +79,6 @@ import { UserPackageModule } from './modules/user_package/user_package.module';
 
     //3rd modules
     PaymentModule,
-    WebhookModule,
   ],
   controllers: [AppController],
   providers: [AppService],
