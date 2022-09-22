@@ -71,12 +71,12 @@ import { UserPackageModule } from './modules/user_package/user_package.module';
     BillsModule,
     ContractModule,
     StandardPriceModule,
+    PackageModule,
+    UserPackageModule,
 
     //3rd modules
     PaymentModule,
     WebhookModule,
-    PackageModule,
-    UserPackageModule,
   ],
   controllers: [AppController],
   providers: [AppService],

@@ -3,6 +3,7 @@ import {
   CreateDateColumn,
   Entity,
   JoinColumn,
+  OneToOne,
   PrimaryGeneratedColumn,
   Unique,
   UpdateDateColumn,
@@ -58,9 +59,11 @@ export class Order {
   @UpdateDateColumn()
   updated_at: Date;
 
-  @JoinColumn({ name: 'location_id' })
+  @OneToOne(() => Location)
+  @JoinColumn({ name: 'location_id', referencedColumnName: 'id' })
   location?: Location;
 
-  @JoinColumn({ name: 'package_id' })
+  @OneToOne(() => UserPackage)
+  @JoinColumn({ name: 'user_package_id', referencedColumnName: 'id' })
   user_package?: UserPackage;
 }

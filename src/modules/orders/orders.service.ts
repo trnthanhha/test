@@ -18,6 +18,7 @@ import { LocationsService } from '../locations/locations.service';
 import { StandardPriceService } from '../standard-price/standard-price.service';
 import { User } from '../users/entities/user.entity';
 import { LocationStatus } from '../locations/locations.contants';
+import { Location } from '../locations/entities/location.entity';
 
 @Injectable()
 export class OrdersService {
@@ -69,6 +70,10 @@ export class OrdersService {
     return await this.orderRepository.findOne({
       where: {
         ref_uid,
+      },
+      relations: {
+        location: true,
+        user_package: true,
       },
     });
   }
