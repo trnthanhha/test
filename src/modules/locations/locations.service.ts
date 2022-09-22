@@ -102,8 +102,10 @@ export class LocationsService {
     return resp;
   }
 
-  async findOne(id: number) {
-    return this.locationRepository.findOneBy({ id });
+  async findOne(id: number, entityManager?: EntityManager) {
+    const repo =
+      entityManager?.getRepository(Location) || this.locationRepository;
+    return repo.findOneBy({ id });
   }
 
   async checkout(

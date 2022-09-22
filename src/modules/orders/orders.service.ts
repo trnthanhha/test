@@ -99,9 +99,8 @@ export class OrdersService {
   }
 
   async create(order: Order, dbManager?: EntityManager) {
-    return (dbManager?.getRepository(Order) || this.orderRepository).save(
-      order,
-    );
+    const repo = dbManager?.getRepository(Order) || this.orderRepository;
+    return repo.save(order);
   }
 
   async remove(id: number) {
@@ -155,7 +154,7 @@ export class OrdersService {
         }
 
         order.location_id = loc.id;
-        const insertedOrder = await this.create(order);
+        const insertedOrder = await this.create(order, entityManager);
         const result = await this.locationsService.checkout(
           entityManager,
           loc.id,
