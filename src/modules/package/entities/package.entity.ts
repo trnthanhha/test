@@ -17,11 +17,14 @@ export class Package {
   @Column()
   quantity: number;
 
-  @Column({ type: 'double precision' })
+  @Column({ type: 'double precision', nullable: true })
   promotion: number;
 
-  @Column({ type: 'double precision' })
+  @Column({ type: 'double precision', nullable: true })
   discount: number;
+
+  @Column({ default: 1 })
+  version: number;
 
   @CreateDateColumn()
   created_at: Date;

@@ -88,6 +88,7 @@ export class PaymentVNPayImplementor implements PaymentVendorAdapters {
     }
 
     const dto = new OrderStatusDto();
+    dto.ref_uid = vnp_Params['vnp_TxnRef'];
     dto.status_code = vnp_Params['vnp_ResponseCode'];
     switch (vnp_Params['vnp_ResponseCode']) {
       case '00':

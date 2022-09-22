@@ -95,8 +95,11 @@ export class OrdersController {
 
   @Auth()
   @Get('/status')
-  validateStatus(@Req() req): OrderStatusDto {
-    return PaymentGatewayFactory.Build().decodeResponse(req);
+  async validateStatus(@Req() req): Promise<OrderStatusDto> {
+    const response = PaymentGatewayFactory.Build().decodeResponse(req);
+
+    const order = await this.ordersService.findOneByRefID(response.ref_uid);
+    return Object.assign(response, order);
   }
 
   @Auth()

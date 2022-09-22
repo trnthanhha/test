@@ -3,15 +3,12 @@ import {
   CreateDateColumn,
   Entity,
   JoinColumn,
-  ManyToOne,
-  OneToOne,
   PrimaryGeneratedColumn,
   Unique,
   UpdateDateColumn,
 } from 'typeorm';
 import { PaymentStatus, PaymentType } from '../orders.constants';
 import { Location } from '../../locations/entities/location.entity';
-import { User } from '../../users/entities/user.entity';
 import { UserPackage } from '../../user_package/entities/user_package.entity';
 
 @Unique('location_package', ['location_id', 'user_package_id'])
@@ -20,6 +17,7 @@ export class Order {
   @PrimaryGeneratedColumn()
   id: number;
 
+  @Column({ unique: true })
   ref_uid: string;
 
   @Column({

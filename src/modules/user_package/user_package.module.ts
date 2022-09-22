@@ -4,6 +4,6 @@ import { UserPackageController } from './user_package.controller';
 
 @Module({
   controllers: [UserPackageController],
-  providers: [UserPackageService]
+  providers: [UserPackageService],
 })
 export class UserPackageModule {}
