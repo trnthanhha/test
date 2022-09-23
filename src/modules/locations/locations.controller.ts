@@ -23,7 +23,7 @@ import { UserType } from '../users/users.constants';
 import { Auth } from '../../decorators/roles.decorator';
 import { CreateLocationDto } from './dto/create-location.dto';
 import { LocationHandleService } from '../location-handle/location-handle.service';
-import { FindManyOptions, Like } from 'typeorm';
+import { FindManyOptions, Like, Raw } from 'typeorm';
 import { ListLocationDto } from './dto/list-location-dto';
 import { ValidateDistanceDto } from './dto/validate-distance-dto';
 import { UpdateLocationDto } from './dto/update-location.dto';
@@ -110,6 +110,10 @@ export class LocationsController {
     if (!whereCondition.status) {
       whereCondition.status = LocationStatus.APPROVED;
     }
+
+    whereCondition.purchase_status = Raw(
+      `purchase_status IS NULL OR type = 'admin'`, // not pending purchase custom location, or admin created location
+    );
 
     if (blacklist && user?.type === UserType.ADMIN) {
       whereCondition.is_blacklist = true;
