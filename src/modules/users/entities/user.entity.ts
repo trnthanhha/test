@@ -21,7 +21,7 @@ export class User {
   @Column()
   first_name: string;
 
-  @Column()
+  @Column({ nullable: true })
   last_name: string;
 
   @Exclude()
@@ -43,6 +43,10 @@ export class User {
   @Exclude()
   @Column({ nullable: true })
   refresh_token: string;
+
+  @Exclude()
+  @Column({ nullable: true })
+  locamos_access_token: string;
 
   @Column({ nullable: true })
   ref_user_id: number;

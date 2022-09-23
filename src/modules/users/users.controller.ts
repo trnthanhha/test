@@ -26,6 +26,7 @@ import { REDIS_CLIENT_PROVIDER } from '../redis/redis.constants';
 import { generateRedisKey } from '../redis/redis.keys.pattern';
 import { CreateUserDto } from './dto/create-user.dto';
 import { UpdateUserDto } from './dto/update-user.dto';
+import { AuthService } from '../auth/auth.service';
 
 @ApiTags('users')
 @Controller('users')
@@ -33,6 +34,7 @@ import { UpdateUserDto } from './dto/update-user.dto';
 export class UsersController {
   constructor(
     private readonly usersService: UsersService,
+    private readonly authService: AuthService,
     @Inject(REDIS_CLIENT_PROVIDER) private readonly redis: Redis,
   ) {}
 
@@ -117,10 +119,16 @@ export class UsersController {
       }
     }
 
-    return getObjectExcludedFields(customer, [
+    const filtered = getObjectExcludedFields(customer, [
       'identification_number',
       'identification_created_at',
     ]);
+
+    const profile = await this.authService.getProfile(
+      customer.locamos_access_token,
+    );
+
+    return Object.assign(filtered, profile);
   }
 
   @ApiOperation({ summary: 'create a user' })

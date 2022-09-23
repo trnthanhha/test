@@ -1,9 +1,7 @@
 import { Injectable } from '@nestjs/common';
-import { UpdateBillDto } from './dto/update-bill.dto';
 import { Bill } from './entities/bill.entity';
 import { InjectRepository } from '@nestjs/typeorm';
 import { EntityManager, Repository, UpdateResult } from 'typeorm';
-import { Order } from '../orders/entities/order.entity';
 
 @Injectable()
 export class BillsService {
