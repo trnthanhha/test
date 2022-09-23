@@ -16,7 +16,6 @@ import { LoginDto, LoginResponse } from './dto/auth.dto';
 import { RefreshTokenDto } from './dto/refresh-token.dto';
 import { RegisterDto } from './dto/register.dto';
 import { ResetPasswordDto } from './dto/reset-password.dto';
-import { hashPassword } from '../../utils/password';
 import { HttpService } from '@nestjs/axios';
 import { LocaMosEndpoint } from './auth.constants';
 import { lastValueFrom, map } from 'rxjs';
@@ -108,13 +107,11 @@ export class AuthService {
     //
     //   throw new BadRequestException(message);
     // }
-    const newToken = await this.loginLocaMosGetAccessToken(
+    user.locamos_access_token = await this.loginLocaMosGetAccessToken(
       correctUsername,
       password,
       lang,
     );
-
-    user.locamos_access_token = newToken;
     return await this.generateToken(user);
   }
 
