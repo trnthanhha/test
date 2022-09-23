@@ -6,9 +6,11 @@ import { Bill } from '../../modules/bills/entities/bill.entity';
 import { Order } from '../../modules/orders/entities/order.entity';
 import { BillStatus } from '../../modules/bills/bills.constants';
 import { InjectRepository } from '@nestjs/typeorm';
-import { Repository } from 'typeorm';
+import { EntityManager, Repository } from 'typeorm';
 import { BillsService } from '../../modules/bills/bills.service';
 import { PrepareError } from '../../errors/types';
+import { UserPackage } from '../../modules/user_package/entities/user_package.entity';
+import { Location } from '../../modules/locations/entities/location.entity';
 
 @Injectable()
 export class PaymentService {
@@ -27,9 +29,12 @@ export class PaymentService {
   }
 
   async syncOrderStatus(payload: any) {
+    const manager: EntityManager = this.orderRepository.manager;
     const { vnp_ResponseCode, vnp_TxnRef, vnp_TransactionNo } = payload;
     let bill: Bill;
     let order: Order;
+    let location: Location;
+    let pkg: UserPackage;
     try {
       bill = await this.billsService.findOneByRefID(vnp_TxnRef);
       order = bill.order;
@@ -42,6 +47,18 @@ export class PaymentService {
         (vnp_ResponseCode === '00' && PaymentStatus.PAID) ||
         PaymentStatus.FAILED;
 
+      if (order.payment_status === PaymentStatus.PAID) {
+        bill.status = BillStatus.PAID;
+        if (order.location_id > 0) {
+          location = await manager
+            .getRepository(Location)
+            .findOneBy({ id: order.location_id });
+        } else if (order.user_package_id > 0) {
+          pkg = await manager
+            .getRepository(UserPackage)
+            .findOneBy({ id: order.user_package_id });
+        }
+      }
       bill.status = this.orderStatusToBillStatus(order.payment_status);
       bill.invoice_number = vnp_TransactionNo;
     } catch (ex) {
@@ -53,6 +70,40 @@ export class PaymentService {
         return Promise.all([
           this.ordersService.update(order.id, order, entityManager),
           this.billsService.update(bill, entityManager),
+          new Promise((resolve, reject) => {
+            if (location) {
+              location.purchase_status = null;
+              location.paid_at = new Date();
+              entityManager
+                .update(
+                  Location,
+                  {
+                    id: location.id,
+                  },
+                  location,
+                )
+                .then(resolve)
+                .catch(reject);
+              return;
+            }
+            if (pkg) {
+              pkg.is_paid = true;
+              pkg.paid_at = new Date();
+              entityManager
+                .update(
+                  UserPackage,
+                  {
+                    id: location.id,
+                  },
+                  location,
+                )
+                .then(resolve)
+                .catch(reject);
+              return;
+            }
+
+            resolve(undefined);
+          }),
         ]);
       },
     );

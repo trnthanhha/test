@@ -65,14 +65,6 @@ export class OrdersService {
       where: {
         id: id,
       },
-    });
-  }
-
-  async findOneByRefID(ref_uid: string): Promise<Order> {
-    return await this.orderRepository.findOne({
-      where: {
-        ref_uid,
-      },
       relations: {
         location: true,
         user_package: true,
@@ -153,7 +145,6 @@ export class OrdersService {
           entityManager,
           loc.id,
           loc.version,
-          insertedOrder.id,
         );
         if (!result.affected) {
           return {

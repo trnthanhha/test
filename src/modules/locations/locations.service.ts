@@ -108,12 +108,7 @@ export class LocationsService {
     return repo.findOneBy({ id });
   }
 
-  async checkout(
-    dbManager: EntityManager,
-    id: number,
-    version: number,
-    order_id?: number,
-  ) {
+  async checkout(dbManager: EntityManager, id: number, version: number) {
     return dbManager.update(
       Location,
       {
@@ -123,7 +118,6 @@ export class LocationsService {
       {
         purchase_status: LocationPurchaseStatus.Unauthorized,
         version: version + 1,
-        required_order_id: order_id,
       },
     );
   }

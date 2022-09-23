@@ -28,12 +28,14 @@ import { OrderStatusDto } from './dto/order-status-dto';
 import { CheckoutDto } from './dto/checkout-dto';
 import { GetAuthUser } from '../../decorators/user.decorator';
 import { UsersService } from '../users/users.service';
+import { BillsService } from '../bills/bills.service';
 
 @ApiTags('orders')
 @Controller('orders')
 export class OrdersController {
   constructor(
     private readonly ordersService: OrdersService,
+    private readonly billsService: BillsService,
     private readonly usersService: UsersService,
   ) {}
 
@@ -98,7 +100,8 @@ export class OrdersController {
   async validateStatus(@Req() req): Promise<OrderStatusDto> {
     const response = PaymentGatewayFactory.Build().decodeResponse(req);
 
-    const order = await this.ordersService.findOneByRefID(response.ref_uid);
+    const bill = await this.billsService.findOneByRefID(response.ref_uid);
+    const order = await this.ordersService.findOne(bill.order_id);
     return Object.assign(response, order);
   }
 
