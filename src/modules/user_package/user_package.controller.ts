@@ -10,7 +10,9 @@ import {
 import { UserPackageService } from './user_package.service';
 import { CreateUserPackageDto } from './dto/create-user_package.dto';
 import { UpdateUserPackageDto } from './dto/update-user_package.dto';
+import { ApiTags } from '@nestjs/swagger';
 
+@ApiTags('user packages')
 @Controller('user-package')
 export class UserPackageController {
   constructor(private readonly userPackageService: UserPackageService) {}

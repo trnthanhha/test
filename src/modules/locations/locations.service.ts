@@ -116,7 +116,7 @@ export class LocationsService {
         version,
       },
       {
-        purchase_status: LocationPurchaseStatus.Unauthorized,
+        purchase_status: LocationPurchaseStatus.UNAUTHORIZED,
         version: version + 1,
       },
     );

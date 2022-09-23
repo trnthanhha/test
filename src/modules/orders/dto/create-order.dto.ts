@@ -13,7 +13,10 @@ export class CreateOrderDto {
       }),
     },
   )
-  @ApiProperty({ required: true, example: 123 })
+  @ApiProperty({
+    required: true,
+    example: 123,
+  })
   location_id: number;
 
   @Min(1)
@@ -49,4 +52,20 @@ export class CreateOrderDto {
   @IsOptional()
   @ApiProperty({ example: 'https://your_location.com/image.png' })
   map_captured: string;
+
+  @Min(1)
+  @IsOptional()
+  @IsNumber(
+    {},
+    {
+      message: i18nValidationMessage('validation.isNumber', {
+        name: 'package_id',
+      }),
+    },
+  )
+  @ApiProperty({
+    required: true,
+    example: 123,
+  })
+  package_id: number;
 }

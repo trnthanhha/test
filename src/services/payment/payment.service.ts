@@ -11,6 +11,8 @@ import { BillsService } from '../../modules/bills/bills.service';
 import { PrepareError } from '../../errors/types';
 import { UserPackage } from '../../modules/user_package/entities/user_package.entity';
 import { Location } from '../../modules/locations/entities/location.entity';
+import { LocationPurchaseStatus } from '../../modules/locations/locations.contants';
+import { UPackagePurchaseStatus } from '../../modules/user_package/user_package.constants';
 
 @Injectable()
 export class PaymentService {
@@ -73,31 +75,13 @@ export class PaymentService {
           // Update location / package
           new Promise((resolve, reject) => {
             if (location) {
-              location.purchase_status = null;
-              location.paid_at = new Date();
-              entityManager
-                .update(
-                  Location,
-                  {
-                    id: location.id,
-                  },
-                  location,
-                )
+              this.updateLocation(bill.status, location, entityManager)
                 .then(resolve)
                 .catch(reject);
               return;
             }
             if (pkg) {
-              pkg.is_paid = true;
-              pkg.paid_at = new Date();
-              entityManager
-                .update(
-                  UserPackage,
-                  {
-                    id: location.id,
-                  },
-                  location,
-                )
+              this.updateUserPackage(bill.status, pkg, entityManager)
                 .then(resolve)
                 .catch(reject);
               return;
@@ -118,5 +102,45 @@ export class PaymentService {
     }
 
     return BillStatus.UNAUTHORIZED;
+  }
+
+  updateLocation(
+    billStatus: BillStatus,
+    location: Location,
+    entityManager: EntityManager,
+  ) {
+    if (billStatus === BillStatus.PAID) {
+      location.purchase_status = null;
+      location.paid_at = new Date();
+    } else {
+      location.purchase_status = LocationPurchaseStatus.FAILED;
+    }
+    return entityManager.update(
+      Location,
+      {
+        id: location.id,
+      },
+      location,
+    );
+  }
+
+  updateUserPackage(
+    billStatus: BillStatus,
+    userPackage: UserPackage,
+    entityManager: EntityManager,
+  ) {
+    if (billStatus === BillStatus.PAID) {
+      userPackage.purchase_status = UPackagePurchaseStatus.PAID;
+      userPackage.paid_at = new Date();
+    } else {
+      userPackage.purchase_status = UPackagePurchaseStatus.FAILED;
+    }
+    return entityManager.update(
+      UserPackage,
+      {
+        id: userPackage.id,
+      },
+      userPackage,
+    );
   }
 }

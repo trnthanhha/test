@@ -12,11 +12,18 @@ import { CreatePackageDto } from './dto/create-package.dto';
 import { UpdatePackageDto } from './dto/update-package.dto';
 import { Auth } from '../../decorators/roles.decorator';
 import { UserType } from '../users/users.constants';
-import { ApiOperation } from '@nestjs/swagger';
+import { ApiOperation, ApiTags } from '@nestjs/swagger';
+import { StandardPriceService } from '../standard-price/standard-price.service';
+import { StandardPrice } from '../standard-price/entities/standard-price.entity';
+import { Package } from './entities/package.entity';
 
+@ApiTags('packages')
 @Controller('package')
 export class PackageController {
-  constructor(private readonly packageService: PackageService) {}
+  constructor(
+    private readonly packageService: PackageService,
+    private readonly stdPriceService: StandardPriceService,
+  ) {}
 
   @Auth(UserType.ADMIN)
   @ApiOperation({ summary: 'Create a package' })
@@ -27,7 +34,7 @@ export class PackageController {
 
   @ApiOperation({ summary: 'Get all packages' })
   @Get()
-  findAll() {
+  findAll(): Promise<Package[]> {
     return this.packageService.findAll();
   }
 

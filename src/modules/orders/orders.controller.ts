@@ -4,14 +4,12 @@ import {
   Delete,
   Get,
   Param,
-  Patch,
   Post,
   Query,
   Req,
 } from '@nestjs/common';
 import { OrdersService } from './orders.service';
 import { CreateOrderDto } from './dto/create-order.dto';
-import { UpdateOrderDto } from './dto/update-order.dto';
 import {
   ApiNotFoundResponse,
   ApiOkResponse,
@@ -41,7 +39,8 @@ export class OrdersController {
 
   @Auth()
   @ApiOperation({
-    summary: 'Create a order',
+    summary:
+      'Nếu mua location, cần có location_id, nếu location chưa tồn tại, cần thông tin lat, long, map_captured, nếu mua Package, cần package_id',
   })
   @ApiOkResponse({
     type: CreateOrderDto,

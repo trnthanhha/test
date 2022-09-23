@@ -31,4 +31,6 @@ export class Package {
 
   @UpdateDateColumn()
   updated_at: Date;
+
+  price: number;
 }
