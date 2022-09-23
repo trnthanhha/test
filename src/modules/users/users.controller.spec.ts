@@ -10,6 +10,9 @@ import {
   REDIS_CLIENT_PROVIDER,
   REDIS_TOKEN_PROVIDER,
 } from '../redis/redis.constants';
+import { AuthService } from '../auth/auth.service';
+import { JwtService } from '@nestjs/jwt';
+import { HttpModule } from '@nestjs/axios';
 
 describe('UsersController', () => {
   it('get profile, hidden password, ignore find admin if customer', async () => {
@@ -76,10 +79,16 @@ async function getController(mockRepo, mockRedis = jest.fn(() => ({}))) {
           AcceptLanguageResolver,
         ],
       }),
+      HttpModule,
     ],
     controllers: [UsersController],
     providers: [
       UsersService,
+      JwtService,
+      {
+        provide: AuthService,
+        useClass: AuthenticationServiceStub,
+      },
       {
         provide: getRepositoryToken(User),
         useFactory: mockRepo,
@@ -108,4 +117,10 @@ function getExampleUser() {
   model.refresh_token = '123-refresh-token';
 
   return model;
+}
+
+class AuthenticationServiceStub {
+  getProfile() {
+    return {};
+  }
 }
