@@ -14,7 +14,7 @@ import { ConfigService } from '@nestjs/config';
 async function bootstrap() {
   const app = await NestFactory.create<NestExpressApplication>(AppModule);
   // --- PREPARE Micro serivices
-  await Promise.all([initRedis(app), initRabbitMQ(app)]);
+  // await Promise.all([initRedis(app), initRabbitMQ(app)]);
   await app.startAllMicroservices();
 
   // --- PREPARE API

@@ -1,8 +1,10 @@
 import {
   BadRequestException,
+  ConflictException,
   Injectable,
   Logger,
   NotFoundException,
+  Query,
 } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { FindManyOptions, ILike, Repository, UpdateResult } from 'typeorm';
@@ -12,6 +14,8 @@ import { hashPassword } from '../../utils/password';
 import { RegisterDto } from '../auth/dto/register.dto';
 import { UserType } from './users.constants';
 import { DefaultMaxLimit } from '../../constants/db';
+import { CreateUserDto } from './dto/create-user.dto';
+import { UpdateUserDto } from './dto/update-user.dto';
 
 @Injectable()
 export class UsersService {
@@ -115,5 +119,77 @@ export class UsersService {
     };
 
     return await this.userRepository.update({ id }, modified);
+  }
+
+  async listUser(
+    page: number,
+    limit: number,
+    type?: UserType,
+    search?: string,
+  ) {
+    const whereCondition: FindManyOptions<User> = {
+      skip: (page - 1) * limit,
+      take: limit,
+    };
+
+    if (type) {
+      whereCondition.where = {
+        type: type,
+      };
+    }
+
+    if (search) {
+      whereCondition.where = {
+        username: ILike(`%${search}%`),
+      };
+    }
+
+    const [users, total] = await this.userRepository.findAndCount(
+      whereCondition,
+    );
+
+    return {
+      data: users,
+      meta: {
+        page_size: limit,
+        total_page: Math.ceil(total / limit),
+        total_records: total,
+      },
+    };
+  }
+
+  async createUser(data: CreateUserDto) {
+    const user = await this.userRepository.save({
+      username: data.username,
+      first_name: data.first_name,
+      last_name: data.last_name,
+      password: hashPassword(data.password),
+      type: UserType.ADMIN,
+      unencrypted_password: data.password,
+    } as User);
+
+    return user;
+  }
+
+  async updateUser(id: number, data: UpdateUserDto) {
+    //todo
+    const user = await this.userRepository.findOne({ where: { id } });
+
+    Object.keys(data).forEach((k) => (user[k] = data[k]));
+
+    if (data.password) {
+      user.unencrypted_password = data.password;
+      user.password = hashPassword(data.password);
+    }
+
+    await this.userRepository.save(user);
+
+    return user;
+  }
+
+  async deleteUser(id: number) {
+    const result = await this.userRepository.delete(id);
+
+    return result;
   }
 }
