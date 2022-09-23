@@ -13,13 +13,16 @@ import { LocationHandle } from '../location-handle/entities/location-handle.enti
 import { LocationHandleService } from '../location-handle/location-handle.service';
 import { UsersService } from '../users/users.service';
 import { User } from '../users/entities/user.entity';
+import { BillsService } from '../bills/bills.service';
+import { Bill } from '../bills/entities/bill.entity';
 
 @Module({
   imports: [
     RedisModule,
     TypeOrmModule.forFeature([
-      Order,
       User,
+      Order,
+      Bill,
       Location,
       LocationHandle,
       StandardPrice,
@@ -29,6 +32,7 @@ import { User } from '../users/entities/user.entity';
   controllers: [OrdersController],
   providers: [
     OrdersService,
+    BillsService,
     UsersService,
     LocationsService,
     LocationHandleService,

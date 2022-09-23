@@ -19,6 +19,7 @@ import { User } from '../users/entities/user.entity';
 import { LocationStatus } from '../locations/locations.contants';
 import { Bill } from '../bills/entities/bill.entity';
 import { BillStatus, PaymentVendor } from '../bills/bills.constants';
+import { BillsService } from '../bills/bills.service';
 
 @Injectable()
 export class OrdersService {
@@ -27,6 +28,7 @@ export class OrdersService {
   constructor(
     @InjectRepository(Order)
     private orderRepository: Repository<Order>,
+    private readonly billsService: BillsService,
     private readonly locationsService: LocationsService,
     private readonly standardPriceService: StandardPriceService,
   ) {}
@@ -142,6 +144,11 @@ export class OrdersService {
 
         order.location_id = loc.id;
         const insertedOrder = await this.create(order, entityManager);
+        await this.billsService.create(
+          this.initBill(insertedOrder),
+          entityManager,
+        );
+
         const result = await this.locationsService.checkout(
           entityManager,
           loc.id,
@@ -184,10 +191,10 @@ export class OrdersService {
     return order;
   }
 
-  initBill(order: Order, txNo: string): Bill {
+  initBill(order: Order): Bill {
     const bill = new Bill();
     bill.order_id = order.id;
-    bill.ref_id = txNo;
+    bill.ref_id = order.ref_uid;
     bill.status = BillStatus.UNAUTHORIZED;
     bill.created_by_id = order.created_by_id;
     bill.vendor = PaymentVendor.VNPAY;

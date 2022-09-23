@@ -9,7 +9,6 @@ import {
 } from 'typeorm';
 import { BillStatus, PaymentVendor } from '../bills.constants';
 import { Order } from '../../orders/entities/order.entity';
-import { UserPackage } from '../../user_package/entities/user_package.entity';
 
 @Entity()
 export class Bill {
