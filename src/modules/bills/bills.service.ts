@@ -1,28 +1,44 @@
 import { Injectable } from '@nestjs/common';
-import { CreateBillDto } from './dto/create-bill.dto';
 import { UpdateBillDto } from './dto/update-bill.dto';
+import { Bill } from './entities/bill.entity';
+import { InjectRepository } from '@nestjs/typeorm';
+import { EntityManager, Repository, UpdateResult } from 'typeorm';
+import { Order } from '../orders/entities/order.entity';
 
 @Injectable()
 export class BillsService {
-  create(createBillDto: CreateBillDto) {
-    console.log(createBillDto);
-    return 'This action adds a new bill';
+  constructor(
+    @InjectRepository(Bill)
+    private billRepository: Repository<Bill>,
+  ) {}
+  create(bill: Bill, dbManager?: EntityManager): Promise<Bill> {
+    const repo = dbManager?.getRepository(Bill) || this.billRepository;
+    return repo.save(bill);
+  }
+
+  update(bill: Bill, dbManager?: EntityManager): Promise<UpdateResult> {
+    const repo = dbManager?.getRepository(Bill) || this.billRepository;
+    return repo.update(
+      {
+        id: bill.id,
+        version: bill.version,
+      },
+      Object.assign(bill, { version: bill.version + 1 }),
+    );
   }
 
   findAll() {
     return `This action returns all bills`;
   }
 
-  findOne(id: number) {
-    return `This action returns a #${id} bill`;
-  }
-
-  update(id: number, updateBillDto: UpdateBillDto) {
-    console.log(updateBillDto);
-    return `This action updates a #${id} bill`;
-  }
-
-  remove(id: number) {
-    return `This action removes a #${id} bill`;
+  async findOneByRefID(ref_id: string): Promise<Bill> {
+    return await this.billRepository.findOne({
+      where: {
+        ref_id,
+      },
+      relations: {
+        order: true,
+      },
+    });
   }
 }

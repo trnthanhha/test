@@ -117,13 +117,6 @@ export class OrdersController {
   }
 
   @Auth(UserType.ADMIN)
-  @ApiOperation({ summary: 'Update a order' })
-  @Patch(':id')
-  update(@Param('id') id: string, @Body() updateOrderDto: UpdateOrderDto) {
-    return this.ordersService.update(+id, updateOrderDto);
-  }
-
-  @Auth(UserType.ADMIN)
   @ApiOperation({ summary: 'Delete a order' })
   @ApiOkResponse({
     status: 200,

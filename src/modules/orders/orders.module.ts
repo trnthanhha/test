@@ -17,12 +17,14 @@ import { User } from '../users/entities/user.entity';
 @Module({
   imports: [
     RedisModule,
-    TypeOrmModule.forFeature([Order]),
-    TypeOrmModule.forFeature([User]),
-    TypeOrmModule.forFeature([Location]),
-    TypeOrmModule.forFeature([LocationHandle]),
-    TypeOrmModule.forFeature([StandardPrice]),
-    TypeOrmModule.forFeature([StandardPriceHistory]),
+    TypeOrmModule.forFeature([
+      Order,
+      User,
+      Location,
+      LocationHandle,
+      StandardPrice,
+      StandardPriceHistory,
+    ]),
   ],
   controllers: [OrdersController],
   providers: [

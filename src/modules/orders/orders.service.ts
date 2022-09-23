@@ -4,7 +4,6 @@ import {
   InternalServerErrorException,
   Logger,
 } from '@nestjs/common';
-import { UpdateOrderDto } from './dto/update-order.dto';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Order } from './entities/order.entity';
 import { EntityManager, FindManyOptions, Repository } from 'typeorm';
@@ -18,7 +17,8 @@ import { LocationsService } from '../locations/locations.service';
 import { StandardPriceService } from '../standard-price/standard-price.service';
 import { User } from '../users/entities/user.entity';
 import { LocationStatus } from '../locations/locations.contants';
-import { Location } from '../locations/entities/location.entity';
+import { Bill } from '../bills/entities/bill.entity';
+import { BillStatus, PaymentVendor } from '../bills/bills.constants';
 
 @Injectable()
 export class OrdersService {
@@ -78,24 +78,15 @@ export class OrdersService {
     });
   }
 
-  async update(id: number, updateOrderDto: UpdateOrderDto) {
-    const order = await this.orderRepository.findOne({
-      where: {
-        id: id,
-      },
-    });
-
-    if (order.version !== updateOrderDto.version)
-      throw new Error('Update fail please try again');
-    if (!PaymentStatus[order.payment_status])
-      throw new Error('Payment status not found');
-    if (!order) throw new Error('Not Found Order');
-
-    Object.keys(updateOrderDto).forEach((v) => (order[v] = updateOrderDto[v]));
-    order.version = order.version + 1;
-    await this.orderRepository.save(order);
-
-    return await this.orderRepository.update(id, updateOrderDto);
+  async update(id: number, order: Order, dbManager?: EntityManager) {
+    const repo = dbManager?.getRepository(Order) || this.orderRepository;
+    const rs = await repo.update(
+      { id, version: order.version },
+      Object.assign(order, { version: order.version + 1 }),
+    );
+    if (!rs.affected) {
+      throw new Error('update handle failed, criteria not match');
+    }
   }
 
   async create(order: Order, dbManager?: EntityManager) {
@@ -131,11 +122,7 @@ export class OrdersService {
     }
 
     const pmGateway = PaymentGatewayFactory.Build();
-    const order = new Order();
-    order.ref_uid = randomUUID();
-    order.price = stdPrice.price;
-    order.payment_status = PaymentStatus.UNAUTHORIZED;
-    order.note = order.note || 'Thanh toan mua LocaMos dia diem';
+    const order = this.initOrder(stdPrice.price);
     order.created_by_id = user.id;
 
     const created = await this.orderRepository.manager.transaction(
@@ -185,5 +172,26 @@ export class OrdersService {
 
     const redirectUrl = pmGateway.generateURLRedirect(created, ipAddr);
     return CheckoutDto.success(redirectUrl, loc);
+  }
+
+  initOrder(price: number): Order {
+    const order = new Order();
+    order.ref_uid = randomUUID();
+    order.price = price;
+    order.payment_status = PaymentStatus.UNAUTHORIZED;
+    order.note = order.note || 'Thanh toan mua LocaMos dia diem';
+
+    return order;
+  }
+
+  initBill(order: Order, txNo: string): Bill {
+    const bill = new Bill();
+    bill.order_id = order.id;
+    bill.ref_id = txNo;
+    bill.status = BillStatus.UNAUTHORIZED;
+    bill.created_by_id = order.created_by_id;
+    bill.vendor = PaymentVendor.VNPAY;
+
+    return bill;
   }
 }

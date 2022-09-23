@@ -1,7 +1,7 @@
-export enum PaymentStatus {
-  PENDING = 'pending',
+export enum BillStatus {
   UNAUTHORIZED = 'unauthorized',
   PAID = 'paid',
+  FAILED = 'failed',
   CANCELLED = 'cancelled',
 }
 
