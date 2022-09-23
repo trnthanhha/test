@@ -70,6 +70,7 @@ export class PaymentService {
         return Promise.all([
           this.ordersService.update(order.id, order, entityManager),
           this.billsService.update(bill, entityManager),
+          // Update location / package
           new Promise((resolve, reject) => {
             if (location) {
               location.purchase_status = null;
