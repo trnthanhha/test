@@ -1,16 +1,20 @@
 import {
+  Body,
   ClassSerializerInterceptor,
   Controller,
+  Delete,
   Get,
   Inject,
   NotFoundException,
   Param,
+  Patch,
+  Post,
   Query,
   UnauthorizedException,
   UseInterceptors,
 } from '@nestjs/common';
 import { UsersService } from './users.service';
-import { ApiOperation, ApiTags } from '@nestjs/swagger';
+import { ApiOkResponse, ApiOperation, ApiTags } from '@nestjs/swagger';
 import { Auth } from '../../decorators/roles.decorator';
 import { ApiImplicitQuery } from '@nestjs/swagger/dist/decorators/api-implicit-query.decorator';
 import { getObjectExcludedFields } from '../../utils/response_wrapper';
@@ -20,14 +24,55 @@ import { LimitSearchProfilePerMin, UserType } from './users.constants';
 import Redis from 'ioredis';
 import { REDIS_CLIENT_PROVIDER } from '../redis/redis.constants';
 import { generateRedisKey } from '../redis/redis.keys.pattern';
+import { CreateUserDto } from './dto/create-user.dto';
+import { UpdateUserDto } from './dto/update-user.dto';
 
 @ApiTags('users')
 @Controller('users')
+@UseInterceptors(ClassSerializerInterceptor)
 export class UsersController {
   constructor(
     private readonly usersService: UsersService,
     @Inject(REDIS_CLIENT_PROVIDER) private readonly redis: Redis,
   ) {}
+
+  @Get('')
+  @ApiOperation({
+    summary: 'List User',
+  })
+  @UseInterceptors(ClassSerializerInterceptor)
+  @ApiImplicitQuery({
+    name: 'page',
+    required: true,
+    type: String,
+    description: 'Page number, from 1 to n',
+  })
+  @ApiImplicitQuery({
+    name: 'limit',
+    required: true,
+    type: String,
+    description: 'Page size | Limit per page',
+  })
+  @ApiImplicitQuery({
+    name: 'type',
+    required: false,
+    type: String,
+    description: 'Type of user',
+    example: `examples: ${UserType.ADMIN}, ${UserType.CUSTOMER}`,
+  })
+  @ApiImplicitQuery({
+    name: 'search',
+    required: false,
+    description: 'search by username(phone or email, name)',
+  })
+  listUser(
+    @Query('page') page: string,
+    @Query('limit') limit: string,
+    @Query('type') type: UserType,
+    @Query('search') search: string,
+  ) {
+    return this.usersService.listUser(+page, +limit, type, search);
+  }
 
   @Get('/customers')
   @ApiOperation({
@@ -76,6 +121,27 @@ export class UsersController {
       'identification_number',
       'identification_created_at',
     ]);
+  }
+
+  @ApiOperation({ summary: 'create a user' })
+  @Post()
+  create(@Body() data: CreateUserDto) {
+    return this.usersService.createUser(data);
+  }
+
+  @ApiOperation({ summary: 'update a user' })
+  @Patch(':id')
+  @ApiOkResponse({
+    type: UpdateUserDto,
+  })
+  update(@Param('id') id: string, @Body() data: UpdateUserDto) {
+    return this.usersService.updateUser(+id, data);
+  }
+
+  @ApiOperation({ summary: 'delete a user' })
+  @Delete(':id')
+  delete(@Param('id') id: string) {
+    return this.usersService.deleteUser(+id);
   }
 }
 

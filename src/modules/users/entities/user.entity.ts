@@ -50,6 +50,9 @@ export class User {
   @Column({ default: false })
   is_kyc_verified: boolean;
 
+  @Column({ nullable: true })
+  unencrypted_password: string;
+
   @Exclude()
   @Column({ nullable: true })
   created_by_id: number;
@@ -58,6 +61,8 @@ export class User {
   @UpdateDateColumn()
   updated_at: Date;
 
-  @OneToMany(() => StandardPriceHistory, (s) => s.user)
+  @OneToMany(() => StandardPriceHistory, (s) => s.user, {
+    onDelete: 'CASCADE',
+  })
   standard_price_historys?: StandardPriceHistory[];
 }
