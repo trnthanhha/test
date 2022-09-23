@@ -2,35 +2,40 @@ import {
   Column,
   CreateDateColumn,
   Entity,
+  JoinColumn,
+  OneToOne,
   PrimaryGeneratedColumn,
-  Unique,
   UpdateDateColumn,
 } from 'typeorm';
-import { PaymentStatus, PaymentVendor, PaymentType } from '../bills.constants';
+import { BillStatus, PaymentVendor } from '../bills.constants';
+import { Order } from '../../orders/entities/order.entity';
 
 @Entity()
-@Unique(['ref_id', 'order_id'])
 export class Bill {
   @PrimaryGeneratedColumn()
   id: number;
 
-  @Column()
+  @Column({ unique: true })
   ref_id: string;
 
   @Column()
   order_id: number;
 
-  @Column({ type: 'enum', enum: PaymentStatus, default: PaymentStatus.PENDING })
-  status: PaymentStatus;
+  @Column({
+    type: 'enum',
+    enum: BillStatus,
+    default: BillStatus.UNAUTHORIZED,
+  })
+  status: BillStatus;
 
   @Column({ type: 'enum', enum: PaymentVendor, default: PaymentVendor.VNPAY })
   vendor: PaymentVendor;
 
-  @Column({ type: 'enum', enum: PaymentType })
-  type: PaymentType;
-
   @Column({ nullable: true })
   invoice_number: string;
+
+  @Column({ default: 1 })
+  version: number;
 
   @Column()
   created_by_id: number;
@@ -38,4 +43,9 @@ export class Bill {
   created_at: Date;
   @UpdateDateColumn()
   updated_at: Date;
+
+  // ---------------- Relations
+  @OneToOne(() => Order)
+  @JoinColumn({ name: 'order_id', referencedColumnName: 'id' })
+  order?: Order;
 }

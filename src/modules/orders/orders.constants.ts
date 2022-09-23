@@ -1,6 +1,7 @@
 export enum PaymentStatus {
   UNAUTHORIZED = 'unauthorized',
   PAID = 'paid',
+  FAILED = 'failed',
   CANCELLED = 'cancelled',
 }
 

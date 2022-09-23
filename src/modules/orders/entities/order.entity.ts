@@ -18,9 +18,6 @@ export class Order {
   @PrimaryGeneratedColumn()
   id: number;
 
-  @Column({ unique: true })
-  ref_uid: string;
-
   @Column({
     type: 'enum',
     enum: PaymentType,
@@ -59,6 +56,7 @@ export class Order {
   @UpdateDateColumn()
   updated_at: Date;
 
+  // -------------- RELATED
   @OneToOne(() => Location)
   @JoinColumn({ name: 'location_id', referencedColumnName: 'id' })
   location?: Location;
@@ -66,4 +64,6 @@ export class Order {
   @OneToOne(() => UserPackage)
   @JoinColumn({ name: 'user_package_id', referencedColumnName: 'id' })
   user_package?: UserPackage;
+
+  ref_uid: string;
 }

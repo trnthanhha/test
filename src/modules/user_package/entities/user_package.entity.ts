@@ -26,6 +26,12 @@ export class UserPackage {
   @Column()
   remaining_quantity: number;
 
+  @Column({ nullable: true })
+  paid_at: Date;
+
+  @Column({ default: false })
+  is_paid: boolean;
+
   @CreateDateColumn()
   created_at: Date;
 
