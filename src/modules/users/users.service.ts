@@ -14,6 +14,7 @@ import { UserType } from './users.constants';
 import { DefaultMaxLimit } from '../../constants/db';
 import { CreateUserDto } from './dto/create-user.dto';
 import { UpdateUserDto } from './dto/update-user.dto';
+import { QueryDeepPartialEntity } from 'typeorm/query-builder/QueryPartialEntity';
 
 @Injectable()
 export class UsersService {
@@ -79,7 +80,8 @@ export class UsersService {
   }
 
   async createBySignUp(registerDto: RegisterDto, lang: string): Promise<User> {
-    const { password, first_name, last_name } = registerDto;
+    const { password, first_name, last_name, locamos_access_token } =
+      registerDto;
     const username: string = registerDto.username.replace('+', '');
 
     const findUserByPhone: User = await this.userRepository.findOne({
@@ -100,21 +102,24 @@ export class UsersService {
     nUser.first_name = first_name;
     nUser.last_name = last_name;
     nUser.password = hashedPwd;
+    nUser.locamos_access_token = locamos_access_token;
     nUser.type = UserType.CUSTOMER;
 
     return this.userRepository.save(nUser);
   }
 
   // no use repo
-  async updateRefreshToken(
+  async updateToken(
     id: number,
     refreshToken: string,
+    locamosToken?: string,
   ): Promise<UpdateResult> {
-    const modified: {
-      refresh_token: string;
-    } = {
+    const modified: QueryDeepPartialEntity<User> = {
       refresh_token: refreshToken,
     };
+    if (locamosToken) {
+      modified.locamos_access_token = locamosToken;
+    }
 
     return await this.userRepository.update({ id }, modified);
   }

@@ -55,4 +55,6 @@ export class RegisterDto {
   @MaxLength(32)
   @Match('password')
   password_confirm: string;
+
+  locamos_access_token: string;
 }

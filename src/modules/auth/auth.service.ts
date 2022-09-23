@@ -53,7 +53,11 @@ export class AuthService {
 
     const expiredTime: number = this.expiredDay(7);
 
-    await this.userService.updateRefreshToken(user.id, refreshToken);
+    await this.userService.updateToken(
+      user.id,
+      refreshToken,
+      user.locamos_access_token,
+    );
 
     return {
       id: user.id,
@@ -104,8 +108,13 @@ export class AuthService {
     //
     //   throw new BadRequestException(message);
     // }
-    await this.loginLocaMosGetAccessToken(correctUsername, password, lang);
+    const newToken = await this.loginLocaMosGetAccessToken(
+      correctUsername,
+      password,
+      lang,
+    );
 
+    user.locamos_access_token = newToken;
     return await this.generateToken(user);
   }
 
@@ -185,7 +194,7 @@ export class AuthService {
   }
 
   async logout(user: User): Promise<UpdateResult> {
-    return await this.userService.updateRefreshToken(user.id, '');
+    return await this.userService.updateToken(user.id, '');
   }
 
   private async access3rd(
@@ -205,7 +214,8 @@ export class AuthService {
     dto.username = correctUsername;
     dto.password = password;
     dto.password_confirm = password;
-    dto.first_name = profile.data.info.name;
+    dto.first_name = profile.info.name;
+    dto.locamos_access_token = accessToken;
 
     return this.register(dto, lang);
   }
@@ -242,7 +252,7 @@ export class AuthService {
     return response.data.access_token;
   }
 
-  async getProfile(accessToken: string) {
+  async getProfile(accessToken: string): Promise<any> {
     const obs = this.httpService
       .get(`${process.env.LOCAMOS_BASE_URL}${LocaMosEndpoint.Profile}`, {
         headers: {
