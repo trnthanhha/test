@@ -17,7 +17,8 @@ export enum LocationNFTStatus {
 }
 
 export enum LocationPurchaseStatus {
-  Unauthorized = 'unauthorized',
+  UNAUTHORIZED = 'unauthorized',
+  FAILED = 'failed',
 }
 
 export const DefaultSafeZoneRadius = 50;

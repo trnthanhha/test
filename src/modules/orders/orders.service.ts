@@ -20,6 +20,10 @@ import { LocationStatus } from '../locations/locations.contants';
 import { Bill } from '../bills/entities/bill.entity';
 import { BillStatus, PaymentVendor } from '../bills/bills.constants';
 import { BillsService } from '../bills/bills.service';
+import { UserPackage } from '../user_package/entities/user_package.entity';
+import { Location } from '../locations/entities/location.entity';
+import { Package } from '../package/entities/package.entity';
+import { PackageService } from '../package/package.service';
 
 @Injectable()
 export class OrdersService {
@@ -28,6 +32,7 @@ export class OrdersService {
   constructor(
     @InjectRepository(Order)
     private orderRepository: Repository<Order>,
+    private readonly packageServices: PackageService,
     private readonly billsService: BillsService,
     private readonly locationsService: LocationsService,
     private readonly standardPriceService: StandardPriceService,
@@ -94,17 +99,18 @@ export class OrdersService {
 
   // Business
   async checkout(createOrderDto: CreateOrderDto, req: any, user: User) {
-    let loc;
+    let loc: Location;
+    let pkg: Package;
     if (createOrderDto.location_id > 0) {
-      loc = loc = await this.locationsService.findOne(
-        createOrderDto.location_id,
-      );
+      loc = await this.locationsService.findOne(createOrderDto.location_id);
       if (!loc.canPurchased()) {
         return CheckoutDto.fail(
           new BadRequestException(),
           'Location is unable to purchase',
         );
       }
+    } else if (createOrderDto.package_id > 0) {
+      pkg = await this.packageServices.findOne(createOrderDto.package_id);
     }
 
     const stdPrice = await this.standardPriceService.getStandardPrice();
@@ -116,40 +122,46 @@ export class OrdersService {
     }
 
     const pmGateway = PaymentGatewayFactory.Build();
-    const order = this.initOrder(stdPrice.price);
+    const order = this.initOrder(pkg?.price || stdPrice.price);
     order.created_by_id = user.id;
 
     const created = await this.orderRepository.manager.transaction(
       async (entityManager): Promise<Order | any> => {
-        if (!loc) {
+        let userPackage: UserPackage;
+        if (pkg) {
+          userPackage = await this.createUserPackage(pkg, user, entityManager);
+        } else if (!loc) {
           loc = await this.locationsService.create(
             Object.assign(new CreateLocationDto(), createOrderDto),
             user,
             entityManager,
           );
-        }
-        if (loc.status !== LocationStatus.APPROVED) {
-          return {
-            error: 'Invalid distance',
-          };
+          if (loc.status !== LocationStatus.APPROVED) {
+            return {
+              error: 'Invalid distance',
+            };
+          }
         }
 
-        order.location_id = loc.id;
+        order.location_id = loc?.id;
+        order.user_package_id = userPackage?.id;
         const insertedOrder = await this.create(order, entityManager);
         await this.billsService.create(
           this.initBill(insertedOrder),
           entityManager,
         );
 
-        const result = await this.locationsService.checkout(
-          entityManager,
-          loc.id,
-          loc.version,
-        );
-        if (!result.affected) {
-          return {
-            error: 'Invalid version. Location has data changed',
-          };
+        if (loc) {
+          const result = await this.locationsService.checkout(
+            entityManager,
+            loc.id,
+            loc.version,
+          );
+          if (!result.affected) {
+            return {
+              error: 'Invalid version. Location has data changed',
+            };
+          }
         }
         return insertedOrder;
       },
@@ -191,5 +203,19 @@ export class OrdersService {
     bill.vendor = PaymentVendor.VNPAY;
 
     return bill;
+  }
+
+  async createUserPackage(
+    pkg: Package,
+    user: User,
+    entityManager: EntityManager,
+  ): Promise<UserPackage> {
+    const userPackage = new UserPackage();
+    userPackage.package_id = pkg.id;
+    userPackage.user_id = user.id;
+    userPackage.package_name = pkg.name;
+    userPackage.quantity = pkg.quantity;
+    userPackage.remaining_quantity = pkg.quantity;
+    return entityManager.getRepository(UserPackage).save(userPackage);
   }
 }

@@ -14,6 +14,8 @@ import { LocationHandle } from '../../modules/location-handle/entities/location-
 import { StandardPrice } from '../../modules/standard-price/entities/standard-price.entity';
 import { StandardPriceHistory } from '../../modules/standard-price/entities/standard-price-history.entity';
 import { RedisModule } from '../../modules/redis/redis.module';
+import { PackageService } from '../../modules/package/package.service';
+import { Package } from '../../modules/package/entities/package.entity';
 
 @Module({
   imports: [
@@ -22,6 +24,7 @@ import { RedisModule } from '../../modules/redis/redis.module';
       Bill,
       Location,
       LocationHandle,
+      Package,
       StandardPrice,
       StandardPriceHistory,
     ]),
@@ -32,6 +35,7 @@ import { RedisModule } from '../../modules/redis/redis.module';
     PaymentService,
     OrdersService,
     BillsService,
+    PackageService,
     LocationsService,
     LocationHandleService,
     StandardPriceService,

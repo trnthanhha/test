@@ -4,10 +4,13 @@ import { UpdatePackageDto } from './dto/update-package.dto';
 import { Package } from './entities/package.entity';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
+import { StandardPrice } from '../standard-price/entities/standard-price.entity';
+import { StandardPriceService } from '../standard-price/standard-price.service';
 
 @Injectable()
 export class PackageService {
   constructor(
+    private readonly stdPriceService: StandardPriceService,
     @InjectRepository(Package)
     private readonly packageRepository: Repository<Package>,
   ) {}
@@ -19,12 +22,31 @@ export class PackageService {
     return this.packageRepository.save(pkg);
   }
 
-  findAll() {
-    return this.packageRepository.find();
+  async findAll(): Promise<Package[]> {
+    const stdPrice: StandardPrice =
+      await this.stdPriceService.getStandardPrice();
+    if (!stdPrice || !stdPrice.price) {
+      throw new Error('standard price is not configured');
+    }
+    const packages = await this.packageRepository.find();
+    packages.forEach((pkg) => {
+      pkg.price = stdPrice.price * pkg.quantity;
+    });
+    return packages;
   }
 
-  findOne(id: number) {
-    return this.packageRepository.findOneBy({ id });
+  async findOne(id: number) {
+    const stdPrice: StandardPrice =
+      await this.stdPriceService.getStandardPrice();
+    if (!stdPrice || !stdPrice.price) {
+      throw new Error('standard price is not configured');
+    }
+    const pkg = await this.packageRepository.findOneBy({ id });
+    if (pkg) {
+      pkg.price = stdPrice.price * pkg.quantity;
+    }
+
+    return pkg;
   }
 
   update(id: number, updatePackageDto: UpdatePackageDto) {

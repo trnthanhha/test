@@ -5,6 +5,7 @@ import {
   PrimaryGeneratedColumn,
   UpdateDateColumn,
 } from 'typeorm';
+import { UPackagePurchaseStatus } from '../user_package.constants';
 
 @Entity()
 export class UserPackage {
@@ -29,8 +30,12 @@ export class UserPackage {
   @Column({ nullable: true })
   paid_at: Date;
 
-  @Column({ default: false })
-  is_paid: boolean;
+  @Column({
+    default: UPackagePurchaseStatus.UNAUTHORIZED,
+    type: 'enum',
+    enum: UPackagePurchaseStatus,
+  })
+  purchase_status: UPackagePurchaseStatus;
 
   @CreateDateColumn()
   created_at: Date;

@@ -142,8 +142,8 @@ export class Location {
     return (
       !this.is_blacklist &&
       !this.user_id &&
-      this.status === LocationStatus.APPROVED &&
-      this.purchase_status !== LocationPurchaseStatus.Unauthorized
+      !this.purchase_status &&
+      this.status === LocationStatus.APPROVED
     );
   }
 }

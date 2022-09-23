@@ -15,6 +15,8 @@ import { UsersService } from '../users/users.service';
 import { User } from '../users/entities/user.entity';
 import { BillsService } from '../bills/bills.service';
 import { Bill } from '../bills/entities/bill.entity';
+import { PackageService } from '../package/package.service';
+import { Package } from '../package/entities/package.entity';
 
 @Module({
   imports: [
@@ -25,6 +27,7 @@ import { Bill } from '../bills/entities/bill.entity';
       Bill,
       Location,
       LocationHandle,
+      Package,
       StandardPrice,
       StandardPriceHistory,
     ]),
@@ -34,6 +37,7 @@ import { Bill } from '../bills/entities/bill.entity';
     OrdersService,
     BillsService,
     UsersService,
+    PackageService,
     LocationsService,
     LocationHandleService,
     StandardPriceService,

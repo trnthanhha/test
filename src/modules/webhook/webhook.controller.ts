@@ -9,7 +9,9 @@ import {
 import { ClientProxy } from '@nestjs/microservices';
 import { RabbitMQServices } from '../../services/message-broker/webhook.types';
 import { PaymentGatewayFactory } from '../orders/vendor_adapters/payment.vendor.adapters';
+import { ApiTags } from '@nestjs/swagger';
 
+@ApiTags('webhook')
 @Controller('webhook')
 @UseInterceptors(ClassSerializerInterceptor)
 export default class WebhookController {

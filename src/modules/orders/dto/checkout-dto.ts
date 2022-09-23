@@ -3,12 +3,12 @@ import { Location } from '../../locations/entities/location.entity';
 export class CheckoutDto {
   public static success = (
     redirect_url: string,
-    loc: Location,
+    loc?: Location,
   ): CheckoutDto => {
     const rs = new CheckoutDto();
     rs.redirect_url = redirect_url;
     rs.success = true;
-    rs.location_name = loc.name;
+    rs.location_name = loc?.name;
 
     return rs;
   };
