@@ -165,7 +165,6 @@ export class UsersService {
       last_name: data.last_name,
       password: hashPassword(data.password),
       type: UserType.ADMIN,
-      unencrypted_password: data.password,
     } as User);
 
     return user;
@@ -178,7 +177,6 @@ export class UsersService {
     Object.keys(data).forEach((k) => (user[k] = data[k]));
 
     if (data.password) {
-      user.unencrypted_password = data.password;
       user.password = hashPassword(data.password);
     }
 

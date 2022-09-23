@@ -50,9 +50,6 @@ export class User {
   @Column({ default: false })
   is_kyc_verified: boolean;
 
-  @Column({ nullable: true })
-  unencrypted_password: string;
-
   @Exclude()
   @Column({ nullable: true })
   created_by_id: number;
