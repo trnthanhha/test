@@ -7,7 +7,7 @@ import {
 import { InjectRepository } from '@nestjs/typeorm';
 import { Order } from './entities/order.entity';
 import { EntityManager, FindManyOptions, Repository } from 'typeorm';
-import { PaymentStatus } from './orders.constants';
+import { PaymentStatus, PaymentType } from './orders.constants';
 import { CheckoutDto } from './dto/checkout-dto';
 import { PaymentGatewayFactory } from './vendor_adapters/payment.vendor.adapters';
 import { randomUUID } from 'crypto';
@@ -99,6 +99,79 @@ export class OrdersService {
 
   // Business
   async checkout(createOrderDto: CreateOrderDto, req: any, user: User) {
+    switch (createOrderDto.type) {
+      case PaymentType.CASH:
+        return this.chargeByCash(createOrderDto, req, user);
+      case PaymentType.PACKAGE:
+        break;
+      case PaymentType.POINT:
+      default:
+        throw new Error('Unimplemented payment method');
+    }
+    const dbManager: EntityManager = this.orderRepository.manager;
+    const userPackage = await dbManager
+      .getRepository(UserPackage)
+      .findOneBy({ id: createOrderDto.user_package_id });
+    //-----------Validate
+    if (!userPackage) {
+      return CheckoutDto.fail(
+        new BadRequestException(),
+        'User not exist any packages',
+      );
+    }
+
+    if (userPackage.remaining_quantity <= 0) {
+      return CheckoutDto.fail(
+        new BadRequestException(),
+        'Remaining quantity of package is not enough',
+      );
+    }
+
+    const order = this.initOrder(1);
+    order.payment_type = PaymentType.PACKAGE;
+    order.payment_status = PaymentStatus.PAID;
+
+    const bill = this.initBill(order);
+    bill.status = BillStatus.PAID;
+    bill.vendor = PaymentVendor.LOCAMOS;
+  }
+
+  initOrder(price: number): Order {
+    const order = new Order();
+    order.ref_uid = randomUUID();
+    order.price = price;
+    order.payment_status = PaymentStatus.UNAUTHORIZED;
+    order.note = order.note || 'Thanh toan mua LocaMos dia diem';
+
+    return order;
+  }
+
+  initBill(order: Order): Bill {
+    const bill = new Bill();
+    bill.order_id = order.id;
+    bill.ref_id = order.ref_uid;
+    bill.status = BillStatus.UNAUTHORIZED;
+    bill.created_by_id = order.created_by_id;
+    bill.vendor = PaymentVendor.VNPAY;
+
+    return bill;
+  }
+
+  async createUserPackage(
+    pkg: Package,
+    user: User,
+    entityManager: EntityManager,
+  ): Promise<UserPackage> {
+    const userPackage = new UserPackage();
+    userPackage.package_id = pkg.id;
+    userPackage.user_id = user.id;
+    userPackage.package_name = pkg.name;
+    userPackage.quantity = pkg.quantity;
+    userPackage.remaining_quantity = pkg.quantity;
+    return entityManager.getRepository(UserPackage).save(userPackage);
+  }
+
+  async chargeByCash(createOrderDto: CreateOrderDto, req: any, user: User) {
     let loc: Location;
     let pkg: Package;
     if (createOrderDto.location_id > 0) {
@@ -184,38 +257,47 @@ export class OrdersService {
     return CheckoutDto.success(redirectUrl, loc);
   }
 
-  initOrder(price: number): Order {
-    const order = new Order();
-    order.ref_uid = randomUUID();
-    order.price = price;
-    order.payment_status = PaymentStatus.UNAUTHORIZED;
-    order.note = order.note || 'Thanh toan mua LocaMos dia diem';
-
-    return order;
-  }
-
-  initBill(order: Order): Bill {
-    const bill = new Bill();
-    bill.order_id = order.id;
-    bill.ref_id = order.ref_uid;
-    bill.status = BillStatus.UNAUTHORIZED;
-    bill.created_by_id = order.created_by_id;
-    bill.vendor = PaymentVendor.VNPAY;
-
-    return bill;
-  }
-
-  async createUserPackage(
+  async chargeAndCreateBill(
+    createOrderDto: CreateOrderDto,
+    order: Order,
     pkg: Package,
+    loc: Location,
     user: User,
     entityManager: EntityManager,
-  ): Promise<UserPackage> {
-    const userPackage = new UserPackage();
-    userPackage.package_id = pkg.id;
-    userPackage.user_id = user.id;
-    userPackage.package_name = pkg.name;
-    userPackage.quantity = pkg.quantity;
-    userPackage.remaining_quantity = pkg.quantity;
-    return entityManager.getRepository(UserPackage).save(userPackage);
+  ) {
+    let userPackage: UserPackage;
+    if (pkg) {
+      userPackage = await this.createUserPackage(pkg, user, entityManager);
+    } else if (!loc) {
+      loc = await this.locationsService.create(
+        Object.assign(new CreateLocationDto(), createOrderDto),
+        user,
+        entityManager,
+      );
+      if (loc.status !== LocationStatus.APPROVED) {
+        return {
+          error: 'Invalid distance',
+        };
+      }
+    }
+
+    order.location_id = loc?.id;
+    order.user_package_id = userPackage?.id;
+    const insertedOrder = await this.create(order, entityManager);
+    await this.billsService.create(this.initBill(insertedOrder), entityManager);
+
+    if (loc) {
+      const result = await this.locationsService.checkout(
+        entityManager,
+        loc.id,
+        loc.version,
+      );
+      if (!result.affected) {
+        return {
+          error: 'Invalid version. Location has data changed',
+        };
+      }
+    }
+    return insertedOrder;
   }
 }

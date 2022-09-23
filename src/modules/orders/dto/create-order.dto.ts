@@ -1,6 +1,7 @@
-import { IsNumber, IsOptional, Min } from 'class-validator';
+import { IsEnum, IsNumber, IsOptional, Min } from 'class-validator';
 import { i18nValidationMessage } from 'nestjs-i18n';
 import { ApiProperty } from '@nestjs/swagger';
+import { PaymentType } from '../orders.constants';
 
 export class CreateOrderDto {
   @Min(1)
@@ -68,4 +69,31 @@ export class CreateOrderDto {
     example: 123,
   })
   package_id: number;
+
+  @ApiProperty({
+    required: true,
+    example: 'cash | point | package',
+  })
+  @IsEnum(PaymentType, {
+    message: i18nValidationMessage('validation.IsEnumPaymentType', {
+      name: 'type',
+    }),
+  })
+  type: PaymentType;
+
+  @Min(1)
+  @IsOptional()
+  @IsNumber(
+    {},
+    {
+      message: i18nValidationMessage('validation.isNumber', {
+        name: 'user_package_id',
+      }),
+    },
+  )
+  @ApiProperty({
+    required: true,
+    example: 123,
+  })
+  user_package_id: number;
 }
