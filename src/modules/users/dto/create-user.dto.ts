@@ -1,7 +1,5 @@
-import { ApiProperty, PartialType } from '@nestjs/swagger';
-import { IsNotEmpty, IsOptional, IsString } from 'class-validator';
-import { User } from '../entities/user.entity';
-import { UserType } from '../users.constants';
+import { ApiProperty } from '@nestjs/swagger';
+import { IsOptional, IsString } from 'class-validator';
 
 export class CreateUserDto {
   @IsOptional()

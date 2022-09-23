@@ -1,10 +1,8 @@
 import {
   BadRequestException,
-  ConflictException,
   Injectable,
   Logger,
   NotFoundException,
-  Query,
 } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { FindManyOptions, ILike, Repository, UpdateResult } from 'typeorm';
