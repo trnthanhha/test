@@ -1,7 +1,9 @@
 import {
   BadRequestException,
   Injectable,
+  InternalServerErrorException,
   NotAcceptableException,
+  NotFoundException,
 } from '@nestjs/common';
 import { JwtService } from '@nestjs/jwt';
 import * as admin from 'firebase-admin';
@@ -15,6 +17,10 @@ import { RefreshTokenDto } from './dto/refresh-token.dto';
 import { RegisterDto } from './dto/register.dto';
 import { ResetPasswordDto } from './dto/reset-password.dto';
 import { hashPassword } from '../../utils/password';
+import { HttpService } from '@nestjs/axios';
+import { LocaMosEndpoint } from './auth.constants';
+import { lastValueFrom, map } from 'rxjs';
+import FormData from 'form-data';
 
 @Injectable()
 export class AuthService {
@@ -22,6 +28,7 @@ export class AuthService {
     private readonly userService: UsersService,
     private readonly jwtService: JwtService,
     private readonly i18n: I18nService,
+    private readonly httpService: HttpService,
   ) {}
 
   expiredDay(day: number): number {
@@ -77,19 +84,27 @@ export class AuthService {
     lang: string,
   ): Promise<LoginResponse> {
     const correctUsername: string = username.replace('+', '');
-    const user: User = await this.userService.findOne(
-      { username: correctUsername } as User,
-      lang,
-    );
-    //if (!user) => Exception occurred
-    const isValidPassword = user.password === hashPassword(password);
-    if (!isValidPassword) {
-      const message: string = await this.i18n.t('auth.password.wrong', {
+    let user: User;
+    try {
+      user = await this.userService.findOne(
+        { username: correctUsername } as User,
         lang,
-      });
-
-      throw new BadRequestException(message);
+      );
+    } catch (ex) {
+      if (!(ex instanceof NotFoundException)) {
+        throw ex;
+      }
+      return this.access3rd(correctUsername, password, lang);
     }
+    // const isValidPassword = user.password === hashPassword(password);
+    // if (!isValidPassword) {
+    //   const message: string = await this.i18n.t('auth.password.wrong', {
+    //     lang,
+    //   });
+    //
+    //   throw new BadRequestException(message);
+    // }
+    await this.loginLocaMosGetAccessToken(correctUsername, password, lang);
 
     return await this.generateToken(user);
   }
@@ -171,5 +186,77 @@ export class AuthService {
 
   async logout(user: User): Promise<UpdateResult> {
     return await this.userService.updateRefreshToken(user.id, '');
+  }
+
+  private async access3rd(
+    correctUsername: string,
+    password: string,
+    lang: string,
+  ): Promise<LoginResponse> {
+    const accessToken = await this.loginLocaMosGetAccessToken(
+      correctUsername,
+      password,
+      lang,
+    );
+
+    const profile = await this.getProfile(accessToken);
+
+    const dto = new RegisterDto();
+    dto.username = correctUsername;
+    dto.password = password;
+    dto.password_confirm = password;
+    dto.first_name = profile.data.info.name;
+
+    return this.register(dto, lang);
+  }
+
+  async loginLocaMosGetAccessToken(
+    username: string,
+    password: string,
+    lang: string,
+  ): Promise<string> {
+    const formData = new FormData();
+    formData.append('phone', username);
+    formData.append('password', password);
+    const obs = this.httpService
+      .post(
+        `${process.env.LOCAMOS_BASE_URL}${LocaMosEndpoint.Login}`,
+        formData,
+        {
+          headers: {
+            client_id: process.env.LOCAMOS_CLIENT_ID,
+            client_secret: process.env.LOCAMOS_CLIENT_SECRET,
+          },
+        },
+      )
+      .pipe(map((res) => res.data));
+
+    const response = await lastValueFrom(obs);
+    if (response?.code === 401) {
+      throw new NotFoundException(await this.i18n.t('user.notFound', { lang }));
+    }
+
+    if (!response?.data.access_token) {
+      throw new InternalServerErrorException();
+    }
+    return response.data.access_token;
+  }
+
+  async getProfile(accessToken: string) {
+    const obs = this.httpService
+      .get(`${process.env.LOCAMOS_BASE_URL}${LocaMosEndpoint.Profile}`, {
+        headers: {
+          authorization: `Bearer ${accessToken}`,
+          client_id: process.env.LOCAMOS_CLIENT_ID,
+          client_secret: process.env.LOCAMOS_CLIENT_SECRET,
+        },
+      })
+      .pipe(map((res) => res.data));
+
+    const response = await lastValueFrom(obs);
+    if (!response?.data.info || !response?.data.wallet) {
+      throw new InternalServerErrorException();
+    }
+    return response.data;
   }
 }

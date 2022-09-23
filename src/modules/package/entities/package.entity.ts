@@ -26,6 +26,12 @@ export class Package {
   @Column({ default: 1 })
   version: number;
 
+  @Column({ nullable: true })
+  price_usd: number;
+
+  @Column({ nullable: true })
+  price_loca: number;
+
   @CreateDateColumn()
   created_at: Date;
 
