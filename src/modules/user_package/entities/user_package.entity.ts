@@ -37,6 +37,9 @@ export class UserPackage {
   })
   purchase_status: UPackagePurchaseStatus;
 
+  @Column()
+  version: number;
+
   @CreateDateColumn()
   created_at: Date;
 
