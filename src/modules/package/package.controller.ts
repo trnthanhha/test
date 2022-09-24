@@ -14,7 +14,6 @@ import { Auth } from '../../decorators/roles.decorator';
 import { UserType } from '../users/users.constants';
 import { ApiOperation, ApiTags } from '@nestjs/swagger';
 import { StandardPriceService } from '../standard-price/standard-price.service';
-import { StandardPrice } from '../standard-price/entities/standard-price.entity';
 import { Package } from './entities/package.entity';
 
 @ApiTags('packages')

@@ -4,6 +4,7 @@ import crypto from 'crypto';
 import querystring from 'qs';
 import { Order } from '../entities/order.entity';
 import { OrderStatusDto } from '../dto/order-status-dto';
+import { TransactionInfo } from './payment.types';
 
 const config = new ConfigService();
 
@@ -27,14 +28,14 @@ export class PaymentVNPayImplementor implements PaymentVendorAdapters {
     };
   }
 
-  generateURLRedirect(order: Order, ipAddr: string): string {
+  generateURLRedirect(txInfo: TransactionInfo, ipAddr: string): string {
     let vnpUrl = this.cf.VNP_Url;
 
     const date = forceToGMT7DateTime(new Date());
     const createDate = getDateTimeFormat(new Date(date));
-    const amount = order.price;
+    const amount = txInfo.price;
 
-    const orderInfo = order.note;
+    const orderInfo = txInfo.note;
     const orderType = 'billpayment';
     const locale = 'vn';
     const currCode = 'VND';
@@ -44,7 +45,7 @@ export class PaymentVNPayImplementor implements PaymentVendorAdapters {
     vnp_Params['vnp_TmnCode'] = this.cf.VNP_TmnCode;
     vnp_Params['vnp_Locale'] = locale;
     vnp_Params['vnp_CurrCode'] = currCode;
-    vnp_Params['vnp_TxnRef'] = order.ref_uid;
+    vnp_Params['vnp_TxnRef'] = txInfo.uuid;
     vnp_Params['vnp_OrderInfo'] = orderInfo;
     vnp_Params['vnp_OrderType'] = orderType;
     vnp_Params['vnp_Amount'] = amount * 100;
