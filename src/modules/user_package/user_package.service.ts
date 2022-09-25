@@ -1,7 +1,8 @@
 import { Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import { Repository } from 'typeorm';
+import { MoreThan, Repository } from 'typeorm';
 import { UserPackage } from './entities/user_package.entity';
+import { UPackagePurchaseStatus } from './user_package.constants';
 
 @Injectable()
 export class UserPackageService {
@@ -9,11 +10,11 @@ export class UserPackageService {
     @InjectRepository(UserPackage)
     private readonly repository: Repository<UserPackage>,
   ) {}
-  findAll() {
-    return `This action returns all userPackage`;
-  }
 
-  findOne(id: number) {
-    return `This action returns a #${id} userPackage`;
+  findUsablePackages() {
+    return this.repository.findBy({
+      remaining_quantity: MoreThan(0),
+      purchase_status: UPackagePurchaseStatus.PAID,
+    });
   }
 }

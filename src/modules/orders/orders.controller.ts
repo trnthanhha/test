@@ -40,7 +40,10 @@ export class OrdersController {
   @Auth()
   @ApiOperation({
     summary:
-      'Nếu mua location, cần có location_id, nếu location chưa tồn tại, cần thông tin lat, long, map_captured, nếu mua Package, cần package_id',
+      '1. Mua location đã tồn tại -> location_id là bắt buộc\n' +
+      '2. Mua location chưa tồn tại -> lat/long/name/map_captured là bắt buộc\n' +
+      '3. Mua location bằng package/combo -> user_package_id là bắt buộc\n' +
+      '4. Mua package bằng cash/point -> package_id là bắt buộc\n',
   })
   @ApiOkResponse({
     type: CreateOrderDto,
