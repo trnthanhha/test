@@ -54,6 +54,7 @@ export class UserPackage {
 
   isUsable(): boolean {
     return (
+      this.remaining_quantity &&
       this.remaining_quantity > 0 &&
       this.purchase_status === UPackagePurchaseStatus.PAID
     );

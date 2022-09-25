@@ -54,7 +54,7 @@ export class OrdersCheckoutImplementorCash
     }
 
     if (!stdPrice || !stdPrice.price) {
-      throw new InternalServerErrorException('Cant get price to purchase')
+      throw new InternalServerErrorException('Cant get price to purchase');
     }
   }
 

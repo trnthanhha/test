@@ -497,7 +497,9 @@ describe('Order controller', () => {
             save: (o: Order) => {
               expect(o.price).toEqual(100);
               expect(o.payment_status).toEqual(PaymentStatus.PAID);
-              expect(o.note).toEqual('Thanh toan mua LocaMos dia diem su dung package');
+              expect(o.note).toEqual(
+                'Thanh toan mua LocaMos dia diem su dung package',
+              );
               // create order
               o.id = 1;
               return o;
@@ -650,6 +652,7 @@ async function getTestingPackageService() {
               version: 1,
               name: 'Premium combo x5',
               price: 500,
+              quantity: 5,
             } as Package);
           },
         })),
@@ -825,5 +828,5 @@ function validUserPackage(): UserPackage {
     quantity: 5,
     price: 500,
     purchase_status: UPackagePurchaseStatus.PAID,
-  } as UserPackage
+  } as UserPackage;
 }

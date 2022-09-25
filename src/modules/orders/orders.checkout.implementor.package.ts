@@ -30,7 +30,7 @@ export class OrdersCheckoutImplementorPackage
     private readonly locationsService: LocationsService,
   ) {}
   preValidate(dto: CreateOrderDto) {
-    if (dto.user_package_id <= 0) {
+    if (!dto.user_package_id || dto.user_package_id <= 0) {
       throw new BadRequestException();
     }
   }
@@ -140,7 +140,7 @@ export class OrdersCheckoutImplementorPackage
     order.user_package_id = userPkg.id;
     order.payment_type = PaymentType.PACKAGE;
     order.payment_status = PaymentStatus.PAID;
-    order.note = 'Thanh toan mua LocaMos dia diem su dung package'
+    order.note = 'Thanh toan mua LocaMos dia diem su dung package';
 
     return order;
   }
