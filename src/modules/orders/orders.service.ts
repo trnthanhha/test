@@ -1,29 +1,15 @@
-import {
-  BadRequestException,
-  Injectable,
-  InternalServerErrorException,
-  Logger,
-} from '@nestjs/common';
+import { Injectable, Logger } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Order } from './entities/order.entity';
 import { EntityManager, FindManyOptions, Repository } from 'typeorm';
 import { PaymentStatus } from './orders.constants';
-import { CheckoutDto } from './dto/checkout-dto';
-import { PaymentGatewayFactory } from './vendor_adapters/payment.vendor.adapters';
-import { randomUUID } from 'crypto';
-import { CreateLocationDto } from '../locations/dto/create-location.dto';
 import { CreateOrderDto } from './dto/create-order.dto';
 import { LocationsService } from '../locations/locations.service';
 import { StandardPriceService } from '../standard-price/standard-price.service';
 import { User } from '../users/entities/user.entity';
-import { LocationStatus } from '../locations/locations.contants';
-import { Bill } from '../bills/entities/bill.entity';
-import { BillStatus, PaymentVendor } from '../bills/bills.constants';
 import { BillsService } from '../bills/bills.service';
-import { UserPackage } from '../user_package/entities/user_package.entity';
-import { Location } from '../locations/entities/location.entity';
-import { Package } from '../package/entities/package.entity';
 import { PackageService } from '../package/package.service';
+import { OrderCheckoutFlowAbstraction } from './orders.checkout.template';
 
 @Injectable()
 export class OrdersService {
@@ -88,134 +74,21 @@ export class OrdersService {
     }
   }
 
-  async create(order: Order, dbManager?: EntityManager) {
-    const repo = dbManager?.getRepository(Order) || this.orderRepository;
-    return repo.save(order);
-  }
-
   async remove(id: number) {
     return this.orderRepository.delete(id);
   }
 
   // Business
   async checkout(createOrderDto: CreateOrderDto, req: any, user: User) {
-    let loc: Location;
-    let pkg: Package;
-    if (createOrderDto.location_id > 0) {
-      loc = await this.locationsService.findOne(createOrderDto.location_id);
-      if (!loc.canPurchased()) {
-        return CheckoutDto.fail(
-          new BadRequestException(),
-          'Location is unable to purchase',
-        );
-      }
-    } else if (createOrderDto.package_id > 0) {
-      pkg = await this.packageServices.findOne(createOrderDto.package_id);
-    }
-
-    const stdPrice = await this.standardPriceService.getStandardPrice();
-    if (!stdPrice) {
-      return CheckoutDto.fail(
-        new InternalServerErrorException(),
-        'Cant get price to purchase',
-      );
-    }
-
-    const pmGateway = PaymentGatewayFactory.Build();
-    const order = this.initOrder(pkg?.price || stdPrice.price);
-    order.created_by_id = user.id;
-
-    const created = await this.orderRepository.manager.transaction(
-      async (entityManager): Promise<Order | any> => {
-        let userPackage: UserPackage;
-        if (pkg) {
-          userPackage = await this.createUserPackage(pkg, user, entityManager);
-        } else if (!loc) {
-          loc = await this.locationsService.create(
-            Object.assign(new CreateLocationDto(), createOrderDto),
-            user,
-            entityManager,
-          );
-          if (loc.status !== LocationStatus.APPROVED) {
-            return {
-              error: 'Invalid distance',
-            };
-          }
-        }
-
-        order.location_id = loc?.id;
-        order.user_package_id = userPackage?.id;
-        const insertedOrder = await this.create(order, entityManager);
-        await this.billsService.create(
-          this.initBill(insertedOrder),
-          entityManager,
-        );
-
-        if (loc) {
-          const result = await this.locationsService.checkout(
-            entityManager,
-            loc.id,
-            loc.version,
-          );
-          if (!result.affected) {
-            return {
-              error: 'Invalid version. Location has data changed',
-            };
-          }
-        }
-        return insertedOrder;
-      },
+    const checkoutFlow = new OrderCheckoutFlowAbstraction(
+      user,
+      this.orderRepository.manager,
+      this.billsService,
+      this.locationsService,
+      this.packageServices,
+      this.standardPriceService,
     );
 
-    if (created.error) {
-      return CheckoutDto.fail(
-        new InternalServerErrorException(),
-        created.error,
-      );
-    }
-
-    const ipAddr =
-      req.headers['x-forwarded-for'] ||
-      req.connection.remoteAddress ||
-      req.socket.remoteAddress ||
-      req.connection.socket.remoteAddress;
-
-    const redirectUrl = pmGateway.generateURLRedirect(created, ipAddr);
-    return CheckoutDto.success(redirectUrl, loc);
-  }
-
-  initOrder(price: number): Order {
-    const order = new Order();
-    order.ref_uid = randomUUID();
-    order.price = price;
-    order.payment_status = PaymentStatus.UNAUTHORIZED;
-    order.note = order.note || 'Thanh toan mua LocaMos dia diem';
-
-    return order;
-  }
-
-  initBill(order: Order): Bill {
-    const bill = new Bill();
-    bill.order_id = order.id;
-    bill.ref_id = order.ref_uid;
-    bill.status = BillStatus.UNAUTHORIZED;
-    bill.created_by_id = order.created_by_id;
-    bill.vendor = PaymentVendor.VNPAY;
-
-    return bill;
-  }
-
-  async createUserPackage(
-    pkg: Package,
-    user: User,
-    entityManager: EntityManager,
-  ): Promise<UserPackage> {
-    const userPackage = new UserPackage();
-    userPackage.package_id = pkg.id;
-    userPackage.user_id = user.id;
-    userPackage.package_name = pkg.name;
-    userPackage.quantity = pkg.quantity;
-    userPackage.remaining_quantity = pkg.quantity;
-    return entityManager.getRepository(UserPackage).save(userPackage);
+    return checkoutFlow.checkout(createOrderDto, req);
   }
 }

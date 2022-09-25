@@ -1,9 +1,8 @@
 import { Injectable } from '@nestjs/common';
-import { CreateUserPackageDto } from './dto/create-user_package.dto';
-import { UpdateUserPackageDto } from './dto/update-user_package.dto';
 import { InjectRepository } from '@nestjs/typeorm';
-import { Repository } from 'typeorm';
+import { MoreThan, Repository } from 'typeorm';
 import { UserPackage } from './entities/user_package.entity';
+import { UPackagePurchaseStatus } from './user_package.constants';
 
 @Injectable()
 export class UserPackageService {
@@ -12,23 +11,10 @@ export class UserPackageService {
     private readonly repository: Repository<UserPackage>,
   ) {}
 
-  create(createUserPackageDto: CreateUserPackageDto) {
-    return 'This action adds a new userPackage';
-  }
-
-  findAll() {
-    return `This action returns all userPackage`;
-  }
-
-  findOne(id: number) {
-    return `This action returns a #${id} userPackage`;
-  }
-
-  update(id: number, updateUserPackageDto: UpdateUserPackageDto) {
-    return `This action updates a #${id} userPackage`;
-  }
-
-  remove(id: number) {
-    return `This action removes a #${id} userPackage`;
+  findUsablePackages() {
+    return this.repository.findBy({
+      remaining_quantity: MoreThan(0),
+      purchase_status: UPackagePurchaseStatus.PAID,
+    });
   }
 }

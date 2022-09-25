@@ -7,6 +7,7 @@ export enum BillStatus {
 
 export enum PaymentVendor {
   VNPAY = 'vnpay',
+  LOCAMOS = 'locamos',
 }
 
 export enum PaymentType {
