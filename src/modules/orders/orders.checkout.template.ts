@@ -10,18 +10,22 @@ import { User } from '../users/entities/user.entity';
 import { Order } from './entities/order.entity';
 import { EntityManager } from 'typeorm';
 import { BillsService } from '../bills/bills.service';
-import { Location } from '../locations/entities/location.entity';
-import { InternalServerErrorException } from '@nestjs/common';
+import { TransactionInfo } from './vendor_adapters/payment.types';
+import { OrdersCheckoutImplementorPackage } from './orders.checkout.implementor.package';
+import { BadRequestException } from '@nestjs/common';
+import { randomUUID } from 'crypto';
 
 export interface OrdersCheckoutFlowInterface {
-  prepareData(dto: CreateOrderDto): Promise<PrepareOrder | CheckoutDto>;
+  preValidate(dto: CreateOrderDto);
+  prepareData(dto: CreateOrderDto): Promise<PrepareOrder>;
+  validateData(pOrder: PrepareOrder);
   processBusiness(pOrder: PrepareOrder): Promise<Order>;
   processDBTransaction(
     order: Order,
     createOrderDto: CreateOrderDto,
     pOrder: PrepareOrder,
-  );
-  responseResult(req: any, created: Order, newLocation: Location);
+  ): Promise<any>;
+  responseResult(req: any, info: TransactionInfo, newItem: any);
 }
 
 export class OrderCheckoutFlowAbstraction {
@@ -34,27 +38,45 @@ export class OrderCheckoutFlowAbstraction {
     private readonly standardPriceService: StandardPriceService,
   ) {}
 
-  async checkout(createOrderDto: CreateOrderDto, req: any) {
-    const flow = this.getFlow(createOrderDto);
-    const preparedData = await flow.prepareData(createOrderDto);
-    if (preparedData instanceof CheckoutDto) {
-      // got failed
-      return preparedData;
-    }
-    const order = await flow.processBusiness(preparedData);
-    const inserted = await flow.processDBTransaction(
-      order,
-      createOrderDto,
-      preparedData,
-    );
-    if (inserted.error) {
-      return CheckoutDto.fail(
-        new InternalServerErrorException(),
-        inserted.error,
-      );
+  async checkout(dto: CreateOrderDto, req: any) {
+    // -- Base validate
+    if (
+      // buy exist location
+      !dto.location_id &&
+      // or? new custom location -> need lat + long + name + map_captured
+      (!dto.lat || !dto.long || !dto.name || !dto.map_captured) &&
+      // or? buy package?
+      !dto.package_id
+    ) {
+      throw new BadRequestException();
     }
 
-    return flow.responseResult(req, inserted, preparedData.location);
+    // -- Choose flow
+    const flow = this.getFlow(dto);
+    // -- Custom validate by flow
+    flow.preValidate(dto);
+    const preparedData = await flow.prepareData(dto);
+    flow.validateData(preparedData);
+    // -- Business logic
+    const order = await flow.processBusiness(preparedData);
+    order.ref_uid = randomUUID();
+
+    // -- Start db execution
+    const result = await flow.processDBTransaction(order, dto, preparedData);
+    if (result instanceof CheckoutDto) {
+      // got failed
+      return result;
+    }
+
+    return flow.responseResult(
+      req,
+      {
+        price: order.price,
+        note: order.note,
+        uuid: order.ref_uid,
+      },
+      result,
+    );
   }
 
   getFlow = (createOrderDto: CreateOrderDto): OrdersCheckoutFlowInterface => {
@@ -69,7 +91,12 @@ export class OrderCheckoutFlowAbstraction {
           this.standardPriceService,
         );
       case PaymentType.PACKAGE:
-        throw new Error('Unimplemented payment method');
+        return new OrdersCheckoutImplementorPackage(
+          this.user,
+          this.dbManager,
+          this.billsService,
+          this.locationsService,
+        );
       case PaymentType.POINT:
       default:
         throw new Error('Unimplemented payment method');

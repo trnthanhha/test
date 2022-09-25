@@ -2,7 +2,6 @@ import { PaymentVendorAdapters } from './payment.vendor.adapters';
 import { ConfigService } from '@nestjs/config';
 import crypto from 'crypto';
 import querystring from 'qs';
-import { Order } from '../entities/order.entity';
 import { OrderStatusDto } from '../dto/order-status-dto';
 import { TransactionInfo } from './payment.types';
 

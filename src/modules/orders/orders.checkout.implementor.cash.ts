@@ -11,18 +11,22 @@ import { CreateOrderDto } from './dto/create-order.dto';
 import { LocationsService } from '../locations/locations.service';
 import { PackageService } from '../package/package.service';
 import { StandardPriceService } from '../standard-price/standard-price.service';
-import { randomUUID } from 'crypto';
 import { Order } from './entities/order.entity';
 import { PaymentStatus } from './orders.constants';
 import { User } from '../users/entities/user.entity';
 import { EntityManager } from 'typeorm';
 import { UserPackage } from '../user_package/entities/user_package.entity';
 import { CreateLocationDto } from '../locations/dto/create-location.dto';
-import { LocationStatus } from '../locations/locations.contants';
+import {
+  LocationPurchaseStatus,
+  LocationStatus,
+} from '../locations/locations.contants';
 import { BillsService } from '../bills/bills.service';
 import { Bill } from '../bills/entities/bill.entity';
 import { BillStatus, PaymentVendor } from '../bills/bills.constants';
 import { PaymentGatewayFactory } from './vendor_adapters/payment.vendor.adapters';
+import { TransactionInfo } from './vendor_adapters/payment.types';
+import { UPackagePurchaseStatus } from '../user_package/user_package.constants';
 
 export class OrdersCheckoutImplementorCash
   implements OrdersCheckoutFlowInterface
@@ -35,32 +39,35 @@ export class OrdersCheckoutImplementorCash
     private readonly packageServices: PackageService,
     private readonly standardPriceService: StandardPriceService,
   ) {}
+  preValidate(dto: CreateOrderDto) {
+    // required cash -> no user_package_id
+    if (dto.user_package_id) {
+      throw new BadRequestException();
+    }
+  }
 
-  async prepareData(
-    createOrderDto: CreateOrderDto,
-  ): Promise<PrepareOrder | CheckoutDto> {
+  validateData(pOrder: PrepareOrder) {
+    // required cash -> no user_package_id
+    const { location, stdPrice } = pOrder;
+    if (location && !location.canPurchased()) {
+      throw new BadRequestException('Location is unable to purchase');
+    }
+
+    if (!stdPrice || !stdPrice.price) {
+      throw new InternalServerErrorException('Cant get price to purchase')
+    }
+  }
+
+  async prepareData(createOrderDto: CreateOrderDto): Promise<PrepareOrder> {
     let loc: Location;
     let pkg: Package;
     if (createOrderDto.location_id > 0) {
       loc = await this.locationsService.findOne(createOrderDto.location_id);
-      if (!loc.canPurchased()) {
-        return CheckoutDto.fail(
-          new BadRequestException(),
-          'Location is unable to purchase',
-        );
-      }
     } else if (createOrderDto.package_id > 0) {
       pkg = await this.packageServices.findOne(createOrderDto.package_id);
     }
 
     const stdPrice = await this.standardPriceService.getStandardPrice();
-    if (!stdPrice) {
-      return CheckoutDto.fail(
-        new InternalServerErrorException(),
-        'Cant get price to purchase',
-      );
-    }
-
     return {
       pkg,
       location: loc,
@@ -70,15 +77,24 @@ export class OrdersCheckoutImplementorCash
 
   async processBusiness(pOrder: PrepareOrder): Promise<Order> {
     const { pkg, stdPrice } = pOrder;
-
-    return this.initOrder(pkg?.price || stdPrice.price);
+    let price;
+    let note;
+    if (pkg) {
+      // buy combo
+      price = pkg.price; // calculated by pkg.quantity * stdPrice.price
+      note = 'Thanh toan mua LocaMos package/combo';
+    } else {
+      price = stdPrice.price;
+      note = 'Thanh toan mua LocaMos dia diem';
+    }
+    return this.initOrder(price, note);
   }
 
   async processDBTransaction(
     order: Order,
     createOrderDto: CreateOrderDto,
     pOrder: PrepareOrder,
-  ) {
+  ): Promise<Location | UserPackage> {
     const pkg = pOrder.pkg;
     let loc = pOrder.location;
     return await this.dbManager.transaction(
@@ -97,9 +113,10 @@ export class OrdersCheckoutImplementorCash
             entityManager,
           );
           if (loc.status !== LocationStatus.APPROVED) {
-            return {
-              error: 'Invalid distance',
-            };
+            return CheckoutDto.fail(
+              new InternalServerErrorException(),
+              'Invalid distance',
+            );
           }
         }
 
@@ -118,19 +135,25 @@ export class OrdersCheckoutImplementorCash
             entityManager,
             loc.id,
             loc.version,
+            LocationPurchaseStatus.UNAUTHORIZED,
           );
           if (!result.affected) {
-            return {
-              error: 'Invalid version. Location has data changed',
-            };
+            return CheckoutDto.fail(
+              new InternalServerErrorException(),
+              'Invalid version. Location has data changed',
+            );
           }
         }
-        return insertedOrder;
+        return loc || userPackage;
       },
     );
   }
 
-  responseResult(req: any, created: Order, newLocation: Location) {
+  responseResult(
+    req: any,
+    info: TransactionInfo,
+    newItem: Location | UserPackage,
+  ) {
     const pmGateway = PaymentGatewayFactory.Build();
 
     const ipAddr =
@@ -139,23 +162,15 @@ export class OrdersCheckoutImplementorCash
       req.socket.remoteAddress ||
       req.connection.socket.remoteAddress;
 
-    const redirectUrl = pmGateway.generateURLRedirect(
-      {
-        uuid: created.ref_uid,
-        note: created.note,
-        price: created.price,
-      },
-      ipAddr,
-    );
-    return CheckoutDto.success(redirectUrl, newLocation);
+    const redirectUrl = pmGateway.generateURLRedirect(info, ipAddr);
+    return CheckoutDto.success(redirectUrl, newItem);
   }
 
-  initOrder(price: number): Order {
+  initOrder(price: number, note: string): Order {
     const order = new Order();
-    order.ref_uid = randomUUID();
     order.price = price;
     order.payment_status = PaymentStatus.UNAUTHORIZED;
-    order.note = order.note || 'Thanh toan mua LocaMos dia diem';
+    order.note = note;
     order.created_by_id = this.user.id;
 
     return order;
@@ -183,6 +198,8 @@ export class OrdersCheckoutImplementorCash
     userPackage.package_name = pkg.name;
     userPackage.quantity = pkg.quantity;
     userPackage.remaining_quantity = pkg.quantity;
+    userPackage.price = pkg.price;
+    userPackage.purchase_status = UPackagePurchaseStatus.UNAUTHORIZED;
     return entityManager.getRepository(UserPackage).save(userPackage);
   }
 }

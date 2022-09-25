@@ -1,14 +1,19 @@
 import { Location } from '../../locations/entities/location.entity';
+import { UserPackage } from '../../user_package/entities/user_package.entity';
 
 export class CheckoutDto {
   public static success = (
-    redirect_url: string,
-    loc?: Location,
+    redirect_url?: string,
+    newItem?: Location | UserPackage,
   ): CheckoutDto => {
     const rs = new CheckoutDto();
     rs.redirect_url = redirect_url;
     rs.success = true;
-    rs.location_name = loc?.name;
+    if (newItem instanceof Location) {
+      rs.location_name = newItem.name;
+    } else {
+      rs.package_name = newItem?.package_name;
+    }
 
     return rs;
   };
@@ -27,4 +32,5 @@ export class CheckoutDto {
   message?: string;
   redirect_url?: string;
   location_name?: string;
+  package_name?: string;
 }

@@ -22,7 +22,7 @@ import {
 } from '../redis/redis.constants';
 import { UsersService } from '../users/users.service';
 import { AcceptLanguageResolver, I18nModule, QueryResolver } from 'nestjs-i18n';
-import { PaymentType } from './orders.constants';
+import { PaymentStatus, PaymentType } from './orders.constants';
 import {
   LocationNFTStatus,
   LocationPurchaseStatus,
@@ -37,6 +37,9 @@ import {
 } from 'typeorm';
 import { FindOptionsWhere } from 'typeorm/find-options/FindOptionsWhere';
 import { UserPackage } from '../user_package/entities/user_package.entity';
+import { Repository } from 'typeorm/repository/Repository';
+import { UPackagePurchaseStatus } from '../user_package/user_package.constants';
+import { BadRequestException } from '@nestjs/common';
 
 describe('Order controller', () => {
   beforeEach(() => {
@@ -48,6 +51,7 @@ describe('Order controller', () => {
   });
 
   it('Checkout: buy existed location by cash', async () => {
+    // ---- Custom mock repository
     mockManager.update = (
       entity,
       criteria,
@@ -67,6 +71,30 @@ describe('Order controller', () => {
       }
     };
 
+    mockManager.getRepository = (e): Repository<any> => {
+      switch (e) {
+        case Order:
+          return {
+            save: (o: Order) => {
+              expect(o.price).toEqual(100);
+              expect(o.payment_status).toEqual(PaymentStatus.UNAUTHORIZED);
+              expect(o.note).toEqual('Thanh toan mua LocaMos dia diem');
+              // create order
+              o.id = 1;
+              return o;
+            },
+          } as unknown as Repository<any>;
+        case Bill:
+          return {
+            save: (b: Bill) => {
+              b.id = 1;
+              return b;
+            },
+          } as unknown as Repository<any>;
+      }
+    };
+
+    // --- Process
     const controller = await getOrderController();
     const dto = new CreateOrderDto();
     dto.location_id = 1;
@@ -83,6 +111,7 @@ describe('Order controller', () => {
   it('Checkout: buy custom location by cash', async () => {
     const updated = new UpdateResult();
     updated.affected = 1;
+    // -- Custom mock repository
     mockManager.update = (
       entity,
       criteria,
@@ -107,7 +136,30 @@ describe('Order controller', () => {
           return Promise.resolve(updated);
       }
     };
+    mockManager.getRepository = (e): Repository<any> => {
+      switch (e) {
+        case Order:
+          return {
+            save: (o: Order) => {
+              expect(o.price).toEqual(100);
+              expect(o.payment_status).toEqual(PaymentStatus.UNAUTHORIZED);
+              expect(o.note).toEqual('Thanh toan mua LocaMos dia diem');
+              // create order
+              o.id = 1;
+              return o;
+            },
+          } as unknown as Repository<any>;
+        case Bill:
+          return {
+            save: (b: Bill) => {
+              b.id = 1;
+              return b;
+            },
+          } as unknown as Repository<any>;
+      }
+    };
 
+    // --- Processing
     const controller = await getOrderController();
     const dto = new CreateOrderDto();
     dto.lat = 20;
@@ -121,12 +173,14 @@ describe('Order controller', () => {
       new User(),
     );
     expect(rs.success).toEqual(true);
-    expect(rs.location_name).toEqual(undefined);
+    expect(rs.location_name).toEqual('my new custom location');
   });
 
   it('Checkout: buy package by cash', async () => {
     const updated = new UpdateResult();
     updated.affected = 1;
+
+    // --- Custom mock repository
     mockManager.update = (
       entity,
       criteria,
@@ -143,7 +197,51 @@ describe('Order controller', () => {
           return Promise.resolve(updated);
       }
     };
+    mockManager.getRepository = (e) => {
+      switch (e) {
+        case UserPackage:
+          return {
+            save: (item: UserPackage) => {
+              expect(item).toEqual(
+                Object.assign(new UserPackage(), {
+                  package_id: 2,
+                  user_id: -1,
+                  package_name: 'Premium combo x5',
+                  quantity: 5,
+                  remaining_quantity: 5,
+                  price: 500,
+                  purchase_status: UPackagePurchaseStatus.UNAUTHORIZED,
+                } as UserPackage),
+              );
 
+              item.id = 7;
+              item.version = 1;
+
+              return item;
+            },
+          } as unknown as Repository<any>;
+        case Order:
+          return {
+            save: (o: Order) => {
+              expect(o.price).toEqual(500);
+              expect(o.payment_status).toEqual(PaymentStatus.UNAUTHORIZED);
+              expect(o.note).toEqual('Thanh toan mua LocaMos package/combo');
+              // create order
+              o.id = 1;
+              return o;
+            },
+          } as unknown as Repository<any>;
+        case Bill:
+          return {
+            save: (b: Bill) => {
+              b.id = 1;
+              return b;
+            },
+          } as unknown as Repository<any>;
+      }
+    };
+
+    // --- Processing
     const controller = await getOrderController();
     const dto = new CreateOrderDto();
     dto.type = PaymentType.CASH;
@@ -154,6 +252,276 @@ describe('Order controller', () => {
       new User(),
     );
     expect(rs.success).toEqual(true);
+    expect(rs.package_name).toEqual('Premium combo x5');
+  });
+
+  it('Checkout: buy location by package -- failed by no remaining quantity', async () => {
+    // ---- Custom mock repository
+    mockManager.getRepository = (e): Repository<any> => {
+      switch (e) {
+        case Location:
+          return {
+            findOneBy: ({ id }) => {
+              expect(id).toEqual(1);
+              const loc = new Location();
+              loc.id = 1;
+              loc.name = 'my bought location name';
+              loc.status = LocationStatus.APPROVED;
+              loc.version = 3;
+
+              return loc;
+            },
+          } as unknown as Repository<any>;
+        case UserPackage:
+          return {
+            findOneBy: ({ id }) => {
+              expect(id).toEqual(4);
+              return Object.assign(new UserPackage(), {
+                id: 4,
+                remaining_quantity: 0,
+              } as UserPackage);
+            },
+          } as unknown as Repository<any>;
+      }
+    };
+
+    // --- Process
+    const { controller, dto } = await initParamTestBuyByPackage();
+    await expect(
+      controller.create(
+        dto,
+        { headers: {}, socket: {}, connection: { remoteAddress: 'localhost' } },
+        new User(),
+      ),
+    ).rejects.toEqual(
+      new BadRequestException(
+        'User not exist package || zero quantity || package unpaid',
+      ),
+    );
+  });
+
+  it('Checkout: buy location by package -- failed by user package unpaid - failed purchase', async () => {
+    // ---- Custom mock repository
+    mockManager.getRepository = (e): Repository<any> => {
+      switch (e) {
+        case Location:
+          return {
+            findOneBy: ({ id }) => {
+              expect(id).toEqual(1);
+              const loc = new Location();
+              loc.id = 1;
+              loc.name = 'my bought location name';
+              loc.status = LocationStatus.APPROVED;
+              loc.version = 3;
+
+              return loc;
+            },
+          } as unknown as Repository<any>;
+        case UserPackage:
+          return {
+            findOneBy: ({ id }) => {
+              expect(id).toEqual(4);
+              return Object.assign(new UserPackage(), {
+                id: 4,
+                remaining_quantity: 4,
+                purchase_status: UPackagePurchaseStatus.FAILED,
+              } as UserPackage);
+            },
+          } as unknown as Repository<any>;
+      }
+    };
+
+    // --- Process
+    const { controller, dto } = await initParamTestBuyByPackage();
+    await expect(
+      controller.create(
+        dto,
+        { headers: {}, socket: {}, connection: { remoteAddress: 'localhost' } },
+        new User(),
+      ),
+    ).rejects.toEqual(
+      new BadRequestException(
+        'User not exist package || zero quantity || package unpaid',
+      ),
+    );
+  });
+
+  it('Checkout: buy location by package -- failed by user package unpaid - unauthorized purchase', async () => {
+    // ---- Custom mock repository
+    mockManager.getRepository = (e): Repository<any> => {
+      switch (e) {
+        case Location:
+          return {
+            findOneBy: ({ id }) => {
+              expect(id).toEqual(1);
+              const loc = new Location();
+              loc.id = 1;
+              loc.name = 'my bought location name';
+              loc.status = LocationStatus.APPROVED;
+              loc.version = 3;
+
+              return loc;
+            },
+          } as unknown as Repository<any>;
+        case UserPackage:
+          return {
+            findOneBy: ({ id }) => {
+              expect(id).toEqual(4);
+              return Object.assign(new UserPackage(), {
+                id: 4,
+                remaining_quantity: 4,
+                purchase_status: UPackagePurchaseStatus.UNAUTHORIZED,
+              } as UserPackage);
+            },
+          } as unknown as Repository<any>;
+      }
+    };
+
+    // --- Process
+    const { controller, dto } = await initParamTestBuyByPackage();
+    await expect(
+      controller.create(
+        dto,
+        { headers: {}, socket: {}, connection: { remoteAddress: 'localhost' } },
+        new User(),
+      ),
+    ).rejects.toThrowError(
+      new BadRequestException(
+        'User not exist package || zero quantity || package unpaid',
+      ),
+    );
+  });
+
+  it('Checkout: buy existed location by package -- failed by location cant purchase', async () => {
+    const updated = new UpdateResult();
+    updated.affected = 1;
+    // -- Custom mock repository
+    mockManager.getRepository = (e): Repository<any> => {
+      switch (e) {
+        case Location:
+          return {
+            findOneBy: ({ id }) => {
+              expect(id).toEqual(1);
+              const loc = new Location();
+              loc.id = 1;
+              loc.name = 'my bought location name';
+              loc.purchase_status = LocationPurchaseStatus.UNAUTHORIZED;
+              loc.version = 3;
+
+              return loc;
+            },
+          } as unknown as Repository<any>;
+        case UserPackage:
+          return {
+            findOneBy: ({ id }) => {
+              expect(id).toEqual(4);
+              return Object.assign(new UserPackage(), {
+                id: 4,
+                package_name: 'Premium combo x5',
+                version: 2,
+                package_id: 2,
+                quantity: 5,
+                remaining_quantity: 4,
+                purchase_status: UPackagePurchaseStatus.PAID,
+              } as UserPackage);
+            },
+          } as unknown as Repository<any>;
+      }
+    };
+
+    // --- Processing
+    const { controller, dto } = await initParamTestBuyByPackage();
+    await expect(
+      controller.create(
+        dto,
+        { headers: {}, socket: {}, connection: { remoteAddress: 'localhost' } },
+        new User(),
+      ),
+    ).rejects.toThrowError(
+      new BadRequestException('Location is unable to purchase'),
+    );
+  });
+
+  it('Checkout: buy existed location by package succeeded', async () => {
+    const updated = new UpdateResult();
+    updated.affected = 1;
+    // -- Custom mock repository
+    mockManager.update = (
+      entity,
+      criteria,
+      updateValue,
+    ): Promise<UpdateResult> => {
+      switch (entity) {
+        case Location:
+          expect(criteria).toEqual({ id: 2, version: 1 });
+          expect(updateValue).toEqual({
+            purchase_status: null,
+            version: 2,
+          });
+
+          return Promise.resolve(updated);
+        case LocationHandle:
+          expect(criteria).toEqual({
+            name: 'my-new-custom-location',
+            total: 2,
+          });
+          expect(updateValue).toEqual({ total: 3 });
+
+          return Promise.resolve(updated);
+      }
+    };
+    mockManager.getRepository = (e): Repository<any> => {
+      switch (e) {
+        case Location:
+          return {
+            findOneBy: ({ id }) => {
+              expect(id).toEqual(1);
+              const loc = new Location();
+              loc.id = 2;
+              loc.name = 'my bought location name';
+              loc.status = LocationStatus.APPROVED;
+              loc.version = 1;
+
+              return loc;
+            },
+          } as unknown as Repository<any>;
+        case UserPackage:
+          return {
+            findOneBy: ({ id }) => {
+              expect(id).toEqual(4);
+              return Object.assign(new UserPackage(), validUserPackage());
+            },
+          } as unknown as Repository<any>;
+        case Order:
+          return {
+            save: (o: Order) => {
+              expect(o.price).toEqual(100);
+              expect(o.payment_status).toEqual(PaymentStatus.PAID);
+              expect(o.note).toEqual('Thanh toan mua LocaMos dia diem su dung package');
+              // create order
+              o.id = 1;
+              return o;
+            },
+          } as unknown as Repository<any>;
+        case Bill:
+          return {
+            save: (b: Bill) => {
+              b.id = 1;
+              return b;
+            },
+          } as unknown as Repository<any>;
+      }
+    };
+
+    // --- Processing
+    const { controller, dto } = await initParamTestBuyByPackage();
+    const rs = await controller.create(
+      dto,
+      { headers: {}, socket: {}, connection: { remoteAddress: 'localhost' } },
+      new User(),
+    );
+    expect(rs.success).toEqual(true);
+    expect(rs.location_name).toEqual('my bought location name');
   });
 });
 
@@ -163,52 +531,13 @@ const mockManager = {
   ): Promise<Location> {
     return runInTx(mockManager);
   },
-  getRepository: (e) => {
-    switch (e) {
-      case Order:
-        return {
-          save: (o: Order) => {
-            // create order
-            o.id = 1;
-            return o;
-          },
-        };
-      case Bill:
-        return {
-          save: (b: Bill) => {
-            b.id = 1;
-            return b;
-          },
-        };
-      case UserPackage:
-        return {
-          save: (item: UserPackage) => {
-            expect(item).toEqual(
-              Object.assign(new UserPackage(), {
-                package_id: 2,
-                user_id: -1,
-                package_name: 'Package 1',
-                quantity: 5,
-                remaining_quantity: 5,
-              } as UserPackage),
-            );
-
-            item.id = 7;
-            item.version = 1;
-
-            return item;
-          },
-        };
-    }
-  },
   findOneBy: (entity, { name }) => {
     switch (entity) {
       case LocationHandle:
-        const hdl = new LocationHandle();
-        hdl.name = name;
-        hdl.total = 2;
-
-        return hdl;
+        return Object.assign(new LocationHandle(), {
+          name,
+          total: 2,
+        } as LocationHandle);
     }
   },
   save: (item) => {
@@ -319,9 +648,8 @@ async function getTestingPackageService() {
             return Object.assign(new Package(), {
               id: 2,
               version: 1,
-              name: 'Package 1',
-              price: 200,
-              quantity: 5,
+              name: 'Premium combo x5',
+              price: 500,
             } as Package);
           },
         })),
@@ -473,3 +801,29 @@ const mockRedis = jest.fn(() => ({
     return JSON.stringify(stdPrice);
   }),
 }));
+
+async function initParamTestBuyByPackage() {
+  const controller = await getOrderController();
+  const dto = new CreateOrderDto();
+  dto.type = PaymentType.PACKAGE;
+  dto.user_package_id = 4;
+  dto.location_id = 1;
+
+  return {
+    controller,
+    dto,
+  };
+}
+
+function validUserPackage(): UserPackage {
+  return {
+    id: 4,
+    package_name: 'Premium combo x5',
+    version: 2,
+    package_id: 2,
+    remaining_quantity: 4,
+    quantity: 5,
+    price: 500,
+    purchase_status: UPackagePurchaseStatus.PAID,
+  } as UserPackage
+}
