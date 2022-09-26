@@ -26,7 +26,8 @@ import { REDIS_CLIENT_PROVIDER } from '../redis/redis.constants';
 import { generateRedisKey } from '../redis/redis.keys.pattern';
 import { CreateUserDto } from './dto/create-user.dto';
 import { UpdateUserDto } from './dto/update-user.dto';
-import { AuthService } from '../auth/auth.service';
+import { HttpService } from '@nestjs/axios';
+import { LocamosLinkageService } from '../../services/locamos-linkage/user.service';
 
 @ApiTags('users')
 @Controller('users')
@@ -34,7 +35,7 @@ import { AuthService } from '../auth/auth.service';
 export class UsersController {
   constructor(
     private readonly usersService: UsersService,
-    private readonly authService: AuthService,
+    private readonly httpService: HttpService,
     @Inject(REDIS_CLIENT_PROVIDER) private readonly redis: Redis,
   ) {}
 
@@ -124,9 +125,9 @@ export class UsersController {
       'identification_created_at',
     ]);
 
-    const profile = await this.authService.getProfile(
-      customer.locamos_access_token,
-    );
+    const profile = await new LocamosLinkageService(
+      this.httpService,
+    ).getProfile(customer.locamos_access_token);
 
     return Object.assign(filtered, profile);
   }

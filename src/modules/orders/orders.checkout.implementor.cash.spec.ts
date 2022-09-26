@@ -107,5 +107,5 @@ describe('Checkout by cash', () => {
 });
 
 function getEmptyFlowInstance(): OrdersCheckoutImplementorCash {
-  return new OrdersCheckoutImplementorCash(null, null, null, null, null, null);
+  return new OrdersCheckoutImplementorCash(null, null, null, null, null);
 }

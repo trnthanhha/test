@@ -12,12 +12,14 @@ import { PackageService } from '../package/package.service';
 import { OrderCheckoutFlowAbstraction } from './orders.checkout.template';
 import { RabbitMQServices } from '../../services/message-broker/webhook.types';
 import { ClientProxy } from '@nestjs/microservices';
+import { HttpService } from '@nestjs/axios';
 
 @Injectable()
 export class OrdersService {
   private readonly logger = new Logger(OrdersService.name);
 
   constructor(
+    private readonly httpService: HttpService,
     @Inject(RabbitMQServices.VNPay) private readonly publisher: ClientProxy,
     @InjectRepository(Order)
     private orderRepository: Repository<Order>,
@@ -84,6 +86,7 @@ export class OrdersService {
   // Business
   async checkout(createOrderDto: CreateOrderDto, req: any, user: User) {
     const checkoutFlow = new OrderCheckoutFlowAbstraction(
+      this.httpService,
       this.publisher,
       user,
       this.orderRepository.manager,

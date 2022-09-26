@@ -35,7 +35,7 @@ export class OrdersCheckoutImplementorPackage
     }
   }
 
-  validateData(pOrder: PrepareOrder) {
+  async validateData(pOrder: PrepareOrder) {
     const { userPkg, location } = pOrder;
     if (!userPkg || !userPkg.isUsable()) {
       throw new BadRequestException(

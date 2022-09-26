@@ -19,6 +19,7 @@ import { StandardPriceHistory } from '../standard-price/entities/standard-price-
 import { RedisModule } from '../redis/redis.module';
 import { PackageService } from '../package/package.service';
 import { Package } from '../package/entities/package.entity';
+import { HttpModule } from '@nestjs/axios';
 
 @Module({
   imports: [
@@ -32,6 +33,7 @@ import { Package } from '../package/entities/package.entity';
       StandardPriceHistory,
     ]),
     RedisModule,
+    HttpModule,
   ],
   controllers: [ConsumersController],
   providers: [

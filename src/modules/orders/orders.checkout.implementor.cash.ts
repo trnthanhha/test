@@ -27,12 +27,11 @@ export class OrdersCheckoutImplementorCash
   implements OrdersCheckoutFlowInterface
 {
   constructor(
-    private readonly user: User,
-    private readonly dbManager: EntityManager,
-    private readonly billsService: BillsService,
-    private readonly locationsService: LocationsService,
-    private readonly packageServices: PackageService,
-    private readonly standardPriceService: StandardPriceService,
+    protected readonly user: User,
+    protected readonly billsService: BillsService,
+    protected readonly locationsService: LocationsService,
+    protected readonly packageServices: PackageService,
+    protected readonly standardPriceService: StandardPriceService,
   ) {}
   preValidate(dto: CreateOrderDto) {
     // required cash -> no user_package_id
@@ -41,7 +40,7 @@ export class OrdersCheckoutImplementorCash
     }
   }
 
-  validateData(pOrder: PrepareOrder) {
+  async validateData(pOrder: PrepareOrder) {
     // required cash -> no user_package_id
     const { location, stdPrice } = pOrder;
     if (location && !location.canPurchased()) {

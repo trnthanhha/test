@@ -18,6 +18,7 @@ import { PackageService } from '../../modules/package/package.service';
 import { Package } from '../../modules/package/entities/package.entity';
 import { WebhookFactory } from '../message-broker/webhook.factory';
 import { RabbitMQServices } from '../message-broker/webhook.types';
+import { HttpModule } from '@nestjs/axios';
 
 @Module({
   imports: [
@@ -31,6 +32,7 @@ import { RabbitMQServices } from '../message-broker/webhook.types';
       StandardPriceHistory,
     ]),
     RedisModule,
+    HttpModule,
   ],
   controllers: [PaymentController],
   providers: [
