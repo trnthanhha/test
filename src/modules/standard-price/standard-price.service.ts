@@ -51,6 +51,9 @@ export class StandardPriceService {
     }
 
     await this.redis.del(this.standardPriceCacheKey);
+    return {
+      success: true,
+    };
   }
 
   async getStandardPrice() {
