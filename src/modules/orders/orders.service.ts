@@ -1,4 +1,4 @@
-import { Injectable, Logger } from '@nestjs/common';
+import { Inject, Injectable, Logger } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Order } from './entities/order.entity';
 import { EntityManager, FindManyOptions, Repository } from 'typeorm';
@@ -10,12 +10,15 @@ import { User } from '../users/entities/user.entity';
 import { BillsService } from '../bills/bills.service';
 import { PackageService } from '../package/package.service';
 import { OrderCheckoutFlowAbstraction } from './orders.checkout.template';
+import { RabbitMQServices } from '../../services/message-broker/webhook.types';
+import { ClientProxy } from '@nestjs/microservices';
 
 @Injectable()
 export class OrdersService {
   private readonly logger = new Logger(OrdersService.name);
 
   constructor(
+    @Inject(RabbitMQServices.VNPay) private readonly publisher: ClientProxy,
     @InjectRepository(Order)
     private orderRepository: Repository<Order>,
     private readonly packageServices: PackageService,
@@ -81,6 +84,7 @@ export class OrdersService {
   // Business
   async checkout(createOrderDto: CreateOrderDto, req: any, user: User) {
     const checkoutFlow = new OrderCheckoutFlowAbstraction(
+      this.publisher,
       user,
       this.orderRepository.manager,
       this.billsService,

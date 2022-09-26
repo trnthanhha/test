@@ -16,6 +16,8 @@ import { StandardPriceHistory } from '../../modules/standard-price/entities/stan
 import { RedisModule } from '../../modules/redis/redis.module';
 import { PackageService } from '../../modules/package/package.service';
 import { Package } from '../../modules/package/entities/package.entity';
+import { WebhookFactory } from '../message-broker/webhook.factory';
+import { RabbitMQServices } from '../message-broker/webhook.types';
 
 @Module({
   imports: [
@@ -39,6 +41,7 @@ import { Package } from '../../modules/package/entities/package.entity';
     LocationsService,
     LocationHandleService,
     StandardPriceService,
+    WebhookFactory.Build(RabbitMQServices.VNPay),
   ],
 })
 export class PaymentModule {}

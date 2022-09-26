@@ -1,16 +1,28 @@
-import { Controller } from '@nestjs/common';
+import { Controller, Logger } from '@nestjs/common';
 import { Ctx, EventPattern, Payload, RmqContext } from '@nestjs/microservices';
 import { PaymentService } from '../../services/payment/payment.service';
 import { PrepareError } from '../../errors/types';
+import { PaymentStatus, PaymentType } from '../orders/orders.constants';
+import { TransactionInfo } from '../orders/vendor_adapters/payment.types';
 
 @Controller()
 export class ConsumersController {
+  private readonly logger = new Logger(ConsumersController.name);
   constructor(private readonly paymentService: PaymentService) {}
 
   @EventPattern('vnpay')
   async updateVNPayOrder(@Payload() payload: any, @Ctx() ctx: RmqContext) {
+    this.logger.log('receive message IPN from VNPay, value: ', payload);
+    const {
+      vnp_ResponseCode,
+      vnp_TxnRef: uuid,
+      vnp_TransactionNo: invoice_number,
+    } = payload;
+    const status =
+      (vnp_ResponseCode === '00' && PaymentStatus.PAID) || PaymentStatus.FAILED;
+
     await this.paymentService
-      .syncOrderStatus(payload)
+      .syncOrderStatus({ uuid, status, invoice_number })
       .then(() => {
         this.ack(ctx);
       })
@@ -26,6 +38,39 @@ export class ConsumersController {
         }
         this.requeue(ctx);
       });
+  }
+
+  @EventPattern('locamos')
+  async updateLocaMosSystem(
+    @Payload() payload: { info: TransactionInfo; type: PaymentType },
+    @Ctx() ctx: RmqContext,
+  ) {
+    this.logger.log('receive message to sync LocaMos, value: ', payload);
+    switch (payload.type) {
+      case PaymentType.PACKAGE:
+      case PaymentType.POINT:
+        await this.paymentService
+          .syncOrderStatus({
+            uuid: payload.info.uuid,
+            status: PaymentStatus.PAID,
+            invoice_number: null,
+          })
+          .then(() => {
+            this.ack(ctx);
+          })
+          .catch((ex) => {
+            if (
+              ex instanceof PrepareError ||
+              ex?.message?.includes(
+                'duplicate key value violates unique constraint',
+              )
+            ) {
+              this.drop(ctx);
+              return;
+            }
+            this.requeue(ctx);
+          });
+    }
   }
 
   ack(ctx) {

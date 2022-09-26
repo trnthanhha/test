@@ -40,6 +40,7 @@ import { UserPackage } from '../user_package/entities/user_package.entity';
 import { Repository } from 'typeorm/repository/Repository';
 import { UPackagePurchaseStatus } from '../user_package/user_package.constants';
 import { BadRequestException } from '@nestjs/common';
+import { RabbitMQServices } from '../../services/message-broker/webhook.types';
 
 describe('Order controller', () => {
   beforeEach(() => {
@@ -455,7 +456,7 @@ describe('Order controller', () => {
         case Location:
           expect(criteria).toEqual({ id: 2, version: 1 });
           expect(updateValue).toEqual({
-            purchase_status: null,
+            purchase_status: LocationPurchaseStatus.UNAUTHORIZED,
             version: 2,
           });
 
@@ -508,7 +509,7 @@ describe('Order controller', () => {
           return {
             save: (o: Order) => {
               expect(o.price).toEqual(100);
-              expect(o.payment_status).toEqual(PaymentStatus.PAID);
+              expect(o.payment_status).toEqual(PaymentStatus.UNAUTHORIZED);
               expect(o.note).toEqual(
                 'Thanh toan mua LocaMos dia diem su dung package',
               );
@@ -630,6 +631,12 @@ async function getTestingOrderService() {
         provide: getRepositoryToken(Order),
         useFactory: jest.fn(() => ({
           manager: mockManager,
+        })),
+      },
+      {
+        provide: RabbitMQServices.VNPay,
+        useFactory: jest.fn(() => ({
+          emit: () => ({}),
         })),
       },
     ],

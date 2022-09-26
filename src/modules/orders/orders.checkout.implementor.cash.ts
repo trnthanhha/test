@@ -17,13 +17,8 @@ import { User } from '../users/entities/user.entity';
 import { EntityManager } from 'typeorm';
 import { UserPackage } from '../user_package/entities/user_package.entity';
 import { CreateLocationDto } from '../locations/dto/create-location.dto';
-import {
-  LocationPurchaseStatus,
-  LocationStatus,
-} from '../locations/locations.contants';
+import { LocationStatus } from '../locations/locations.contants';
 import { BillsService } from '../bills/bills.service';
-import { Bill } from '../bills/entities/bill.entity';
-import { BillStatus, PaymentVendor } from '../bills/bills.constants';
 import { PaymentGatewayFactory } from './vendor_adapters/payment.vendor.adapters';
 import { TransactionInfo } from './vendor_adapters/payment.types';
 import { UPackagePurchaseStatus } from '../user_package/user_package.constants';
@@ -91,62 +86,40 @@ export class OrdersCheckoutImplementorCash
   }
 
   async processDBTransaction(
+    txManager: EntityManager,
     order: Order,
     createOrderDto: CreateOrderDto,
     pOrder: PrepareOrder,
   ): Promise<Location | UserPackage> {
     const pkg = pOrder.pkg;
     let loc = pOrder.location;
-    return await this.dbManager.transaction(
-      async (entityManager): Promise<Order | any> => {
-        let userPackage: UserPackage;
-        if (pkg) {
-          userPackage = await this.createUserPackage(
-            pkg,
-            this.user,
-            entityManager,
-          );
-        } else if (!loc) {
-          loc = await this.locationsService.create(
-            Object.assign(new CreateLocationDto(), createOrderDto),
-            this.user,
-            entityManager,
-          );
-          if (loc.status !== LocationStatus.APPROVED) {
-            return CheckoutDto.fail(
-              new InternalServerErrorException(),
-              'Invalid distance',
-            );
-          }
-        }
+    let userPackage: UserPackage;
+    if (pkg) {
+      userPackage = await this.createUserPackage(pkg, this.user, txManager);
+    } else if (!loc) {
+      loc = await this.locationsService.create(
+        Object.assign(new CreateLocationDto(), createOrderDto),
+        this.user,
+        txManager,
+      );
+      if (loc.status !== LocationStatus.APPROVED) {
+        throw new InternalServerErrorException('Invalid distance');
+      }
+    }
 
-        order.location_id = loc?.id;
-        order.user_package_id = userPackage?.id;
-        const insertedOrder = await entityManager
-          .getRepository(Order)
-          .save(order);
-        await this.billsService.create(
-          this.initBill(insertedOrder),
-          entityManager,
+    if (loc) {
+      const result = await this.locationsService.checkout(
+        txManager,
+        loc.id,
+        loc.version,
+      );
+      if (!result.affected) {
+        throw new InternalServerErrorException(
+          'Invalid version. Location has data changed',
         );
-
-        if (loc) {
-          const result = await this.locationsService.checkout(
-            entityManager,
-            loc.id,
-            loc.version,
-            LocationPurchaseStatus.UNAUTHORIZED,
-          );
-          if (!result.affected) {
-            return CheckoutDto.fail(
-              new InternalServerErrorException(),
-              'Invalid version. Location has data changed',
-            );
-          }
-        }
-        return loc || userPackage;
-      },
-    );
+      }
+    }
+    return loc || userPackage;
   }
 
   responseResult(
@@ -174,17 +147,6 @@ export class OrdersCheckoutImplementorCash
     order.created_by_id = this.user.id;
 
     return order;
-  }
-
-  initBill(order: Order): Bill {
-    const bill = new Bill();
-    bill.order_id = order.id;
-    bill.ref_id = order.ref_uid;
-    bill.status = BillStatus.UNAUTHORIZED;
-    bill.created_by_id = order.created_by_id;
-    bill.vendor = PaymentVendor.VNPAY;
-
-    return bill;
   }
 
   async createUserPackage(
