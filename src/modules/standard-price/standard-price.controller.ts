@@ -14,6 +14,7 @@ import { GetAuthUser } from 'src/decorators/user.decorator';
 import { User } from '../users/entities/user.entity';
 import { UpdateStandardPriceDto } from './dto/update-standard-price.dto';
 import { StandardPriceService } from './standard-price.service';
+import { UserType } from '../users/users.constants';
 
 @ApiTags('standard-price')
 @Controller('standard-price')
@@ -35,7 +36,7 @@ export class StandardPriceController {
   @ApiOkResponse({
     status: 200,
   })
-  @Auth()
+  @Auth(UserType.ADMIN)
   @Patch()
   async update(
     @Body() data: UpdateStandardPriceDto,
