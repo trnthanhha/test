@@ -13,6 +13,7 @@ import { UserPackage } from '../../modules/user_package/entities/user_package.en
 import { Location } from '../../modules/locations/entities/location.entity';
 import { LocationPurchaseStatus } from '../../modules/locations/locations.contants';
 import { UPackagePurchaseStatus } from '../../modules/user_package/user_package.constants';
+import { PaymentResult } from './payment.types';
 
 @Injectable()
 export class PaymentService {
@@ -30,25 +31,21 @@ export class PaymentService {
     // console.log('sync payment status each 30s');
   }
 
-  async syncOrderStatus(payload: any) {
+  async syncOrderStatus(pmResult: PaymentResult) {
     const manager: EntityManager = this.orderRepository.manager;
-    const { vnp_ResponseCode, vnp_TxnRef, vnp_TransactionNo } = payload;
     let bill: Bill;
     let order: Order;
     let location: Location;
     let pkg: UserPackage;
     try {
-      bill = await this.billsService.findOneByRefID(vnp_TxnRef);
+      bill = await this.billsService.findOneByRefID(pmResult.uuid);
       order = bill.order;
       if (order.payment_status === PaymentStatus.PAID) {
         this.logger.log('order closed, no need to sync, orderID: ', order.id);
         throw new BadRequestException();
       }
 
-      order.payment_status =
-        (vnp_ResponseCode === '00' && PaymentStatus.PAID) ||
-        PaymentStatus.FAILED;
-
+      order.payment_status = pmResult.status;
       if (order.payment_status === PaymentStatus.PAID) {
         bill.status = BillStatus.PAID;
         if (order.location_id > 0) {
@@ -62,7 +59,7 @@ export class PaymentService {
         }
       }
       bill.status = this.orderStatusToBillStatus(order.payment_status);
-      bill.invoice_number = vnp_TransactionNo;
+      bill.invoice_number = pmResult.invoice_number;
     } catch (ex) {
       throw new PrepareError(ex, 'Not found order');
     }

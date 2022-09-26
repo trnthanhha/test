@@ -17,13 +17,8 @@ import { User } from '../users/entities/user.entity';
 import { EntityManager } from 'typeorm';
 import { UserPackage } from '../user_package/entities/user_package.entity';
 import { CreateLocationDto } from '../locations/dto/create-location.dto';
-import {
-  LocationPurchaseStatus,
-  LocationStatus,
-} from '../locations/locations.contants';
+import { LocationStatus } from '../locations/locations.contants';
 import { BillsService } from '../bills/bills.service';
-import { Bill } from '../bills/entities/bill.entity';
-import { BillStatus, PaymentVendor } from '../bills/bills.constants';
 import { PaymentGatewayFactory } from './vendor_adapters/payment.vendor.adapters';
 import { TransactionInfo } from './vendor_adapters/payment.types';
 import { UPackagePurchaseStatus } from '../user_package/user_package.constants';

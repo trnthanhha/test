@@ -40,6 +40,7 @@ import { UserPackage } from '../user_package/entities/user_package.entity';
 import { Repository } from 'typeorm/repository/Repository';
 import { UPackagePurchaseStatus } from '../user_package/user_package.constants';
 import { BadRequestException } from '@nestjs/common';
+import { RabbitMQServices } from '../../services/message-broker/webhook.types';
 
 describe('Order controller', () => {
   beforeEach(() => {
@@ -630,6 +631,12 @@ async function getTestingOrderService() {
         provide: getRepositoryToken(Order),
         useFactory: jest.fn(() => ({
           manager: mockManager,
+        })),
+      },
+      {
+        provide: RabbitMQServices.VNPay,
+        useFactory: jest.fn(() => ({
+          emit: () => ({}),
         })),
       },
     ],

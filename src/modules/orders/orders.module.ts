@@ -17,6 +17,8 @@ import { BillsService } from '../bills/bills.service';
 import { Bill } from '../bills/entities/bill.entity';
 import { PackageService } from '../package/package.service';
 import { Package } from '../package/entities/package.entity';
+import { WebhookFactory } from '../../services/message-broker/webhook.factory';
+import { RabbitMQServices } from '../../services/message-broker/webhook.types';
 
 @Module({
   imports: [
@@ -41,6 +43,7 @@ import { Package } from '../package/entities/package.entity';
     LocationsService,
     LocationHandleService,
     StandardPriceService,
+    WebhookFactory.Build(RabbitMQServices.VNPay),
   ],
   exports: [OrdersService],
 })

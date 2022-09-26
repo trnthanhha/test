@@ -1,5 +1,4 @@
 import { PrepareOrder } from './orders.checkout.types';
-import { CheckoutDto } from './dto/checkout-dto';
 import { CreateOrderDto } from './dto/create-order.dto';
 import { LocationsService } from '../locations/locations.service';
 import { PackageService } from '../package/package.service';
@@ -18,6 +17,7 @@ import { Bill } from '../bills/entities/bill.entity';
 import { BillStatus, PaymentVendor } from '../bills/bills.constants';
 import { Location } from '../locations/entities/location.entity';
 import { UserPackage } from '../user_package/entities/user_package.entity';
+import { ClientProxy } from '@nestjs/microservices';
 
 export interface OrdersCheckoutFlowInterface {
   preValidate(dto: CreateOrderDto);
@@ -35,6 +35,7 @@ export interface OrdersCheckoutFlowInterface {
 
 export class OrderCheckoutFlowAbstraction {
   constructor(
+    private readonly publisher: ClientProxy,
     private readonly user: User,
     private readonly dbManager: EntityManager,
     private readonly billsService: BillsService,
@@ -108,6 +109,7 @@ export class OrderCheckoutFlowAbstraction {
         );
       case PaymentType.PACKAGE:
         return new OrdersCheckoutImplementorPackage(
+          this.publisher,
           this.user,
           this.dbManager,
           this.billsService,

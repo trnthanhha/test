@@ -17,13 +17,13 @@ import {
 import { PaymentStatus, PaymentType } from './orders.constants';
 import { CreateLocationDto } from '../locations/dto/create-location.dto';
 import { LocationStatus } from '../locations/locations.contants';
-import { Bill } from '../bills/entities/bill.entity';
-import { BillStatus, PaymentVendor } from '../bills/bills.constants';
+import { ClientProxy } from '@nestjs/microservices';
 
 export class OrdersCheckoutImplementorPackage
   implements OrdersCheckoutFlowInterface
 {
   constructor(
+    private readonly publisher: ClientProxy,
     private readonly user: User,
     private readonly dbManager: EntityManager,
     private readonly billsService: BillsService,
@@ -121,6 +121,11 @@ export class OrdersCheckoutImplementorPackage
   }
 
   responseResult(req: any, info: TransactionInfo, newItem: any) {
+    this.publisher.emit('locamos', {
+      info,
+      type: PaymentType.PACKAGE,
+    });
+
     return CheckoutDto.success('', newItem);
   }
 

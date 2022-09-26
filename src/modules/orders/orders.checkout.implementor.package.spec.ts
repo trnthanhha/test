@@ -168,7 +168,7 @@ describe('Checkout by package', () => {
 });
 
 function getEmptyFlowInstance(): OrdersCheckoutImplementorPackage {
-  return new OrdersCheckoutImplementorPackage(null, null, null, null);
+  return new OrdersCheckoutImplementorPackage(null, null, null, null, null);
 }
 function validUserPackage(): UserPackage {
   return Object.assign(new UserPackage(), {
