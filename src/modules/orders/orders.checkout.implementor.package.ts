@@ -81,62 +81,43 @@ export class OrdersCheckoutImplementorPackage
   }
 
   async processDBTransaction(
+    txManager: EntityManager,
     order: Order,
     createOrderDto: CreateOrderDto,
     pOrder: PrepareOrder,
   ): Promise<any> {
     let loc = pOrder.location;
-    return await this.dbManager.transaction(
-      async (entityManager): Promise<Order | any> => {
-        if (!loc) {
-          loc = await this.locationsService.create(
-            Object.assign(new CreateLocationDto(), createOrderDto),
-            this.user,
-            entityManager,
-          );
-          if (loc.status !== LocationStatus.APPROVED) {
-            return CheckoutDto.fail(
-              new InternalServerErrorException(),
-              'Invalid distance',
-            );
-          }
-        }
+    if (!loc) {
+      loc = await this.locationsService.create(
+        Object.assign(new CreateLocationDto(), createOrderDto),
+        this.user,
+        txManager,
+      );
+      if (loc.status !== LocationStatus.APPROVED) {
+        throw new InternalServerErrorException('Invalid distance');
+      }
+    }
 
-        const userPkg = pOrder.userPkg;
-        await entityManager.getRepository(UserPackage).update(
-          { id: userPkg.id, version: userPkg.version },
-          {
-            version: userPkg.version + 1,
-            remaining_quantity: userPkg.remaining_quantity,
-          },
-        );
-
-        order.location_id = loc?.id;
-        const insertedOrder = await entityManager
-          .getRepository(Order)
-          .save(order);
-        await this.billsService.create(
-          this.initBill(insertedOrder),
-          entityManager,
-        );
-
-        if (loc) {
-          const result = await this.locationsService.checkout(
-            entityManager,
-            loc.id,
-            loc.version,
-            null, // no purchase
-          );
-          if (!result.affected) {
-            return CheckoutDto.fail(
-              new InternalServerErrorException(),
-              'Invalid version. Location has data changed',
-            );
-          }
-        }
-        return loc;
+    const userPkg = pOrder.userPkg;
+    await txManager.getRepository(UserPackage).update(
+      { id: userPkg.id, version: userPkg.version },
+      {
+        version: userPkg.version + 1,
+        remaining_quantity: userPkg.remaining_quantity,
       },
     );
+
+    const result = await this.locationsService.checkout(
+      txManager,
+      loc.id,
+      loc.version,
+    );
+    if (!result.affected) {
+      throw new InternalServerErrorException(
+        'Invalid version. Location has data changed',
+      );
+    }
+    return loc;
   }
 
   responseResult(req: any, info: TransactionInfo, newItem: any) {
@@ -146,22 +127,11 @@ export class OrdersCheckoutImplementorPackage
   initOrder(userPkg: UserPackage) {
     const order = new Order();
     order.price = userPkg.price / userPkg.quantity;
-    order.user_package_id = userPkg.id;
     order.payment_type = PaymentType.PACKAGE;
-    order.payment_status = PaymentStatus.PAID;
+    order.payment_status = PaymentStatus.UNAUTHORIZED;
     order.note = 'Thanh toan mua LocaMos dia diem su dung package';
+    order.created_by_id = userPkg.user_id;
 
     return order;
-  }
-
-  initBill(order: Order): Bill {
-    const bill = new Bill();
-    bill.order_id = order.id;
-    bill.ref_id = order.ref_uid;
-    bill.status = BillStatus.PAID;
-    bill.created_by_id = order.created_by_id;
-    bill.vendor = PaymentVendor.VNPAY;
-
-    return bill;
   }
 }

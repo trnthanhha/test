@@ -455,7 +455,7 @@ describe('Order controller', () => {
         case Location:
           expect(criteria).toEqual({ id: 2, version: 1 });
           expect(updateValue).toEqual({
-            purchase_status: null,
+            purchase_status: LocationPurchaseStatus.UNAUTHORIZED,
             version: 2,
           });
 
@@ -508,7 +508,7 @@ describe('Order controller', () => {
           return {
             save: (o: Order) => {
               expect(o.price).toEqual(100);
-              expect(o.payment_status).toEqual(PaymentStatus.PAID);
+              expect(o.payment_status).toEqual(PaymentStatus.UNAUTHORIZED);
               expect(o.note).toEqual(
                 'Thanh toan mua LocaMos dia diem su dung package',
               );

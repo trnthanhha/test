@@ -14,6 +14,10 @@ import { TransactionInfo } from './vendor_adapters/payment.types';
 import { OrdersCheckoutImplementorPackage } from './orders.checkout.implementor.package';
 import { BadRequestException } from '@nestjs/common';
 import { randomUUID } from 'crypto';
+import { Bill } from '../bills/entities/bill.entity';
+import { BillStatus, PaymentVendor } from '../bills/bills.constants';
+import { Location } from '../locations/entities/location.entity';
+import { UserPackage } from '../user_package/entities/user_package.entity';
 
 export interface OrdersCheckoutFlowInterface {
   preValidate(dto: CreateOrderDto);
@@ -21,6 +25,7 @@ export interface OrdersCheckoutFlowInterface {
   validateData(pOrder: PrepareOrder);
   processBusiness(pOrder: PrepareOrder): Promise<Order>;
   processDBTransaction(
+    txManager: EntityManager,
     order: Order,
     createOrderDto: CreateOrderDto,
     pOrder: PrepareOrder,
@@ -62,11 +67,22 @@ export class OrderCheckoutFlowAbstraction {
     order.ref_uid = randomUUID();
 
     // -- Start db execution
-    const result = await flow.processDBTransaction(order, dto, preparedData);
-    if (result instanceof CheckoutDto) {
-      // got failed
-      return result;
-    }
+    const result = await this.dbManager.transaction(async (txManager) => {
+      const inserted = await flow.processDBTransaction(
+        txManager,
+        order,
+        dto,
+        preparedData,
+      );
+
+      order.location_id = inserted instanceof Location ? inserted.id : null;
+      order.user_package_id =
+        inserted instanceof UserPackage ? inserted.id : null;
+      const insertedOrder = await txManager.getRepository(Order).save(order);
+      await this.billsService.create(this.initBill(insertedOrder), txManager);
+
+      return inserted;
+    });
 
     return flow.responseResult(
       req,
@@ -102,4 +118,15 @@ export class OrderCheckoutFlowAbstraction {
         throw new Error('Unimplemented payment method');
     }
   };
+
+  initBill(order: Order): Bill {
+    const bill = new Bill();
+    bill.order_id = order.id;
+    bill.ref_id = order.ref_uid;
+    bill.status = BillStatus.UNAUTHORIZED;
+    bill.created_by_id = order.created_by_id;
+    bill.vendor = PaymentVendor.VNPAY;
+
+    return bill;
+  }
 }

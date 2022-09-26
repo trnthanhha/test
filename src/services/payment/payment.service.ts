@@ -139,8 +139,9 @@ export class PaymentService {
       UserPackage,
       {
         id: userPackage.id,
+        version: userPackage.version,
       },
-      userPackage,
+      Object.assign(userPackage, { version: userPackage.version + 1 }),
     );
   }
 }
