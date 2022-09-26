@@ -28,8 +28,6 @@ export class StandardPriceService {
       where: { id: Not(IsNull()) },
     });
 
-    let newStandardPrice: StandardPrice;
-
     await this.standardPriceHistory.save({
       price_after: price,
       price_before: standardPrice ? standardPrice.price : null,
@@ -38,19 +36,21 @@ export class StandardPriceService {
 
     if (standardPrice) {
       standardPrice.price = price;
-      newStandardPrice = await this.repo.save({
-        ...standardPrice,
-        user: currentUser,
-      });
-
-      await this.redis.del(this.standardPriceCacheKey);
+      await this.repo.update(
+        {
+          id: standardPrice.id,
+        },
+        {
+          price,
+        },
+      );
     } else {
-      newStandardPrice = await this.repo.save({
-        price: price,
+      await this.repo.save({
+        price,
       } as StandardPrice);
     }
 
-    return newStandardPrice;
+    await this.redis.del(this.standardPriceCacheKey);
   }
 
   async getStandardPrice() {
