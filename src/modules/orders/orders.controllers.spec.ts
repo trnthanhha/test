@@ -491,6 +491,18 @@ describe('Order controller', () => {
               expect(id).toEqual(4);
               return Object.assign(new UserPackage(), validUserPackage());
             },
+            update: (criteria, updateValue) => {
+              expect(criteria).toEqual({
+                id: 4,
+                version: 2,
+              });
+              expect(updateValue).toEqual({
+                version: 3,
+                remaining_quantity: 3,
+              });
+
+              return Promise.resolve(updated);
+            },
           } as unknown as Repository<any>;
         case Order:
           return {

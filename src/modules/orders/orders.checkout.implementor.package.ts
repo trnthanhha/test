@@ -102,8 +102,17 @@ export class OrdersCheckoutImplementorPackage
           }
         }
 
+        const userPkg = pOrder.userPkg;
+        await entityManager.getRepository(UserPackage).update(
+          { id: userPkg.id, version: userPkg.version },
+          {
+            version: userPkg.version + 1,
+            remaining_quantity: userPkg.remaining_quantity,
+          },
+        );
+
         order.location_id = loc?.id;
-        const insertedOrder = await this.dbManager
+        const insertedOrder = await entityManager
           .getRepository(Order)
           .save(order);
         await this.billsService.create(

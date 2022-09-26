@@ -122,7 +122,7 @@ export class OrdersCheckoutImplementorCash
 
         order.location_id = loc?.id;
         order.user_package_id = userPackage?.id;
-        const insertedOrder = await this.dbManager
+        const insertedOrder = await entityManager
           .getRepository(Order)
           .save(order);
         await this.billsService.create(
