@@ -1,6 +1,6 @@
-import { Order } from '../entities/order.entity';
 import { PaymentVNPayImplementor } from './payment.vnpay.implementor';
 import { OrderStatusDto } from '../dto/order-status-dto';
+import { TransactionInfo } from './payment.types';
 
 export class PaymentGatewayFactory {
   public static Build = (): PaymentVendorAdapters => {
@@ -9,6 +9,6 @@ export class PaymentGatewayFactory {
 }
 
 export interface PaymentVendorAdapters {
-  generateURLRedirect(order: Order, clientUnique: any): string;
+  generateURLRedirect(txInfo: TransactionInfo, clientUnique: any): string;
   decodeResponse(req: Request): OrderStatusDto;
 }

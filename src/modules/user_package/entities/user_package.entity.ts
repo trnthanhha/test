@@ -2,6 +2,7 @@ import {
   Column,
   CreateDateColumn,
   Entity,
+  Index,
   PrimaryGeneratedColumn,
   UpdateDateColumn,
 } from 'typeorm';
@@ -24,12 +25,17 @@ export class UserPackage {
   @Column()
   quantity: number;
 
+  @Index()
   @Column()
   remaining_quantity: number;
+
+  @Column()
+  price: number;
 
   @Column({ nullable: true })
   paid_at: Date;
 
+  @Index()
   @Column({
     default: UPackagePurchaseStatus.UNAUTHORIZED,
     type: 'enum',
@@ -37,9 +43,20 @@ export class UserPackage {
   })
   purchase_status: UPackagePurchaseStatus;
 
+  @Column()
+  version: number;
+
   @CreateDateColumn()
   created_at: Date;
 
   @UpdateDateColumn()
   updated_at: Date;
+
+  isUsable(): boolean {
+    return (
+      this.remaining_quantity &&
+      this.remaining_quantity > 0 &&
+      this.purchase_status === UPackagePurchaseStatus.PAID
+    );
+  }
 }

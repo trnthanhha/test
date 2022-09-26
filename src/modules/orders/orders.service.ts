@@ -1,30 +1,15 @@
-import {
-  BadRequestException,
-  Injectable,
-  InternalServerErrorException,
-  Logger,
-} from '@nestjs/common';
+import { Injectable, Logger } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Order } from './entities/order.entity';
 import { EntityManager, FindManyOptions, Repository } from 'typeorm';
-import { PaymentStatus, PaymentType } from './orders.constants';
-import { CheckoutDto } from './dto/checkout-dto';
-import { PaymentGatewayFactory } from './vendor_adapters/payment.vendor.adapters';
-import { randomUUID } from 'crypto';
-import { CreateLocationDto } from '../locations/dto/create-location.dto';
+import { PaymentStatus } from './orders.constants';
 import { CreateOrderDto } from './dto/create-order.dto';
 import { LocationsService } from '../locations/locations.service';
 import { StandardPriceService } from '../standard-price/standard-price.service';
 import { User } from '../users/entities/user.entity';
-import { LocationStatus } from '../locations/locations.contants';
-import { Bill } from '../bills/entities/bill.entity';
-import { BillStatus, PaymentVendor } from '../bills/bills.constants';
 import { BillsService } from '../bills/bills.service';
-import { UserPackage } from '../user_package/entities/user_package.entity';
-import { Location } from '../locations/entities/location.entity';
-import { Package } from '../package/entities/package.entity';
 import { PackageService } from '../package/package.service';
-import { OrdersCheckoutService } from './orders.checkout.service';
+import { OrderCheckoutFlowAbstraction } from './orders.checkout.template';
 
 @Injectable()
 export class OrdersService {
@@ -95,15 +80,15 @@ export class OrdersService {
 
   // Business
   async checkout(createOrderDto: CreateOrderDto, req: any, user: User) {
-    const checkoutService = new OrdersCheckoutService(
-      this.orderRepository,
-      this.packageServices,
+    const checkoutFlow = new OrderCheckoutFlowAbstraction(
+      user,
+      this.orderRepository.manager,
       this.billsService,
       this.locationsService,
+      this.packageServices,
       this.standardPriceService,
-      user,
     );
 
-    return checkoutService.checkout(createOrderDto, req);
+    return checkoutFlow.checkout(createOrderDto, req);
   }
 }
