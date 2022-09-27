@@ -1,4 +1,4 @@
-import { BadRequestException, Injectable, Logger } from '@nestjs/common';
+import {BadRequestException, Injectable, InternalServerErrorException, Logger} from '@nestjs/common';
 import { Cron } from '@nestjs/schedule';
 import { OrdersService } from '../../modules/orders/orders.service';
 import { PaymentStatus } from '../../modules/orders/orders.constants';
@@ -65,20 +65,20 @@ export class PaymentService {
     }
 
     return this.orderRepository.manager.transaction(
-      (entityManager): Promise<any[]> => {
+      (txManager): Promise<any[]> => {
         return Promise.all([
-          this.ordersService.update(order.id, order, entityManager),
-          this.billsService.update(bill, entityManager),
+          this.ordersService.update(order.id, order, txManager),
+          this.billsService.update(bill, txManager),
           // Update location / package
           new Promise((resolve, reject) => {
             if (location) {
-              this.updateLocation(bill.status, location, entityManager)
+              this.updateLocation(bill.status, location, txManager)
                 .then(resolve)
                 .catch(reject);
               return;
             }
             if (pkg) {
-              this.updateUserPackage(bill.status, pkg, entityManager)
+              this.updateUserPackage(bill.status, pkg, txManager)
                 .then(resolve)
                 .catch(reject);
               return;
@@ -121,7 +121,7 @@ export class PaymentService {
     );
   }
 
-  updateUserPackage(
+  async updateUserPackage(
     billStatus: BillStatus,
     userPackage: UserPackage,
     entityManager: EntityManager,
@@ -132,7 +132,7 @@ export class PaymentService {
     } else {
       userPackage.purchase_status = UPackagePurchaseStatus.FAILED;
     }
-    return entityManager.update(
+    const updateResult = await entityManager.update(
       UserPackage,
       {
         id: userPackage.id,
@@ -140,5 +140,8 @@ export class PaymentService {
       },
       Object.assign(userPackage, { version: userPackage.version + 1 }),
     );
+    if (!updateResult.affected) {
+      throw new InternalServerErrorException(`UserPackage was changed, id: ${userPackage.id}`)
+    }
   }
 }

@@ -5,14 +5,14 @@ export class CreatePackageDto {
   @ApiProperty({ required: true, example: 'Tên package' })
   name: string;
 
-  @ApiProperty({ required: true, example: 'Tên package' })
+  @ApiProperty({ required: true, example: 1 })
   quantity: number;
 
   @IsOptional()
-  @ApiProperty({ example: 'Tên package' })
+  @ApiProperty({ example: 100 })
   promotion: number;
 
   @IsOptional()
-  @ApiProperty({ example: 'Tên package' })
+  @ApiProperty({ example: 20 })
   discount: number;
 }

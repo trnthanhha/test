@@ -72,11 +72,7 @@ export class UsersService {
       password: hashPassword(password),
     });
 
-    if (update.affected === 1) {
-      return true;
-    }
-
-    return false;
+    return update.affected === 1;
   }
 
   async createBySignUp(registerDto: RegisterDto, lang: string): Promise<User> {

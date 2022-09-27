@@ -99,13 +99,17 @@ export class OrdersCheckoutImplementorPackage
     }
 
     const userPkg = pOrder.userPkg;
-    await txManager.getRepository(UserPackage).update(
+    const updateResult = await txManager.getRepository(UserPackage).update(
       { id: userPkg.id, version: userPkg.version },
       {
         version: userPkg.version + 1,
         remaining_quantity: userPkg.remaining_quantity,
       },
     );
+
+    if (!updateResult.affected) {
+      throw new InternalServerErrorException('User package was changed');
+    }
 
     const result = await this.locationsService.checkout(
       txManager,

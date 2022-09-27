@@ -1,4 +1,4 @@
-import { Injectable, Logger } from '@nestjs/common';
+import {Injectable, InternalServerErrorException, Logger} from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import {
   EntityManager,
@@ -7,7 +7,7 @@ import {
   LessThanOrEqual,
   MoreThan,
   MoreThanOrEqual,
-  Repository,
+  Repository, UpdateResult,
 } from 'typeorm';
 import { Location } from './entities/location.entity';
 import {
@@ -108,8 +108,8 @@ export class LocationsService {
     return repo.findOneBy({ id });
   }
 
-  async checkout(dbManager: EntityManager, id: number, version: number) {
-    return dbManager.update(
+  async checkout(dbManager: EntityManager, id: number, version: number): Promise<UpdateResult> {
+    const updateResult = await dbManager.update(
       Location,
       {
         id,
@@ -120,6 +120,11 @@ export class LocationsService {
         version: version + 1,
       },
     );
+    if (!updateResult.affected) {
+      throw new InternalServerErrorException(
+          `Invalid version. Location has data changed, id: ${id}`)
+    }
+    return updateResult;
   }
 
   async existAny(): Promise<boolean> {
