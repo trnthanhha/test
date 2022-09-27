@@ -1,7 +1,6 @@
 import { OrdersCheckoutFlowInterface } from './orders.checkout.template';
 import { OrdersCheckoutImplementorCash } from './orders.checkout.implementor.cash';
 import { User } from '../users/entities/user.entity';
-import { EntityManager } from 'typeorm';
 import { BillsService } from '../bills/bills.service';
 import { LocationsService } from '../locations/locations.service';
 import { PackageService } from '../package/package.service';

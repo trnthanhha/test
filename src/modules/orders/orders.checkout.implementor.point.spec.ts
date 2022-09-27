@@ -104,10 +104,7 @@ describe('Checkout by point', () => {
   });
 });
 
-function getEmptyFlowInstance(
-  user?,
-  mockHttpService?,
-): OrdersCheckoutImplementorPoint {
+function getEmptyFlowInstance(user?): OrdersCheckoutImplementorPoint {
   return new OrdersCheckoutImplementorPoint(
     null,
     null,
