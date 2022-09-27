@@ -56,11 +56,9 @@ export class Location {
   safe_zone_right: number;
 
   @Exclude()
-  @Exclude()
   @Column({ type: 'enum', enum: LocationType })
   type: LocationType;
 
-  @Exclude()
   @Exclude()
   @Index()
   @Column({ type: 'enum', enum: LocationStatus })
@@ -70,7 +68,6 @@ export class Location {
   @Column({ type: 'enum', enum: LocationPurchaseStatus, nullable: true })
   purchase_status: LocationPurchaseStatus;
 
-  @Exclude()
   @Exclude()
   @Column({
     type: 'enum',
