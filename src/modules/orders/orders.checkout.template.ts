@@ -18,11 +18,13 @@ import { BillStatus, PaymentVendor } from '../bills/bills.constants';
 import { Location } from '../locations/entities/location.entity';
 import { UserPackage } from '../user_package/entities/user_package.entity';
 import { ClientProxy } from '@nestjs/microservices';
+import { OrdersCheckoutImplementorPoint } from './orders.checkout.implementor.point';
+import { HttpService } from '@nestjs/axios';
 
 export interface OrdersCheckoutFlowInterface {
   preValidate(dto: CreateOrderDto);
   prepareData(dto: CreateOrderDto): Promise<PrepareOrder>;
-  validateData(pOrder: PrepareOrder);
+  validateData(pOrder: PrepareOrder): Promise<void>;
   processBusiness(pOrder: PrepareOrder): Promise<Order>;
   processDBTransaction(
     txManager: EntityManager,
@@ -35,6 +37,7 @@ export interface OrdersCheckoutFlowInterface {
 
 export class OrderCheckoutFlowAbstraction {
   constructor(
+    private readonly httpService: HttpService,
     private readonly publisher: ClientProxy,
     private readonly user: User,
     private readonly dbManager: EntityManager,
@@ -62,7 +65,7 @@ export class OrderCheckoutFlowAbstraction {
     // -- Custom validate by flow
     flow.preValidate(dto);
     const preparedData = await flow.prepareData(dto);
-    flow.validateData(preparedData);
+    await flow.validateData(preparedData);
     // -- Business logic
     const order = await flow.processBusiness(preparedData);
     order.ref_uid = randomUUID();
@@ -101,7 +104,6 @@ export class OrderCheckoutFlowAbstraction {
       case PaymentType.CASH:
         return new OrdersCheckoutImplementorCash(
           this.user,
-          this.dbManager,
           this.billsService,
           this.locationsService,
           this.packageServices,
@@ -116,6 +118,15 @@ export class OrderCheckoutFlowAbstraction {
           this.locationsService,
         );
       case PaymentType.POINT:
+        return new OrdersCheckoutImplementorPoint(
+          this.httpService,
+          this.publisher,
+          this.user,
+          this.billsService,
+          this.locationsService,
+          this.packageServices,
+          this.standardPriceService,
+        );
       default:
         throw new Error('Unimplemented payment method');
     }

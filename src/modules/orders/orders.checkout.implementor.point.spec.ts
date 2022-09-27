@@ -1,26 +1,14 @@
-import { OrdersCheckoutImplementorCash } from './orders.checkout.implementor.cash';
-import { CreateOrderDto } from './dto/create-order.dto';
-import {
-  BadRequestException,
-  InternalServerErrorException,
-} from '@nestjs/common';
-import { PrepareOrder } from './orders.checkout.types';
 import { Location } from '../locations/entities/location.entity';
+import { PrepareOrder } from './orders.checkout.types';
+import { BadRequestException, NotFoundException } from '@nestjs/common';
 import {
   LocationPurchaseStatus,
   LocationStatus,
 } from '../locations/locations.contants';
-import { StandardPrice } from '../standard-price/entities/standard-price.entity';
+import { OrdersCheckoutImplementorPoint } from './orders.checkout.implementor.point';
+import { Package } from '../package/entities/package.entity';
 
-describe('Checkout by cash', () => {
-  it('preValidate', () => {
-    const dto = new CreateOrderDto();
-    dto.user_package_id = 1;
-    expect(() => {
-      getEmptyFlowInstance().preValidate(dto);
-    }).toThrowError(BadRequestException);
-  });
-
+describe('Checkout by point', () => {
   it('validateData - location is owned', async () => {
     await expect(
       getEmptyFlowInstance().validateData({
@@ -31,7 +19,9 @@ describe('Checkout by cash', () => {
           return loc;
         })(),
       } as PrepareOrder),
-    ).rejects.toThrowError(BadRequestException);
+    ).rejects.toThrowError(
+      new BadRequestException('Location is unable to purchase'),
+    );
   });
 
   it('validateData - location is not paid yet', async () => {
@@ -44,7 +34,9 @@ describe('Checkout by cash', () => {
           return loc;
         })(),
       } as PrepareOrder),
-    ).rejects.toThrowError(BadRequestException);
+    ).rejects.toThrowError(
+      new BadRequestException('Location is unable to purchase'),
+    );
   });
 
   it('validateData - location is not approved', async () => {
@@ -57,7 +49,9 @@ describe('Checkout by cash', () => {
           return loc;
         })(),
       } as PrepareOrder),
-    ).rejects.toThrowError(BadRequestException);
+    ).rejects.toThrowError(
+      new BadRequestException('Location is unable to purchase'),
+    );
   });
 
   it('validateData - location is blacklist', async () => {
@@ -70,10 +64,12 @@ describe('Checkout by cash', () => {
           return loc;
         })(),
       } as PrepareOrder),
-    ).rejects.toThrowError(BadRequestException);
+    ).rejects.toThrowError(
+      new BadRequestException('Location is unable to purchase'),
+    );
   });
 
-  it('validateData - standard price not found', async () => {
+  it('validateData - not found package to buy', async () => {
     await expect(
       getEmptyFlowInstance().validateData({
         location: (() => {
@@ -83,11 +79,11 @@ describe('Checkout by cash', () => {
           return loc;
         })(),
       } as PrepareOrder),
-    ).rejects.toThrowError(InternalServerErrorException);
+    ).rejects.toThrowError(new NotFoundException('not found package to buy'));
   });
 
-  it('validateData - succeeded', () => {
-    expect(() => {
+  it('validateData - user is not created from Locamos', async () => {
+    await expect(
       getEmptyFlowInstance().validateData({
         location: (() => {
           const loc = new Location();
@@ -95,17 +91,30 @@ describe('Checkout by cash', () => {
 
           return loc;
         })(),
-        stdPrice: (() => {
-          const stdPrice = new StandardPrice();
-          stdPrice.price = 100;
+        pkg: (() => {
+          const pkg = new Package();
+          pkg.price_usd = 5000;
 
-          return stdPrice;
+          return pkg;
         })(),
-      } as PrepareOrder);
-    }).not.toThrow();
+      } as PrepareOrder),
+    ).rejects.toThrowError(
+      new NotFoundException('User is not created from LocaMos'),
+    );
   });
 });
 
-function getEmptyFlowInstance(): OrdersCheckoutImplementorCash {
-  return new OrdersCheckoutImplementorCash(null, null, null, null, null);
+function getEmptyFlowInstance(
+  user?,
+  mockHttpService?,
+): OrdersCheckoutImplementorPoint {
+  return new OrdersCheckoutImplementorPoint(
+    null,
+    null,
+    user,
+    null,
+    null,
+    null,
+    null,
+  );
 }

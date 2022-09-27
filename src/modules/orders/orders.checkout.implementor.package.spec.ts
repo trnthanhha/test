@@ -26,22 +26,22 @@ describe('Checkout by package', () => {
     }).toThrowError(BadRequestException);
   });
 
-  it('validateDate - userPackage undefined', () => {
+  it('validateDate - userPackage undefined', async () => {
     const dto = new CreateOrderDto();
     dto.user_package_id = -1;
-    expect(() => {
-      getEmptyFlowInstance().validateData({} as PrepareOrder);
-    }).toThrowError(
+    await expect(
+      getEmptyFlowInstance().validateData({} as PrepareOrder),
+    ).rejects.toThrowError(
       new BadRequestException(
         'User not exist package || zero quantity || package unpaid',
       ),
     );
   });
 
-  it('validateDate - userPackage is not paid', () => {
+  it('validateDate - userPackage is not paid', async () => {
     const dto = new CreateOrderDto();
     dto.user_package_id = -1;
-    expect(() => {
+    await expect(
       getEmptyFlowInstance().validateData({
         userPkg: ((): UserPackage => {
           const uPkg = new UserPackage();
@@ -49,18 +49,18 @@ describe('Checkout by package', () => {
 
           return uPkg;
         })(),
-      } as PrepareOrder);
-    }).toThrowError(
+      } as PrepareOrder),
+    ).rejects.toThrowError(
       new BadRequestException(
         'User not exist package || zero quantity || package unpaid',
       ),
     );
   });
 
-  it('validateDate - userPackage has no remaining quantity', () => {
+  it('validateDate - userPackage has no remaining quantity', async () => {
     const dto = new CreateOrderDto();
     dto.user_package_id = -1;
-    expect(() => {
+    await expect(
       getEmptyFlowInstance().validateData({
         userPkg: ((): UserPackage => {
           const uPkg = new UserPackage();
@@ -68,18 +68,18 @@ describe('Checkout by package', () => {
 
           return uPkg;
         })(),
-      } as PrepareOrder);
-    }).toThrowError(
+      } as PrepareOrder),
+    ).rejects.toThrowError(
       new BadRequestException(
         'User not exist package || zero quantity || package unpaid',
       ),
     );
   });
 
-  it('validateDate - userPackage has no remaining quantity 2', () => {
+  it('validateDate - userPackage has no remaining quantity 2', async () => {
     const dto = new CreateOrderDto();
     dto.user_package_id = -1;
-    expect(() => {
+    await expect(
       getEmptyFlowInstance().validateData({
         userPkg: ((): UserPackage => {
           const uPkg = new UserPackage();
@@ -88,16 +88,16 @@ describe('Checkout by package', () => {
 
           return uPkg;
         })(),
-      } as PrepareOrder);
-    }).toThrowError(
+      } as PrepareOrder),
+    ).rejects.toThrowError(
       new BadRequestException(
         'User not exist package || zero quantity || package unpaid',
       ),
     );
   });
 
-  it('validateData - location is owned', () => {
-    expect(() => {
+  it('validateData - location is owned', async () => {
+    await expect(
       getEmptyFlowInstance().validateData({
         userPkg: validUserPackage(),
         location: (() => {
@@ -106,12 +106,14 @@ describe('Checkout by package', () => {
 
           return loc;
         })(),
-      } as PrepareOrder);
-    }).toThrowError(new BadRequestException('Location is unable to purchase'));
+      } as PrepareOrder),
+    ).rejects.toThrowError(
+      new BadRequestException('Location is unable to purchase'),
+    );
   });
 
-  it('validateData - location is not paid yet', () => {
-    expect(() => {
+  it('validateData - location is not paid yet', async () => {
+    await expect(
       getEmptyFlowInstance().validateData({
         userPkg: validUserPackage(),
         location: (() => {
@@ -120,12 +122,14 @@ describe('Checkout by package', () => {
 
           return loc;
         })(),
-      } as PrepareOrder);
-    }).toThrowError(new BadRequestException('Location is unable to purchase'));
+      } as PrepareOrder),
+    ).rejects.toThrowError(
+      new BadRequestException('Location is unable to purchase'),
+    );
   });
 
-  it('validateData - location is not approved', () => {
-    expect(() => {
+  it('validateData - location is not approved', async () => {
+    await expect(
       getEmptyFlowInstance().validateData({
         userPkg: validUserPackage(),
         location: (() => {
@@ -134,12 +138,14 @@ describe('Checkout by package', () => {
 
           return loc;
         })(),
-      } as PrepareOrder);
-    }).toThrowError(new BadRequestException('Location is unable to purchase'));
+      } as PrepareOrder),
+    ).rejects.toThrowError(
+      new BadRequestException('Location is unable to purchase'),
+    );
   });
 
-  it('validateData - location is blacklist', () => {
-    expect(() => {
+  it('validateData - location is blacklist', async () => {
+    await expect(
       getEmptyFlowInstance().validateData({
         userPkg: validUserPackage(),
         location: (() => {
@@ -148,12 +154,14 @@ describe('Checkout by package', () => {
 
           return loc;
         })(),
-      } as PrepareOrder);
-    }).toThrowError(new BadRequestException('Location is unable to purchase'));
+      } as PrepareOrder),
+    ).rejects.toThrowError(
+      new BadRequestException('Location is unable to purchase'),
+    );
   });
 
-  it('validateData - succeeded', () => {
-    expect(() => {
+  it('validateData - succeeded', async () => {
+    await expect(
       getEmptyFlowInstance().validateData({
         userPkg: validUserPackage(),
         location: (() => {
@@ -162,8 +170,8 @@ describe('Checkout by package', () => {
 
           return loc;
         })(),
-      } as PrepareOrder);
-    }).not.toThrowError();
+      } as PrepareOrder),
+    ).resolves.not.toThrowError();
   });
 });
 

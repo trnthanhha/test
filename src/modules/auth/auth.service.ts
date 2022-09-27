@@ -20,15 +20,19 @@ import { HttpService } from '@nestjs/axios';
 import { LocaMosEndpoint } from './auth.constants';
 import { lastValueFrom, map } from 'rxjs';
 import FormData from 'form-data';
+import { LocamosLinkageService } from '../../services/locamos-linkage/user.service';
 
 @Injectable()
 export class AuthService {
+  private readonly locamosLinkageService: LocamosLinkageService;
   constructor(
     private readonly userService: UsersService,
     private readonly jwtService: JwtService,
     private readonly i18n: I18nService,
     private readonly httpService: HttpService,
-  ) {}
+  ) {
+    this.locamosLinkageService = new LocamosLinkageService(this.httpService);
+  }
 
   expiredDay(day: number): number {
     return new Date().setDate(new Date().getDate() + day);
@@ -205,7 +209,7 @@ export class AuthService {
       lang,
     );
 
-    const profile = await this.getProfile(accessToken);
+    const profile = await this.locamosLinkageService.getProfile(accessToken);
 
     const dto = new RegisterDto();
     dto.username = correctUsername;
@@ -249,21 +253,8 @@ export class AuthService {
     return response.data.access_token;
   }
 
-  async getProfile(accessToken: string): Promise<any> {
-    const obs = this.httpService
-      .get(`${process.env.LOCAMOS_BASE_URL}${LocaMosEndpoint.Profile}`, {
-        headers: {
-          authorization: `Bearer ${accessToken}`,
-          client_id: process.env.LOCAMOS_CLIENT_ID,
-          client_secret: process.env.LOCAMOS_CLIENT_SECRET,
-        },
-      })
-      .pipe(map((res) => res.data));
-
-    const response = await lastValueFrom(obs);
-    if (!response?.data.info || !response?.data.wallet) {
-      throw new InternalServerErrorException();
-    }
-    return response.data;
+  // easy to mock
+  getProfile(accessToken: string) {
+    return this.locamosLinkageService.getProfile(accessToken);
   }
 }

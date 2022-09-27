@@ -19,9 +19,11 @@ import { PackageService } from '../package/package.service';
 import { Package } from '../package/entities/package.entity';
 import { WebhookFactory } from '../../services/message-broker/webhook.factory';
 import { RabbitMQServices } from '../../services/message-broker/webhook.types';
+import { HttpModule } from '@nestjs/axios';
 
 @Module({
   imports: [
+    HttpModule,
     RedisModule,
     TypeOrmModule.forFeature([
       User,
