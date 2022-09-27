@@ -55,11 +55,7 @@ export class OrdersCheckoutImplementorPoint
       where: {
         created_by_id: this.user.id,
         payment_type: PaymentType.POINT,
-        payment_status: In<PaymentStatus>([
-          PaymentStatus.UNAUTHORIZED,
-          PaymentStatus.FAILED,
-          PaymentStatus.CANCELLED,
-        ]),
+        payment_status: PaymentStatus.UNAUTHORIZED,
       },
       take: 1,
     });
