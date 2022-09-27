@@ -26,7 +26,6 @@ import { REDIS_CLIENT_PROVIDER } from '../redis/redis.constants';
 import { generateRedisKey } from '../redis/redis.keys.pattern';
 import { CreateUserDto } from './dto/create-user.dto';
 import { UpdateUserDto } from './dto/update-user.dto';
-import { LocamosLinkageService } from '../../services/locamos-linkage/user.service';
 import { AuthService } from '../auth/auth.service';
 
 @ApiTags('users')
