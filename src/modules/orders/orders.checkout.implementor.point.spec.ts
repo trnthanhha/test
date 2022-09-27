@@ -79,7 +79,7 @@ describe('Checkout by point', () => {
           return loc;
         })(),
       } as PrepareOrder),
-    ).rejects.toThrowError(new NotFoundException('not found package to buy'));
+    ).rejects.toThrowError(new NotFoundException('not found package to buy || package cant buy with point'));
   });
 
   it('validateData - user is not created from Locamos', async () => {
