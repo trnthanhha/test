@@ -7,6 +7,7 @@ import {
 } from '../locations/locations.contants';
 import { OrdersCheckoutImplementorPoint } from './orders.checkout.implementor.point';
 import { Package } from '../package/entities/package.entity';
+import { EntityManager } from 'typeorm';
 
 describe('Checkout by point', () => {
   it('validateData - location is owned', async () => {
@@ -112,8 +113,14 @@ function getEmptyFlowInstance(user?): OrdersCheckoutImplementorPoint {
   return new OrdersCheckoutImplementorPoint(
     null,
     null,
-    null,
-    user,
+    {
+      getRepository: () => ({
+        find: () => {
+          return [];
+        },
+      }),
+    } as unknown as EntityManager,
+    user || { id: 1 },
     null,
     null,
     null,
