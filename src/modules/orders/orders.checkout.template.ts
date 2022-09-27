@@ -121,6 +121,7 @@ export class OrderCheckoutFlowAbstraction {
         return new OrdersCheckoutImplementorPoint(
           this.httpService,
           this.publisher,
+          this.dbManager,
           this.user,
           this.billsService,
           this.locationsService,

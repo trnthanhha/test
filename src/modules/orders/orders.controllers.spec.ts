@@ -105,6 +105,11 @@ describe('Order controller', () => {
       dto,
       { headers: {}, socket: {}, connection: { remoteAddress: 'localhost' } },
       new User(),
+      {
+        status: () => ({
+          send: () => {},
+        }),
+      },
     );
     expect(rs.success).toEqual(true);
     expect(rs.location_name).toEqual('my bought location name');
@@ -173,6 +178,11 @@ describe('Order controller', () => {
       dto,
       { headers: {}, socket: {}, connection: { remoteAddress: 'localhost' } },
       new User(),
+      {
+        status: () => ({
+          send: () => {},
+        }),
+      },
     );
     expect(rs.success).toEqual(true);
     expect(rs.location_name).toEqual('my new custom location');
@@ -252,6 +262,11 @@ describe('Order controller', () => {
       dto,
       { headers: {}, socket: {}, connection: { remoteAddress: 'localhost' } },
       new User(),
+      {
+        status: () => ({
+          send: () => {},
+        }),
+      },
     );
     expect(rs.success).toEqual(true);
     expect(rs.package_name).toEqual('Premium combo x5');
@@ -294,6 +309,11 @@ describe('Order controller', () => {
         dto,
         { headers: {}, socket: {}, connection: { remoteAddress: 'localhost' } },
         new User(),
+        {
+          status: () => ({
+            send: () => {},
+          }),
+        },
       ),
     ).rejects.toEqual(
       new BadRequestException(
@@ -340,6 +360,11 @@ describe('Order controller', () => {
         dto,
         { headers: {}, socket: {}, connection: { remoteAddress: 'localhost' } },
         new User(),
+        {
+          status: () => ({
+            send: () => {},
+          }),
+        },
       ),
     ).rejects.toEqual(
       new BadRequestException(
@@ -386,6 +411,11 @@ describe('Order controller', () => {
         dto,
         { headers: {}, socket: {}, connection: { remoteAddress: 'localhost' } },
         new User(),
+        {
+          status: () => ({
+            send: () => {},
+          }),
+        },
       ),
     ).rejects.toThrowError(
       new BadRequestException(
@@ -438,6 +468,11 @@ describe('Order controller', () => {
         dto,
         { headers: {}, socket: {}, connection: { remoteAddress: 'localhost' } },
         new User(),
+        {
+          status: () => ({
+            send: () => {},
+          }),
+        },
       ),
     ).rejects.toThrowError(
       new BadRequestException('Location is unable to purchase'),
@@ -535,6 +570,11 @@ describe('Order controller', () => {
       dto,
       { headers: {}, socket: {}, connection: { remoteAddress: 'localhost' } },
       new User(),
+      {
+        status: () => ({
+          send: () => {},
+        }),
+      },
     );
     expect(rs.success).toEqual(true);
     expect(rs.location_name).toEqual('my bought location name');
@@ -602,6 +642,14 @@ async function getOrderController() {
       {
         provide: getRepositoryToken(Order),
         useFactory: jest.fn(() => ({})),
+      },
+      {
+        provide: REDIS_TOKEN_PROVIDER,
+        useFactory: mockRedis,
+      },
+      {
+        provide: REDIS_CLIENT_PROVIDER,
+        useFactory: mockRedis,
       },
     ],
   })

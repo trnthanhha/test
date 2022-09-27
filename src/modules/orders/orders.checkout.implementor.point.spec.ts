@@ -7,6 +7,7 @@ import {
 } from '../locations/locations.contants';
 import { OrdersCheckoutImplementorPoint } from './orders.checkout.implementor.point';
 import { Package } from '../package/entities/package.entity';
+import { EntityManager } from 'typeorm';
 
 describe('Checkout by point', () => {
   it('validateData - location is owned', async () => {
@@ -79,7 +80,11 @@ describe('Checkout by point', () => {
           return loc;
         })(),
       } as PrepareOrder),
-    ).rejects.toThrowError(new NotFoundException('not found package to buy'));
+    ).rejects.toThrowError(
+      new NotFoundException(
+        'not found package to buy || package cant buy with point',
+      ),
+    );
   });
 
   it('validateData - user is not created from Locamos', async () => {
@@ -108,7 +113,14 @@ function getEmptyFlowInstance(user?): OrdersCheckoutImplementorPoint {
   return new OrdersCheckoutImplementorPoint(
     null,
     null,
-    user,
+    {
+      getRepository: () => ({
+        find: () => {
+          return [];
+        },
+      }),
+    } as unknown as EntityManager,
+    user || { id: 1 },
     null,
     null,
     null,

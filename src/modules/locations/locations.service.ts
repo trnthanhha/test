@@ -1,4 +1,8 @@
-import {Injectable, InternalServerErrorException, Logger} from '@nestjs/common';
+import {
+  Injectable,
+  InternalServerErrorException,
+  Logger,
+} from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import {
   EntityManager,
@@ -7,7 +11,8 @@ import {
   LessThanOrEqual,
   MoreThan,
   MoreThanOrEqual,
-  Repository, UpdateResult,
+  Repository,
+  UpdateResult,
 } from 'typeorm';
 import { Location } from './entities/location.entity';
 import {
@@ -62,14 +67,14 @@ export class LocationsService {
     newLocation.user_full_name = `${user.last_name} ${user.first_name}`;
 
     dbManager = dbManager || this.locationRepository.manager;
-    return dbManager.transaction(async (entityManager): Promise<Location> => {
+    return dbManager.transaction(async (txManager): Promise<Location> => {
       newLocation.handle = await this.locationHandleService
-        .createHandle(newLocation.name, entityManager)
+        .createHandle(newLocation.name, txManager)
         .catch((ex) => {
           this.logger.error('exception create handle', ex.message);
           throw ex;
         });
-      return entityManager.save(newLocation);
+      return txManager.save(newLocation);
     });
   }
 
@@ -108,7 +113,11 @@ export class LocationsService {
     return repo.findOneBy({ id });
   }
 
-  async checkout(dbManager: EntityManager, id: number, version: number): Promise<UpdateResult> {
+  async checkout(
+    dbManager: EntityManager,
+    id: number,
+    version: number,
+  ): Promise<UpdateResult> {
     const updateResult = await dbManager.update(
       Location,
       {
@@ -122,7 +131,8 @@ export class LocationsService {
     );
     if (!updateResult.affected) {
       throw new InternalServerErrorException(
-          `Invalid version. Location has data changed, id: ${id}`)
+        `Invalid version. Location has data changed, id: ${id}`,
+      );
     }
     return updateResult;
   }

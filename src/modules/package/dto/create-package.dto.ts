@@ -15,4 +15,18 @@ export class CreatePackageDto {
   @IsOptional()
   @ApiProperty({ example: 20 })
   discount: number;
+
+  @ApiProperty({
+    required: true,
+    example: 100,
+    description: 'Giá tính bằng điểm',
+  })
+  price_usd: number;
+
+  @ApiProperty({
+    required: true,
+    example: 100,
+    description: 'Giá tính bằng Loca',
+  })
+  price_loca: number;
 }
