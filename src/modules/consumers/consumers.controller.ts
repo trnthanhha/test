@@ -46,6 +46,9 @@ export class ConsumersController {
     @Ctx() ctx: RmqContext,
   ) {
     this.logger.log('receive message to sync LocaMos, value: ', payload);
+    if (payload.type) {
+      return;
+    }
     switch (payload.type) {
       case PaymentType.PACKAGE:
       case PaymentType.POINT:
