@@ -79,7 +79,11 @@ describe('Checkout by point', () => {
           return loc;
         })(),
       } as PrepareOrder),
-    ).rejects.toThrowError(new NotFoundException('not found package to buy || package cant buy with point'));
+    ).rejects.toThrowError(
+      new NotFoundException(
+        'not found package to buy || package cant buy with point',
+      ),
+    );
   });
 
   it('validateData - user is not created from Locamos', async () => {
@@ -106,6 +110,7 @@ describe('Checkout by point', () => {
 
 function getEmptyFlowInstance(user?): OrdersCheckoutImplementorPoint {
   return new OrdersCheckoutImplementorPoint(
+    null,
     null,
     null,
     user,

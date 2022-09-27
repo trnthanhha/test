@@ -3,11 +3,14 @@ import {
   Controller,
   Delete,
   Get,
+  HttpStatus,
+  Inject,
   InternalServerErrorException,
   Param,
   Post,
   Query,
   Req,
+  Res,
 } from '@nestjs/common';
 import { OrdersService } from './orders.service';
 import { CreateOrderDto } from './dto/create-order.dto';
@@ -28,6 +31,10 @@ import { CheckoutDto } from './dto/checkout-dto';
 import { GetAuthUser } from '../../decorators/user.decorator';
 import { UsersService } from '../users/users.service';
 import { BillsService } from '../bills/bills.service';
+import { REDIS_CLIENT_PROVIDER } from '../redis/redis.constants';
+import Redis from 'ioredis';
+import { PaymentType } from './orders.constants';
+import { generateRedisKey } from '../redis/redis.keys.pattern';
 
 @ApiTags('orders')
 @Controller('orders')
@@ -36,7 +43,9 @@ export class OrdersController {
     private readonly ordersService: OrdersService,
     private readonly billsService: BillsService,
     private readonly usersService: UsersService,
+    @Inject(REDIS_CLIENT_PROVIDER) private readonly redis: Redis,
   ) {}
+  private prefixRedisKey = `${OrdersService.name}-checkout`;
 
   @Auth()
   @ApiOperation({
@@ -55,10 +64,25 @@ export class OrdersController {
     @Body() createOrderDto: CreateOrderDto,
     @Req() req,
     @GetAuthUser() authUser,
-  ): Promise<CheckoutDto> {
+    @Res() response,
+  ) {
     const user = await this.usersService.findByID(authUser.id);
+    if (
+      createOrderDto.type === PaymentType.POINT &&
+      (await this.isOtherOrderOnProcess(user.id))
+    ) {
+      return response
+        .status(HttpStatus.TOO_MANY_REQUESTS)
+        .send({ message: 'Other order is on processing' });
+    }
 
-    return this.ordersService.checkout(createOrderDto, req, user);
+    return this.ordersService
+      .checkout(createOrderDto, req, user)
+      .finally(() => {
+        if (createOrderDto.type === PaymentType.POINT) {
+          this.clearProcessing(user.id);
+        }
+      });
   }
 
   @Auth()
@@ -137,5 +161,21 @@ export class OrdersController {
   @Delete(':id')
   remove(@Param('id') id: string) {
     return this.ordersService.remove(+id);
+  }
+
+  async isOtherOrderOnProcess(userId: number): Promise<boolean> {
+    const orderProcess = generateRedisKey(this.prefixRedisKey, userId);
+
+    const rs = await this.redis.get(orderProcess);
+    if (!!rs) {
+      return true;
+    }
+
+    await this.redis.set(orderProcess, 1, 'EX', 600, 'NX');
+    await this.redis.expire(orderProcess, 60, 'NX');
+  }
+
+  async clearProcessing(userId: number) {
+    await this.redis.del(generateRedisKey(this.prefixRedisKey, userId));
   }
 }

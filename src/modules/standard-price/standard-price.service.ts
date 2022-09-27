@@ -71,7 +71,11 @@ export class StandardPriceService {
       where: { id: Not(IsNull()) },
     });
 
-    this.redis.set(this.standardPriceCacheKey, JSON.stringify(standardPrice));
+    this.redis
+      .set(this.standardPriceCacheKey, JSON.stringify(standardPrice))
+      .then(() => {
+        this.redis.expire(this.standardPriceCacheKey, 60 * 60 * 24);
+      });
 
     return standardPrice;
   }
