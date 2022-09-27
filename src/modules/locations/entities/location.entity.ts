@@ -26,7 +26,7 @@ export class Location {
   @Column({ unique: true })
   handle: string;
 
-  @Column()
+  @Column({ nullable: true })
   map_captured: string;
 
   @Column({ type: 'double precision' })

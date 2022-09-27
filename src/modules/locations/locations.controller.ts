@@ -1,4 +1,5 @@
 import {
+  BadRequestException,
   Body,
   ClassSerializerInterceptor,
   Controller,
@@ -17,23 +18,32 @@ import { ApiImplicitQuery } from '@nestjs/swagger/dist/decorators/api-implicit-q
 import { GetAuthUser } from '../../decorators/user.decorator';
 import { User } from '../users/entities/user.entity';
 import { LocationsService } from './locations.service';
-import { LocationStatus } from './locations.contants';
+import {
+  DefaultSafeZoneRadius,
+  LocationNFTStatus,
+  LocationStatus,
+  LocationType,
+} from './locations.contants';
 import { Location } from './entities/location.entity';
 import { UserType } from '../users/users.constants';
 import { Auth } from '../../decorators/roles.decorator';
 import { CreateLocationDto } from './dto/create-location.dto';
 import { LocationHandleService } from '../location-handle/location-handle.service';
-import { FindManyOptions, Like, Raw } from 'typeorm';
+import { FindManyOptions, Like, Raw, Repository } from 'typeorm';
 import { ListLocationDto } from './dto/list-location-dto';
 import { ValidateDistanceDto } from './dto/validate-distance-dto';
 import { UpdateLocationDto } from './dto/update-location.dto';
 import { UsersService } from '../users/users.service';
+import { MigrateLocationDto } from './dto/migrate-location-dto';
+import { InjectRepository } from '@nestjs/typeorm';
 
 @ApiTags('locations')
 @Controller('locations')
 export class LocationsController {
   private readonly logger = new Logger(LocationsController.name);
   constructor(
+    @InjectRepository(Location)
+    private locationRepository: Repository<Location>,
     private readonly locationsService: LocationsService,
     private readonly locationHandleService: LocationHandleService,
     private readonly usersService: UsersService,
@@ -190,6 +200,60 @@ export class LocationsController {
   @Patch(':id')
   update(@Param('id') id: string, @Body() updateOrderDto: UpdateLocationDto) {
     return this.locationsService.update(+id, updateOrderDto);
+  }
+
+  @Auth(UserType.ADMIN)
+  @ApiOperation({
+    summary: 'Migrate new locations data',
+  })
+  @Post('/migrate')
+  async migrate(
+    @Body() migrateLocationDto: MigrateLocationDto,
+    @GetAuthUser() user: User,
+  ): Promise<Location> {
+    const newLocation = new Location();
+    // validate
+    const dateNMonth = migrateLocationDto.purchase_date.split('/');
+    if (!dateNMonth || dateNMonth.length !== 2) {
+      throw new BadRequestException('purchase date is wrong format');
+    }
+    const paidAt = new Date(
+      new Date().setMonth(+dateNMonth[1] - 1, +dateNMonth[0]),
+    );
+
+    // transfer
+    newLocation.name = migrateLocationDto.nft_name;
+    newLocation.lat = migrateLocationDto.lat;
+    newLocation.long = migrateLocationDto.long;
+    newLocation.user_full_name = migrateLocationDto.nft_owner;
+    newLocation.token_id = migrateLocationDto.nft_network_token_id;
+
+    // biz
+    newLocation.block_radius = DefaultSafeZoneRadius;
+    newLocation.calculateBounds();
+
+    newLocation.nft_status = LocationNFTStatus.APPROVED;
+    newLocation.type = LocationType.ADMIN;
+    newLocation.country = 'VN';
+    newLocation.status = LocationStatus.APPROVED;
+    newLocation.approved_by_id = user.id; // System
+    newLocation.approved_at = paidAt;
+    newLocation.paid_at = paidAt;
+    // sys
+    newLocation.created_by_id = user.id;
+
+    const dbManager = this.locationRepository.manager;
+    return await dbManager.transaction(
+      async (entityManager): Promise<Location> => {
+        newLocation.handle = await this.locationHandleService
+          .createHandle(newLocation.name, entityManager)
+          .catch((ex) => {
+            this.logger.error('exception create handle', ex.message);
+            throw ex;
+          });
+        return dbManager.getRepository(Location).save(newLocation);
+      },
+    );
   }
 
   @Auth()
