@@ -10,9 +10,9 @@ export class LocationHandleService {
     private locationHandleRepo: Repository<LocationHandle>,
   ) {}
 
-  async createHandle(name: string, dbManager?: EntityManager): Promise<string> {
-    if (!dbManager) {
-      dbManager = this.locationHandleRepo.manager;
+  async createHandle(name: string, txManager?: EntityManager): Promise<string> {
+    if (!txManager) {
+      txManager = this.locationHandleRepo.manager;
     }
 
     name = this.convertViToEn(name);
@@ -20,12 +20,12 @@ export class LocationHandleService {
     name = name.match(/[0-9a-zA-Z-_]/g)?.join('');
 
     let total = 1;
-    const existed = await dbManager.findOneBy(LocationHandle, { name });
+    const existed = await txManager.findOneBy(LocationHandle, { name });
     if (!existed) {
-      await dbManager.insert(LocationHandle, { name, total });
+      await txManager.insert(LocationHandle, { name, total });
     } else {
       total = existed.total;
-      const rs = await dbManager.update(
+      const rs = await txManager.update(
         LocationHandle,
         { name, total },
         { total: total + 1 },

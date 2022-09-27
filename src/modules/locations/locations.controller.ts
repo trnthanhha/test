@@ -289,17 +289,15 @@ export class LocationsController {
     newLocation.created_by_id = user.id;
 
     const dbManager = this.locationRepository.manager;
-    return await dbManager.transaction(
-      async (entityManager): Promise<Location> => {
-        newLocation.handle = await this.locationHandleService
-          .createHandle(newLocation.name, entityManager)
-          .catch((ex) => {
-            this.logger.error('exception create handle', ex.message);
-            throw ex;
-          });
-        return dbManager.getRepository(Location).save(newLocation);
-      },
-    );
+    return await dbManager.transaction(async (txManager): Promise<Location> => {
+      newLocation.handle = await this.locationHandleService
+        .createHandle(newLocation.name, txManager)
+        .catch((ex) => {
+          this.logger.error('exception create handle', ex.message);
+          throw ex;
+        });
+      return txManager.getRepository(Location).save(newLocation);
+    });
   }
 
   @Auth()

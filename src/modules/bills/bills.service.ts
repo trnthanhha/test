@@ -1,4 +1,4 @@
-import {Injectable, InternalServerErrorException} from '@nestjs/common';
+import { Injectable, InternalServerErrorException } from '@nestjs/common';
 import { Bill } from './entities/bill.entity';
 import { InjectRepository } from '@nestjs/typeorm';
 import { EntityManager, Repository, UpdateResult } from 'typeorm';
@@ -9,13 +9,13 @@ export class BillsService {
     @InjectRepository(Bill)
     private billRepository: Repository<Bill>,
   ) {}
-  create(bill: Bill, dbManager?: EntityManager): Promise<Bill> {
-    const repo = dbManager?.getRepository(Bill) || this.billRepository;
+  create(bill: Bill, txManager?: EntityManager): Promise<Bill> {
+    const repo = txManager?.getRepository(Bill) || this.billRepository;
     return repo.save(bill);
   }
 
-  async update(bill: Bill, dbManager?: EntityManager): Promise<UpdateResult> {
-    const repo = dbManager?.getRepository(Bill) || this.billRepository;
+  async update(bill: Bill, txManager?: EntityManager): Promise<UpdateResult> {
+    const repo = txManager?.getRepository(Bill) || this.billRepository;
     const updateResult = await repo.update(
       {
         id: bill.id,
@@ -24,7 +24,9 @@ export class BillsService {
       Object.assign(bill, { version: bill.version + 1 }),
     );
     if (!updateResult.affected) {
-      throw new InternalServerErrorException(`Bill was changed, id: ${bill.id}`);
+      throw new InternalServerErrorException(
+        `Bill was changed, id: ${bill.id}`,
+      );
     }
 
     return updateResult;

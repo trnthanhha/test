@@ -1,4 +1,9 @@
-import {BadRequestException, Injectable, InternalServerErrorException, Logger} from '@nestjs/common';
+import {
+  BadRequestException,
+  Injectable,
+  InternalServerErrorException,
+  Logger,
+} from '@nestjs/common';
 import { Cron } from '@nestjs/schedule';
 import { OrdersService } from '../../modules/orders/orders.service';
 import { PaymentStatus } from '../../modules/orders/orders.constants';
@@ -141,7 +146,9 @@ export class PaymentService {
       Object.assign(userPackage, { version: userPackage.version + 1 }),
     );
     if (!updateResult.affected) {
-      throw new InternalServerErrorException(`UserPackage was changed, id: ${userPackage.id}`)
+      throw new InternalServerErrorException(
+        `UserPackage was changed, id: ${userPackage.id}`,
+      );
     }
   }
 }
