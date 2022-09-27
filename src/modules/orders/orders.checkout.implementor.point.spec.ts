@@ -1,11 +1,12 @@
 import { Location } from '../locations/entities/location.entity';
 import { PrepareOrder } from './orders.checkout.types';
-import { BadRequestException } from '@nestjs/common';
+import { BadRequestException, NotFoundException } from '@nestjs/common';
 import {
   LocationPurchaseStatus,
   LocationStatus,
 } from '../locations/locations.contants';
 import { OrdersCheckoutImplementorPoint } from './orders.checkout.implementor.point';
+import { Package } from '../package/entities/package.entity';
 
 describe('Checkout by point', () => {
   it('validateData - location is owned', async () => {
@@ -68,25 +69,49 @@ describe('Checkout by point', () => {
     );
   });
 
-  // it('validateData - succeeded', async () => {
-  //   await expect(
-  //     getEmptyFlowInstance().validateData({
-  //       location: (() => {
-  //         const loc = new Location();
-  //         loc.status = LocationStatus.APPROVED;
-  //
-  //         return loc;
-  //       })(),
-  //     } as PrepareOrder),
-  //   ).resolves.not.toThrowError();
-  // });
+  it('validateData - not found package to buy', async () => {
+    await expect(
+      getEmptyFlowInstance().validateData({
+        location: (() => {
+          const loc = new Location();
+          loc.status = LocationStatus.APPROVED;
+
+          return loc;
+        })(),
+      } as PrepareOrder),
+    ).rejects.toThrowError(new NotFoundException('not found package to buy'));
+  });
+
+  it('validateData - user is not created from Locamos', async () => {
+    await expect(
+      getEmptyFlowInstance().validateData({
+        location: (() => {
+          const loc = new Location();
+          loc.status = LocationStatus.APPROVED;
+
+          return loc;
+        })(),
+        pkg: (() => {
+          const pkg = new Package();
+          pkg.price_usd = 5000;
+
+          return pkg;
+        })(),
+      } as PrepareOrder),
+    ).rejects.toThrowError(
+      new NotFoundException('User is not created from LocaMos'),
+    );
+  });
 });
 
-function getEmptyFlowInstance(): OrdersCheckoutImplementorPoint {
+function getEmptyFlowInstance(
+  user?,
+  mockHttpService?,
+): OrdersCheckoutImplementorPoint {
   return new OrdersCheckoutImplementorPoint(
     null,
     null,
-    null,
+    user,
     null,
     null,
     null,

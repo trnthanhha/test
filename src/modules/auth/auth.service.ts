@@ -252,4 +252,9 @@ export class AuthService {
     }
     return response.data.access_token;
   }
+
+  // easy to mock
+  getProfile(accessToken: string) {
+    return this.locamosLinkageService.getProfile(accessToken);
+  }
 }

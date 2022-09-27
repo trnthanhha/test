@@ -41,6 +41,7 @@ import { Repository } from 'typeorm/repository/Repository';
 import { UPackagePurchaseStatus } from '../user_package/user_package.constants';
 import { BadRequestException } from '@nestjs/common';
 import { RabbitMQServices } from '../../services/message-broker/webhook.types';
+import { HttpModule } from '@nestjs/axios';
 
 describe('Order controller', () => {
   beforeEach(() => {
@@ -621,6 +622,7 @@ async function getTestingOrderService() {
   const locService = await getTestingLocationService();
   const stdPriceService = await getTestingStandardPriceService();
   const module: TestingModule = await Test.createTestingModule({
+    imports: [HttpModule],
     providers: [
       OrdersService,
       BillsService,

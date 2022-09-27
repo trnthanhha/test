@@ -3,6 +3,7 @@ import {
   Controller,
   Delete,
   Get,
+  InternalServerErrorException,
   Param,
   Post,
   Query,
@@ -101,8 +102,14 @@ export class OrdersController {
   @Get('/status')
   async validateStatus(@Req() req): Promise<OrderStatusDto> {
     const response = PaymentGatewayFactory.Build().decodeResponse(req);
+    if (!response.success) {
+      return response;
+    }
 
     const bill = await this.billsService.findOneByRefID(response.ref_uid);
+    if (!bill) {
+      throw new InternalServerErrorException('not found bill');
+    }
     const order = await this.ordersService.findOne(bill.order_id);
     return Object.assign(response, order);
   }

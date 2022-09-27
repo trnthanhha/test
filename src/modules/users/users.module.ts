@@ -11,7 +11,7 @@ import { HttpModule } from '@nestjs/axios';
 @Module({
   imports: [TypeOrmModule.forFeature([User]), RedisModule, HttpModule],
   controllers: [UsersController],
-  providers: [UsersService, JwtService],
+  providers: [UsersService, AuthService, JwtService],
   exports: [UsersService],
 })
 export class UsersModule {}

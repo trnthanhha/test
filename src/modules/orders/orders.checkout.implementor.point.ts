@@ -49,8 +49,11 @@ export class OrdersCheckoutImplementorPoint
   }
 
   async validateData(pOrder: PrepareOrder) {
-    await super.validateData(pOrder);
-    const { pkg } = pOrder;
+    const { location, pkg } = pOrder;
+    if (location && !location.canPurchased()) {
+      throw new BadRequestException('Location is unable to purchase');
+    }
+
     if (!pkg) {
       throw new NotFoundException('not found package to buy');
     }

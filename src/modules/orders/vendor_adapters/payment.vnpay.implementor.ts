@@ -93,6 +93,7 @@ export class PaymentVNPayImplementor implements PaymentVendorAdapters {
     switch (vnp_Params['vnp_ResponseCode']) {
       case '00':
         dto.message = 'Giao dịch thành công';
+        dto.success = true;
         break;
       case '01':
         dto.message = 'Giao dịch chưa hoàn tất';
@@ -115,7 +116,42 @@ export class PaymentVNPayImplementor implements PaymentVendorAdapters {
         dto.message = 'Giao dịch bị nghi ngờ gian lận';
         break;
       case '09':
-        dto.message = 'GD Hoàn trả bị từ chối';
+        dto.message =
+          'Giao dịch không thành công do: Thẻ/Tài khoản của khách hàng chưa đăng ký dịch vụ InternetBanking tại ngân hàng.';
+        break;
+      case '10':
+        dto.message =
+          'Giao dịch không thành công do: Khách hàng xác thực thông tin thẻ/tài khoản không đúng quá 3 lần';
+        break;
+      case '11':
+        dto.message =
+          'Giao dịch không thành công do: Đã hết hạn chờ thanh toán. Xin quý khách vui lòng thực hiện lại giao dịch.';
+        break;
+      case '12':
+        dto.message =
+          'Giao dịch không thành công do: Thẻ/Tài khoản của khách hàng bị khóa.';
+        break;
+      case '13':
+        dto.message =
+          'Giao dịch không thành công do Quý khách nhập sai mật khẩu xác thực giao dịch (OTP). Xin quý khách vui lòng thực hiện lại giao dịch.';
+        break;
+      case '24':
+        dto.message = 'Giao dịch không thành công do: Khách hàng hủy giao dịch';
+        break;
+      case '51':
+        dto.message =
+          'Giao dịch không thành công do: Tài khoản của quý khách không đủ số dư để thực hiện giao dịch.';
+        break;
+      case '65':
+        dto.message =
+          'Giao dịch không thành công do: Tài khoản của Quý khách đã vượt quá hạn mức giao dịch trong ngày.';
+        break;
+      case '75':
+        dto.message = 'Ngân hàng thanh toán đang bảo trì.';
+        break;
+      case '79':
+        dto.message =
+          'Giao dịch không thành công do: KH nhập sai mật khẩu thanh toán quá số lần quy định. Xin quý khách vui lòng thực hiện lại giao dịch';
         break;
       default:
         dto.message = 'GD không xác định';

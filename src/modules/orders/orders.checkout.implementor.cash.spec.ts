@@ -21,8 +21,8 @@ describe('Checkout by cash', () => {
     }).toThrowError(BadRequestException);
   });
 
-  it('validateData - location is owned', () => {
-    expect(() => {
+  it('validateData - location is owned', async () => {
+    await expect(
       getEmptyFlowInstance().validateData({
         location: (() => {
           const loc = new Location();
@@ -30,12 +30,12 @@ describe('Checkout by cash', () => {
 
           return loc;
         })(),
-      } as PrepareOrder);
-    }).toThrowError(BadRequestException);
+      } as PrepareOrder),
+    ).rejects.toThrowError(BadRequestException);
   });
 
-  it('validateData - location is not paid yet', () => {
-    expect(() => {
+  it('validateData - location is not paid yet', async () => {
+    await expect(
       getEmptyFlowInstance().validateData({
         location: (() => {
           const loc = new Location();
@@ -43,12 +43,12 @@ describe('Checkout by cash', () => {
 
           return loc;
         })(),
-      } as PrepareOrder);
-    }).toThrowError(BadRequestException);
+      } as PrepareOrder),
+    ).rejects.toThrowError(BadRequestException);
   });
 
-  it('validateData - location is not approved', () => {
-    expect(() => {
+  it('validateData - location is not approved', async () => {
+    await expect(
       getEmptyFlowInstance().validateData({
         location: (() => {
           const loc = new Location();
@@ -56,12 +56,12 @@ describe('Checkout by cash', () => {
 
           return loc;
         })(),
-      } as PrepareOrder);
-    }).toThrowError(BadRequestException);
+      } as PrepareOrder),
+    ).rejects.toThrowError(BadRequestException);
   });
 
-  it('validateData - location is blacklist', () => {
-    expect(() => {
+  it('validateData - location is blacklist', async () => {
+    await expect(
       getEmptyFlowInstance().validateData({
         location: (() => {
           const loc = new Location();
@@ -69,12 +69,12 @@ describe('Checkout by cash', () => {
 
           return loc;
         })(),
-      } as PrepareOrder);
-    }).toThrowError(BadRequestException);
+      } as PrepareOrder),
+    ).rejects.toThrowError(BadRequestException);
   });
 
-  it('validateData - standard price not found', () => {
-    expect(() => {
+  it('validateData - standard price not found', async () => {
+    await expect(
       getEmptyFlowInstance().validateData({
         location: (() => {
           const loc = new Location();
@@ -82,8 +82,8 @@ describe('Checkout by cash', () => {
 
           return loc;
         })(),
-      } as PrepareOrder);
-    }).toThrowError(InternalServerErrorException);
+      } as PrepareOrder),
+    ).rejects.toThrowError(InternalServerErrorException);
   });
 
   it('validateData - succeeded', () => {
