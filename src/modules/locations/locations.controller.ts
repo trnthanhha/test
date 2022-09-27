@@ -241,7 +241,10 @@ export class LocationsController {
     value.safe_zone_top = existed.safe_zone_top;
     value.safe_zone_bot = existed.safe_zone_bot;
 
-    return this.locationRepository.update(criteria, value);
+    const rs = await this.locationRepository.update(criteria, value);
+    return {
+      success: rs.affected > 0,
+    };
   }
 
   @Auth(UserType.ADMIN)
@@ -249,6 +252,7 @@ export class LocationsController {
     summary: 'Migrate new locations data',
   })
   @Post('/migrate')
+  @UseInterceptors(ClassSerializerInterceptor)
   async migrate(
     @Body() migrateLocationDto: MigrateLocationDto,
     @GetAuthUser() user: User,

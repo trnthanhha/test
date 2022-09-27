@@ -35,34 +35,42 @@ export class Location {
   @Column({ type: 'double precision' })
   lat: number;
 
+  @Exclude()
   @Index()
   @Column({ type: 'double precision' })
   safe_zone_top: number;
 
+  @Exclude()
   @Index()
   @Column({ type: 'double precision' })
   safe_zone_bot: number;
 
+  @Exclude()
   @Index()
   @Column({ type: 'double precision' })
   safe_zone_left: number;
 
+  @Exclude()
   @Index()
   @Column({ type: 'double precision' })
   safe_zone_right: number;
 
   @Exclude()
+  @Exclude()
   @Column({ type: 'enum', enum: LocationType })
   type: LocationType;
 
+  @Exclude()
   @Exclude()
   @Index()
   @Column({ type: 'enum', enum: LocationStatus })
   status: LocationStatus;
 
+  @Exclude()
   @Column({ type: 'enum', enum: LocationPurchaseStatus, nullable: true })
   purchase_status: LocationPurchaseStatus;
 
+  @Exclude()
   @Exclude()
   @Column({
     type: 'enum',
@@ -116,6 +124,7 @@ export class Location {
   @Column({ nullable: true })
   paid_at: Date;
 
+  @Exclude()
   @Column({ default: 1 })
   version: number;
 
