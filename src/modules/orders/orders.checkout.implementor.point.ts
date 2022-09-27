@@ -14,6 +14,7 @@ import { CreateOrderDto } from './dto/create-order.dto';
 import { TransactionInfo } from './vendor_adapters/payment.types';
 import { PaymentType } from './orders.constants';
 import { CheckoutDto } from './dto/checkout-dto';
+import {Order} from "./entities/order.entity";
 
 export class OrdersCheckoutImplementorPoint
   extends OrdersCheckoutImplementorCash
@@ -53,11 +54,15 @@ export class OrdersCheckoutImplementorPoint
       throw new BadRequestException('Location is unable to purchase');
     }
 
-    if (!pkg) {
-      throw new NotFoundException('not found package to buy');
+    if (!pkg || !pkg.price_usd) {
+      throw new NotFoundException('not found package to buy || package cant buy with point');
     }
 
     await this.validateCurrentPointEnough(pkg.price_usd || 0);
+  }
+
+  async processBusiness(pOrder: PrepareOrder): Promise<Order> {
+    return this.initOrder(pOrder.pkg.price_usd, 'Thanh toan mua LocaMos package/combo');
   }
 
   responseResult(req: any, info: TransactionInfo, newItem: any) {
