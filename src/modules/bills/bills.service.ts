@@ -1,4 +1,4 @@
-import { Injectable } from '@nestjs/common';
+import {Injectable, InternalServerErrorException} from '@nestjs/common';
 import { Bill } from './entities/bill.entity';
 import { InjectRepository } from '@nestjs/typeorm';
 import { EntityManager, Repository, UpdateResult } from 'typeorm';
@@ -14,15 +14,20 @@ export class BillsService {
     return repo.save(bill);
   }
 
-  update(bill: Bill, dbManager?: EntityManager): Promise<UpdateResult> {
+  async update(bill: Bill, dbManager?: EntityManager): Promise<UpdateResult> {
     const repo = dbManager?.getRepository(Bill) || this.billRepository;
-    return repo.update(
+    const updateResult = await repo.update(
       {
         id: bill.id,
         version: bill.version,
       },
       Object.assign(bill, { version: bill.version + 1 }),
     );
+    if (!updateResult.affected) {
+      throw new InternalServerErrorException(`Bill was changed, id: ${bill.id}`);
+    }
+
+    return updateResult;
   }
 
   findAll() {
