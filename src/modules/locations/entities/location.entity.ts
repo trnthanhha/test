@@ -142,6 +142,7 @@ export class Location {
     return (
       !this.is_blacklist &&
       !this.user_id &&
+      !this.user_full_name &&
       !this.purchase_status &&
       this.status === LocationStatus.APPROVED
     );
