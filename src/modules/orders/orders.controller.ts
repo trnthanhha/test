@@ -27,7 +27,6 @@ import { Auth } from '../../decorators/roles.decorator';
 import { UserType } from '../users/users.constants';
 import { PaymentGatewayFactory } from './vendor_adapters/payment.vendor.adapters';
 import { OrderStatusDto } from './dto/order-status-dto';
-import { CheckoutDto } from './dto/checkout-dto';
 import { GetAuthUser } from '../../decorators/user.decorator';
 import { UsersService } from '../users/users.service';
 import { BillsService } from '../bills/bills.service';

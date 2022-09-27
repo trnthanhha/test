@@ -107,7 +107,7 @@ describe('Order controller', () => {
       new User(),
       {
         status: () => ({
-          send: () => {},
+          send: () => ({}),
         }),
       },
     );
@@ -180,7 +180,7 @@ describe('Order controller', () => {
       new User(),
       {
         status: () => ({
-          send: () => {},
+          send: () => ({}),
         }),
       },
     );
@@ -264,7 +264,7 @@ describe('Order controller', () => {
       new User(),
       {
         status: () => ({
-          send: () => {},
+          send: () => ({}),
         }),
       },
     );
@@ -311,7 +311,7 @@ describe('Order controller', () => {
         new User(),
         {
           status: () => ({
-            send: () => {},
+            send: () => ({}),
           }),
         },
       ),
@@ -362,7 +362,7 @@ describe('Order controller', () => {
         new User(),
         {
           status: () => ({
-            send: () => {},
+            send: () => ({}),
           }),
         },
       ),
@@ -413,7 +413,7 @@ describe('Order controller', () => {
         new User(),
         {
           status: () => ({
-            send: () => {},
+            send: () => ({}),
           }),
         },
       ),
@@ -470,7 +470,7 @@ describe('Order controller', () => {
         new User(),
         {
           status: () => ({
-            send: () => {},
+            send: () => ({}),
           }),
         },
       ),
@@ -572,7 +572,7 @@ describe('Order controller', () => {
       new User(),
       {
         status: () => ({
-          send: () => {},
+          send: () => ({}),
         }),
       },
     );

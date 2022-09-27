@@ -15,7 +15,7 @@ import { TransactionInfo } from './vendor_adapters/payment.types';
 import { PaymentStatus, PaymentType } from './orders.constants';
 import { CheckoutDto } from './dto/checkout-dto';
 import { Order } from './entities/order.entity';
-import { EntityManager, In } from 'typeorm';
+import { EntityManager } from 'typeorm';
 
 export class OrdersCheckoutImplementorPoint
   extends OrdersCheckoutImplementorCash
