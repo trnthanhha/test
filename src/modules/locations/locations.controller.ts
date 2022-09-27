@@ -8,8 +8,8 @@ import {
   Logger,
   NotFoundException,
   Param,
-  Patch,
   Post,
+  Put,
   Query,
   UseInterceptors,
 } from '@nestjs/common';
@@ -36,6 +36,7 @@ import { UpdateLocationDto } from './dto/update-location.dto';
 import { UsersService } from '../users/users.service';
 import { MigrateLocationDto } from './dto/migrate-location-dto';
 import { InjectRepository } from '@nestjs/typeorm';
+import { QueryDeepPartialEntity } from 'typeorm/query-builder/QueryPartialEntity';
 
 @ApiTags('locations')
 @Controller('locations')
@@ -193,13 +194,54 @@ export class LocationsController {
     Object.assign(newLocation, validateDistanceDto);
     return this.locationsService.isValidDistance(newLocation);
   }
-  @Auth()
+
+  @Auth(UserType.ADMIN)
   @ApiOperation({
-    summary: 'Update a location',
+    summary: 'Update a custom location',
   })
-  @Patch(':id')
-  update(@Param('id') id: string, @Body() updateOrderDto: UpdateLocationDto) {
-    return this.locationsService.update(+id, updateOrderDto);
+  @Put()
+  async update(@Body() updateLocationDto: UpdateLocationDto) {
+    const criteria: { id?: number; handle?: string } = {};
+    if (!!updateLocationDto.id && updateLocationDto.id > 0) {
+      criteria.id = updateLocationDto.id;
+    } else if (updateLocationDto.handle) {
+      criteria.handle = updateLocationDto.handle;
+    } else {
+      throw new BadRequestException(
+        'no criteria found, all your locations will be update with same value, be careful',
+      );
+    }
+    const existed = await this.locationRepository.findOneBy({ ...criteria });
+    if (!existed) {
+      throw new NotFoundException();
+    }
+
+    const value: QueryDeepPartialEntity<Location> = {};
+    if (updateLocationDto.lat) {
+      value.lat = updateLocationDto.lat;
+      existed.lat = value.lat;
+    }
+    if (updateLocationDto.long) {
+      value.long = updateLocationDto.long;
+      existed.long = value.long;
+    }
+    if (updateLocationDto.nft_image) {
+      value.map_captured = updateLocationDto.nft_image;
+    }
+    if (updateLocationDto.nft_owner) {
+      value.user_full_name = updateLocationDto.nft_owner;
+    }
+    if (updateLocationDto.nft_network_token_id) {
+      value.token_id = updateLocationDto.nft_network_token_id;
+    }
+
+    existed.calculateBounds();
+    value.safe_zone_right = existed.safe_zone_right;
+    value.safe_zone_left = existed.safe_zone_left;
+    value.safe_zone_top = existed.safe_zone_top;
+    value.safe_zone_bot = existed.safe_zone_bot;
+
+    return this.locationRepository.update(criteria, value);
   }
 
   @Auth(UserType.ADMIN)
