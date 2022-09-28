@@ -1,6 +1,7 @@
 import {
   Column,
   CreateDateColumn,
+  DeleteDateColumn,
   Entity,
   Index,
   PrimaryGeneratedColumn,
@@ -136,6 +137,10 @@ export class Location {
   @Exclude()
   @UpdateDateColumn()
   updated_at: Date;
+
+  @Exclude()
+  @DeleteDateColumn({ name: 'deleted_at' })
+  deletedAt: Date;
 
   calculateBounds() {
     Object.assign(
