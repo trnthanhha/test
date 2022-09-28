@@ -11,10 +11,11 @@ import { ApiOperation, ApiTags } from '@nestjs/swagger';
 import { ApiImplicitQuery } from '@nestjs/swagger/dist/decorators/api-implicit-query.decorator';
 import { GetAuthUser } from '../../decorators/user.decorator';
 import { User } from '../users/entities/user.entity';
-import { FindManyOptions, ILike } from 'typeorm';
+import { FindOptionsWhere, ILike } from 'typeorm';
 import { UserType } from '../users/users.constants';
 import { Auth } from '../../decorators/roles.decorator';
 import { UserPackage } from './entities/user_package.entity';
+import { PaginationResult } from '../../utils/pagination';
 
 @ApiTags('combo/package')
 @Controller('user-package')
@@ -57,7 +58,7 @@ export class UserPackageController {
     @Query('limit') limit?: string,
     @Query('name') name?: string,
     @Query('user_id') user_id?: number,
-  ) {
+  ): Promise<PaginationResult<UserPackage>> {
     let nLimit = +limit;
     if (!nLimit || nLimit > 500) {
       nLimit = 50;
@@ -68,9 +69,7 @@ export class UserPackageController {
       nPage = 1;
     }
 
-    const { where }: FindManyOptions<UserPackage> = {
-      where: {},
-    };
+    const where: FindOptionsWhere<UserPackage> = {};
     if (user.type === UserType.CUSTOMER) {
       if (user_id && user.id !== user_id) {
         throw new ForbiddenException("user not allow to check others' combo");
@@ -81,10 +80,6 @@ export class UserPackageController {
     if (name) {
       where.package_name = ILike(`%${name}%`);
     }
-    return this.userPackageService.findUsablePackages({
-      where,
-      skip: (nPage - 1) * nLimit,
-      take: nLimit,
-    } as FindManyOptions<UserPackage>);
+    return this.userPackageService.findUsablePackages(where, nLimit, nPage);
   }
 }
