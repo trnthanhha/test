@@ -27,7 +27,7 @@ import { JobRegister } from '../../modules/job-register/entities/job-register.en
 @Injectable()
 export class PaymentService {
   private readonly logger = new Logger(PaymentService.name);
-  private readonly reSyncJobKey = `${PaymentService.name}-reSync`;
+  public static readonly reSyncJobKey = `${PaymentService.name}-reSync`;
 
   constructor(
     private readonly ordersService: OrdersService,
@@ -39,10 +39,20 @@ export class PaymentService {
     @Inject(REDIS_CLIENT_PROVIDER) private readonly redis: Redis,
   ) {}
 
-  @Cron('*/15 * * * * *')
-  async reSync() {
+  @Cron('0 */30 * * * *')
+  async jobReSync() {
+    const onProcess = await this.markJobProcessing(PaymentService.reSyncJobKey);
+    if (onProcess) {
+      return;
+    }
     console.log('sync payment status each 5 minutes');
-    await this.markJobProcessing(this.reSyncJobKey);
+
+    this.runReSync().finally(() => {
+      this.markJobDone(PaymentService.reSyncJobKey);
+    });
+  }
+
+  async runReSync() {
     const take = 50;
     let page = 0;
     const current = new Date();
@@ -62,9 +72,12 @@ export class PaymentService {
         break;
       }
 
+      const processes = [];
       invalidOrders.forEach((o) => {
-        this.rejectBillOrderAndSoftDeleteLocation(o);
+        processes.push(this.rejectBillOrderAndSoftDeleteLocation(o));
       });
+
+      await Promise.all(processes);
 
       if (invalidOrders.length < take) {
         break;
@@ -72,17 +85,29 @@ export class PaymentService {
       page++;
     }
   }
+
   async markJobProcessing(name: string) {
-    const job = new JobRegister();
-    job.name = name;
-    job.is_process = true;
-    const rs = await this.jobRegisterRepository.upsert(job, {
-      conflictPaths: ['name'],
-      skipUpdateIfNoValuesChanged: true,
-    });
-    if (rs.raw) {
-      console.log(rs);
-    }
+    const rs = await this.jobRegisterRepository.update(
+      {
+        name,
+        is_process: false,
+      },
+      {
+        is_process: true,
+      },
+    );
+    return !!rs.affected;
+  }
+
+  async markJobDone(name: string) {
+    await this.jobRegisterRepository.update(
+      {
+        name,
+      },
+      {
+        is_process: false,
+      },
+    );
   }
 
   async rejectBillOrderAndSoftDeleteLocation(order: Order) {
@@ -128,12 +153,14 @@ export class PaymentService {
           }
         }
 
-        rs = await txManager.getRepository(Location).softDelete({
-          id: location.id,
-          version: location.version,
-        });
-        if (!rs.affected) {
-          throw new BadRequestException('location was changed');
+        if (location) {
+          rs = await txManager.getRepository(Location).softDelete({
+            id: location.id,
+            version: location.version,
+          });
+          if (!rs.affected) {
+            throw new BadRequestException('location was changed');
+          }
         }
       })
       .catch(() => ({}));
