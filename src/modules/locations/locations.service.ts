@@ -81,11 +81,11 @@ export class LocationsService {
   async findAll(
     page: number,
     limit: number,
-    whereCondition: FindOptionsWhere<Location>,
+    where: FindOptionsWhere<Location>,
     owned = false,
   ): Promise<PaginationResult<Location>> {
     const options = {
-      where: whereCondition,
+      where,
       skip: (page - 1) * limit,
       take: limit,
     } as FindManyOptions<Location>;

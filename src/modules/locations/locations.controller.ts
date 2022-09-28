@@ -29,7 +29,7 @@ import { UserType } from '../users/users.constants';
 import { Auth } from '../../decorators/roles.decorator';
 import { CreateLocationDto } from './dto/create-location.dto';
 import { LocationHandleService } from '../location-handle/location-handle.service';
-import { FindManyOptions, Like, Raw, Repository } from 'typeorm';
+import { FindOptionsWhere, IsNull, Like, Repository } from 'typeorm';
 import { ValidateDistanceDto } from './dto/validate-distance-dto';
 import { UpdateLocationDto } from './dto/update-location.dto';
 import { UsersService } from '../users/users.service';
@@ -110,7 +110,7 @@ export class LocationsController {
       nPage = 1;
     }
 
-    const { where: whereCondition }: FindManyOptions<Location> = { where: {} };
+    const whereCondition: FindOptionsWhere<Location> = {};
     if (status && user) {
       whereCondition.status = status as LocationStatus;
       if (user.type === UserType.CUSTOMER) {
@@ -122,9 +122,7 @@ export class LocationsController {
       whereCondition.status = LocationStatus.APPROVED;
     }
 
-    whereCondition.purchase_status = Raw(
-      `purchase_status IS NULL OR type = 'admin'`, // not pending purchase custom location, or admin created location
-    );
+    whereCondition.purchase_status = IsNull();
 
     if (blacklist && user?.type === UserType.ADMIN) {
       whereCondition.is_blacklist = true;
