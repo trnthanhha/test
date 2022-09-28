@@ -80,13 +80,15 @@ export class OrdersController {
       .checkout(createOrderDto, req, user)
       .then((rs) => {
         response.status(HttpStatus.OK).send(rs);
+        return rs;
       })
       .catch((ex) => {
         if (ex instanceof BadRequestException) {
           response.status(HttpStatus.BAD_REQUEST).send(ex);
-          return;
+          throw ex;
         }
         response.status(HttpStatus.INTERNAL_SERVER_ERROR).send(ex);
+        throw ex;
       })
       .finally(() => {
         if (createOrderDto.type === PaymentType.POINT) {
