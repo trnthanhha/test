@@ -126,12 +126,19 @@ export class OrdersController {
     example: 'unauthorized',
     required: false,
   })
+  @ApiImplicitQuery({
+    name: 'target',
+    description: 'target to buy, includes: location | combo',
+    example: 'location | combo',
+    required: false,
+  })
   findAll(
     @Query('page') page?: string,
     @Query('limit') limit?: string,
     @Query('payment_status') payment_status?: string,
+    @Query('target') target?: string,
   ) {
-    return this.ordersService.findAll({ limit, page, payment_status });
+    return this.ordersService.findAll({ limit, page, payment_status, target });
   }
 
   @Auth()
