@@ -1,7 +1,13 @@
 import { Inject, Injectable, Logger } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Order } from './entities/order.entity';
-import { EntityManager, FindManyOptions, Repository } from 'typeorm';
+import {
+  EntityManager,
+  FindManyOptions,
+  FindOptionsWhere,
+  MoreThan,
+  Repository,
+} from 'typeorm';
 import { PaymentStatus } from './orders.constants';
 import { CreateOrderDto } from './dto/create-order.dto';
 import { LocationsService } from '../locations/locations.service';
@@ -13,6 +19,7 @@ import { OrderCheckoutFlowAbstraction } from './orders.checkout.template';
 import { RabbitMQServices } from '../../services/message-broker/webhook.types';
 import { ClientProxy } from '@nestjs/microservices';
 import { HttpService } from '@nestjs/axios';
+import { PaginationResult } from '../../utils/pagination';
 
 @Injectable()
 export class OrdersService {
@@ -32,28 +39,33 @@ export class OrdersService {
   async findAll(query: {
     page?: string;
     limit?: string;
+    target?: string;
     payment_status: string;
   }) {
     const page = +query.page || 1;
-    const limit = +query.limit || 10;
+    const limit = +query.limit || 20;
     const paymentStatus = query.payment_status as PaymentStatus;
+    const where: FindOptionsWhere<Order> = {
+      payment_status: paymentStatus || undefined,
+    };
+
+    switch (query.target) {
+      case 'location':
+        where.location_id = MoreThan(0);
+        break;
+      case 'combo':
+      default:
+        where.user_package_id = MoreThan(0);
+    }
 
     const options: FindManyOptions<Order> = {
-      where: paymentStatus ? { payment_status: paymentStatus } : {},
+      where,
       skip: (page - 1) * limit,
       take: limit,
     };
 
     const [orders, total] = await this.orderRepository.findAndCount(options);
-
-    return {
-      data: orders,
-      meta: {
-        page_size: limit,
-        total_page: Math.ceil(total / limit),
-        total_records: total,
-      },
-    };
+    return new PaginationResult<Order>(orders, total, limit);
   }
 
   async findOne(id: number): Promise<Order> {
