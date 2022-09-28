@@ -70,6 +70,7 @@ export class PaymentVNPayImplementor implements PaymentVendorAdapters {
     let vnp_Params = req.query;
 
     const secureHash = vnp_Params['vnp_SecureHash'];
+    const amount = Math.floor(+vnp_Params['vnp_Amount'] / 100);
 
     delete vnp_Params['vnp_SecureHash'];
     delete vnp_Params['vnp_SecureHashType'];
@@ -87,11 +88,14 @@ export class PaymentVNPayImplementor implements PaymentVendorAdapters {
       } as OrderStatusDto;
     }
 
-    const dto = new OrderStatusDto();
-    dto.ref_uid = vnp_Params['vnp_TxnRef'];
-    dto.status_code = vnp_Params['vnp_ResponseCode'];
+    const dto = Object.assign(new OrderStatusDto(), {
+      ref_uid: vnp_Params['vnp_TxnRef'],
+      status_code: vnp_Params['vnp_ResponseCode'],
+      amount,
+    } as OrderStatusDto);
     switch (vnp_Params['vnp_ResponseCode']) {
       case '00':
+      case '99':
         dto.message = 'Giao dịch thành công';
         dto.success = true;
         break;
