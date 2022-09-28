@@ -26,14 +26,7 @@ export class UserPackageService {
       take: limit,
       skip: (page - 1) * limit,
     });
-    const resp = new PaginationResult<UserPackage>();
-    resp.data = list;
-    resp.meta = {
-      page_size: limit,
-      total_page: Math.ceil(total / limit),
-      total_records: total,
-    };
 
-    return resp;
+    return new PaginationResult<UserPackage>(list, total, limit);
   }
 }

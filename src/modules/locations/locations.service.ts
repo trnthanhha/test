@@ -96,15 +96,7 @@ export class LocationsService {
     }
 
     const [data, total] = await this.locationRepository.findAndCount(options);
-    const resp = new PaginationResult<Location>();
-    resp.data = data;
-    resp.meta = {
-      page_size: limit,
-      total_page: Math.ceil(total / limit),
-      total_records: total,
-    };
-
-    return resp;
+    return new PaginationResult<Location>(data, total, limit);
   }
 
   async findOne(id: number, entityManager?: EntityManager) {
