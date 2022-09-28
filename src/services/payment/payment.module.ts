@@ -1,9 +1,9 @@
-import { Module } from '@nestjs/common';
+import { Module, OnModuleInit } from '@nestjs/common';
 import { PaymentService } from './payment.service';
 import { PaymentController } from './payment.controller';
 import { OrdersService } from '../../modules/orders/orders.service';
 import { BillsService } from '../../modules/bills/bills.service';
-import { TypeOrmModule } from '@nestjs/typeorm';
+import { InjectRepository, TypeOrmModule } from '@nestjs/typeorm';
 import { Order } from '../../modules/orders/entities/order.entity';
 import { LocationsService } from '../../modules/locations/locations.service';
 import { StandardPriceService } from '../../modules/standard-price/standard-price.service';
@@ -19,11 +19,14 @@ import { Package } from '../../modules/package/entities/package.entity';
 import { WebhookFactory } from '../message-broker/webhook.factory';
 import { RabbitMQServices } from '../message-broker/webhook.types';
 import { HttpModule } from '@nestjs/axios';
+import { JobRegister } from '../../modules/job-register/entities/job-register.entity';
+import { Repository } from 'typeorm';
 
 @Module({
   imports: [
     TypeOrmModule.forFeature([
       Order,
+      JobRegister,
       Bill,
       Location,
       LocationHandle,
@@ -46,4 +49,19 @@ import { HttpModule } from '@nestjs/axios';
     WebhookFactory.Build(RabbitMQServices.VNPay),
   ],
 })
-export class PaymentModule {}
+export class PaymentModule implements OnModuleInit {
+  constructor(
+    @InjectRepository(JobRegister)
+    private jobRegisterRepository: Repository<JobRegister>,
+  ) {}
+  public async onModuleInit(): Promise<void> {
+    await this.jobRegisterRepository
+      .save(
+        Object.assign(new JobRegister(), {
+          name: PaymentService.reSyncJobKey,
+          is_process: false,
+        } as JobRegister),
+      )
+      .catch(() => ({}));
+  }
+}

@@ -1,5 +1,6 @@
 import {
   BadRequestException,
+  Inject,
   Injectable,
   InternalServerErrorException,
   Logger,
@@ -11,7 +12,7 @@ import { Bill } from '../../modules/bills/entities/bill.entity';
 import { Order } from '../../modules/orders/entities/order.entity';
 import { BillStatus } from '../../modules/bills/bills.constants';
 import { InjectRepository } from '@nestjs/typeorm';
-import { EntityManager, Repository } from 'typeorm';
+import { EntityManager, MoreThan, LessThanOrEqual, Repository } from 'typeorm';
 import { BillsService } from '../../modules/bills/bills.service';
 import { PrepareError } from '../../errors/types';
 import { UserPackage } from '../../modules/user_package/entities/user_package.entity';
@@ -19,21 +20,150 @@ import { Location } from '../../modules/locations/entities/location.entity';
 import { LocationPurchaseStatus } from '../../modules/locations/locations.contants';
 import { UPackagePurchaseStatus } from '../../modules/user_package/user_package.constants';
 import { PaymentResult } from './payment.types';
+import { REDIS_CLIENT_PROVIDER } from '../../modules/redis/redis.constants';
+import Redis from 'ioredis';
+import { JobRegister } from '../../modules/job-register/entities/job-register.entity';
 
 @Injectable()
 export class PaymentService {
   private readonly logger = new Logger(PaymentService.name);
+  public static readonly reSyncJobKey = `${PaymentService.name}-reSync`;
 
   constructor(
     private readonly ordersService: OrdersService,
     private readonly billsService: BillsService,
     @InjectRepository(Order)
     private orderRepository: Repository<Order>,
+    @InjectRepository(JobRegister)
+    private jobRegisterRepository: Repository<JobRegister>,
+    @Inject(REDIS_CLIENT_PROVIDER) private readonly redis: Redis,
   ) {}
 
-  @Cron('*/30 * * * * *')
-  syncPaymentStatus() {
-    // console.log('sync payment status each 30s');
+  @Cron('0 */30 * * * *')
+  async jobReSync() {
+    const onProcess = await this.markJobProcessing(PaymentService.reSyncJobKey);
+    if (onProcess) {
+      return;
+    }
+    console.log('sync payment status each 5 minutes');
+
+    this.runReSync().finally(() => {
+      this.markJobDone(PaymentService.reSyncJobKey);
+    });
+  }
+
+  async runReSync() {
+    const take = 50;
+    let page = 0;
+    const current = new Date();
+    const at48HourBefore = new Date(current.setDate(current.getDate() - 2));
+    while (true) {
+      const invalidOrders = await this.orderRepository.find({
+        // soft delete pending location, check all orders are pending created > 48h, use to buy location
+        where: {
+          payment_status: PaymentStatus.UNAUTHORIZED,
+          created_at: LessThanOrEqual(at48HourBefore),
+          location_id: MoreThan(0),
+        },
+        take,
+        skip: page * take,
+      });
+      if (!invalidOrders.length) {
+        break;
+      }
+
+      const processes = [];
+      invalidOrders.forEach((o) => {
+        processes.push(this.rejectBillOrderAndSoftDeleteLocation(o));
+      });
+
+      await Promise.all(processes);
+
+      if (invalidOrders.length < take) {
+        break;
+      }
+      page++;
+    }
+  }
+
+  async markJobProcessing(name: string) {
+    const rs = await this.jobRegisterRepository.update(
+      {
+        name,
+        is_process: false,
+      },
+      {
+        is_process: true,
+      },
+    );
+    return !!rs.affected;
+  }
+
+  async markJobDone(name: string) {
+    await this.jobRegisterRepository.update(
+      {
+        name,
+      },
+      {
+        is_process: false,
+      },
+    );
+  }
+
+  async rejectBillOrderAndSoftDeleteLocation(order: Order) {
+    const [bill, location] = await Promise.all([
+      this.orderRepository.manager.getRepository(Bill).findOneBy({
+        order_id: order.id,
+        status: BillStatus.UNAUTHORIZED,
+      }),
+      this.orderRepository.manager.getRepository(Location).findOneBy({
+        id: order.location_id,
+      }),
+    ]);
+
+    return this.orderRepository.manager
+      .transaction(async (txManager) => {
+        let rs = await txManager.getRepository(Order).update(
+          {
+            id: order.id,
+            version: order.version,
+          },
+          {
+            version: order.version + 1,
+            payment_status: PaymentStatus.CANCELLED,
+          },
+        );
+        if (!rs.affected) {
+          throw new BadRequestException('order was changed');
+        }
+
+        if (bill) {
+          rs = await txManager.getRepository(Bill).update(
+            {
+              id: bill.id,
+              version: bill.version,
+            },
+            {
+              version: bill.version + 1,
+              status: BillStatus.CANCELLED,
+            },
+          );
+          if (!rs.affected) {
+            throw new BadRequestException('bill was changed');
+          }
+        }
+
+        if (location) {
+          rs = await txManager.getRepository(Location).softDelete({
+            id: location.id,
+            version: location.version,
+          });
+          if (!rs.affected) {
+            throw new BadRequestException('location was changed');
+          }
+        }
+      })
+      .catch(() => ({}));
   }
 
   async syncOrderStatus(pmResult: PaymentResult) {
@@ -47,6 +177,11 @@ export class PaymentService {
       order = bill.order;
       if (order.payment_status === PaymentStatus.PAID) {
         this.logger.log('order closed, no need to sync, orderID: ', order.id);
+        throw new BadRequestException();
+      }
+
+      if (order.payment_status === PaymentStatus.CANCELLED) {
+        this.logger.log('order need to refund, orderID: ', order.id);
         throw new BadRequestException();
       }
 

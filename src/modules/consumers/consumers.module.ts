@@ -20,6 +20,7 @@ import { RedisModule } from '../redis/redis.module';
 import { PackageService } from '../package/package.service';
 import { Package } from '../package/entities/package.entity';
 import { HttpModule } from '@nestjs/axios';
+import { JobRegister } from '../job-register/entities/job-register.entity';
 
 @Module({
   imports: [
@@ -31,6 +32,7 @@ import { HttpModule } from '@nestjs/axios';
       Package,
       StandardPrice,
       StandardPriceHistory,
+      JobRegister,
     ]),
     RedisModule,
     HttpModule,
