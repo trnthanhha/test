@@ -25,6 +25,12 @@ export default class WebhookController {
   @Get('vnpay')
   async storeVNPayMessage(@Req() req) {
     const response = PaymentGatewayFactory.Build().decodeResponse(req);
+    if (!response.success) {
+      return {
+        RspCode: ['00', '99'].includes(response.status_code) && '00' || response.status_code,
+        Message: ['00', '99'].includes(response.status_code) ? 'Confirm Success' : 'Confirmed',
+      };
+    }
     const bill = await this.billsService.findOneByRefID(response.ref_uid);
     if (!bill) {
       return {
