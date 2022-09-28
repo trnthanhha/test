@@ -1,4 +1,5 @@
 import {
+  BadRequestException,
   Body,
   Controller,
   Delete,
@@ -77,6 +78,16 @@ export class OrdersController {
 
     return this.ordersService
       .checkout(createOrderDto, req, user)
+      .then((rs) => {
+        response.status(HttpStatus.OK).send(rs);
+      })
+      .catch((ex) => {
+        if (ex instanceof BadRequestException) {
+          response.status(HttpStatus.BAD_REQUEST).send(ex);
+          return;
+        }
+        response.status(HttpStatus.INTERNAL_SERVER_ERROR).send(ex);
+      })
       .finally(() => {
         if (createOrderDto.type === PaymentType.POINT) {
           this.clearProcessing(user.id);
