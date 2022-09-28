@@ -23,12 +23,12 @@ import {
   LocationType,
   MinimumDistanceConflict,
 } from './locations.contants';
-import { ListLocationDto } from './dto/list-location-dto';
 import { getDistanceBetween, MeterPerDegree } from './locations.calculator';
 import { UpdateLocationDto } from './dto/update-location.dto';
 import { LocationHandleService } from '../location-handle/location-handle.service';
 import { CreateLocationDto } from './dto/create-location.dto';
 import { User } from '../users/entities/user.entity';
+import { PaginationResult } from '../../utils/pagination';
 
 @Injectable()
 export class LocationsService {
@@ -83,7 +83,7 @@ export class LocationsService {
     limit: number,
     whereCondition: FindOptionsWhere<Location>,
     owned = false,
-  ): Promise<ListLocationDto> {
+  ): Promise<PaginationResult<Location>> {
     const options = {
       where: whereCondition,
       skip: (page - 1) * limit,
@@ -96,7 +96,7 @@ export class LocationsService {
     }
 
     const [data, total] = await this.locationRepository.findAndCount(options);
-    const resp = new ListLocationDto();
+    const resp = new PaginationResult<Location>();
     resp.data = data;
     resp.meta = {
       page_size: limit,

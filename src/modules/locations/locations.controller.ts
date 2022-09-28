@@ -30,13 +30,13 @@ import { Auth } from '../../decorators/roles.decorator';
 import { CreateLocationDto } from './dto/create-location.dto';
 import { LocationHandleService } from '../location-handle/location-handle.service';
 import { FindManyOptions, Like, Raw, Repository } from 'typeorm';
-import { ListLocationDto } from './dto/list-location-dto';
 import { ValidateDistanceDto } from './dto/validate-distance-dto';
 import { UpdateLocationDto } from './dto/update-location.dto';
 import { UsersService } from '../users/users.service';
 import { MigrateLocationDto } from './dto/migrate-location-dto';
 import { InjectRepository } from '@nestjs/typeorm';
 import { QueryDeepPartialEntity } from 'typeorm/query-builder/QueryPartialEntity';
+import { PaginationResult } from '../../utils/pagination';
 
 @ApiTags('locations')
 @Controller('locations')
@@ -99,7 +99,7 @@ export class LocationsController {
     @Query('status') status?: string,
     @Query('blacklist') blacklist?: boolean,
     @Query('owned') owned?: boolean,
-  ): Promise<ListLocationDto> {
+  ): Promise<PaginationResult<Location>> {
     let nLimit = +limit;
     if (!nLimit || nLimit > 500) {
       nLimit = 50;
