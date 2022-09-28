@@ -22,58 +22,66 @@ import { UPackagePurchaseStatus } from '../../modules/user_package/user_package.
 import { PaymentResult } from './payment.types';
 import { REDIS_CLIENT_PROVIDER } from '../../modules/redis/redis.constants';
 import Redis from 'ioredis';
-import { generateRedisKey } from '../../modules/redis/redis.keys.pattern';
+import { JobRegister } from '../../modules/job-register/entities/job-register.entity';
 
 @Injectable()
 export class PaymentService {
   private readonly logger = new Logger(PaymentService.name);
-  private readonly reSyncJobRedisKey = `${PaymentService.name}-resync`;
+  private readonly reSyncJobKey = `${PaymentService.name}-reSync`;
 
   constructor(
     private readonly ordersService: OrdersService,
     private readonly billsService: BillsService,
     @InjectRepository(Order)
     private orderRepository: Repository<Order>,
+    @InjectRepository(JobRegister)
+    private jobRegisterRepository: Repository<JobRegister>,
     @Inject(REDIS_CLIENT_PROVIDER) private readonly redis: Redis,
   ) {}
 
   @Cron('*/15 * * * * *')
   async reSync() {
     console.log('sync payment status each 5 minutes');
-    if (await this.isReSyncOnProcess()) {
-      return;
-    }
-    try {
-      const take = 50;
-      let page = 0;
-      const current = new Date();
-      const at48HourBefore = new Date(current.setDate(current.getDate() - 2));
-      while (true) {
-        const invalidOrders = await this.orderRepository.find({
-          // soft delete pending location, check all orders are pending created > 48h, use to buy location
-          where: {
-            payment_status: PaymentStatus.UNAUTHORIZED,
-            created_at: LessThanOrEqual(at48HourBefore),
-            location_id: MoreThan(0),
-          },
-          take,
-          skip: page * take,
-        });
-        if (!invalidOrders.length) {
-          break;
-        }
-
-        invalidOrders.forEach((o) => {
-          this.rejectBillOrderAndSoftDeleteLocation(o);
-        });
-
-        if (invalidOrders.length < take) {
-          break;
-        }
-        page++;
+    await this.markJobProcessing(this.reSyncJobKey);
+    const take = 50;
+    let page = 0;
+    const current = new Date();
+    const at48HourBefore = new Date(current.setDate(current.getDate() - 2));
+    while (true) {
+      const invalidOrders = await this.orderRepository.find({
+        // soft delete pending location, check all orders are pending created > 48h, use to buy location
+        where: {
+          payment_status: PaymentStatus.UNAUTHORIZED,
+          created_at: LessThanOrEqual(at48HourBefore),
+          location_id: MoreThan(0),
+        },
+        take,
+        skip: page * take,
+      });
+      if (!invalidOrders.length) {
+        break;
       }
-    } finally {
-      this.pureJobReSyncOnRedis();
+
+      invalidOrders.forEach((o) => {
+        this.rejectBillOrderAndSoftDeleteLocation(o);
+      });
+
+      if (invalidOrders.length < take) {
+        break;
+      }
+      page++;
+    }
+  }
+  async markJobProcessing(name: string) {
+    const job = new JobRegister();
+    job.name = name;
+    job.is_process = true;
+    const rs = await this.jobRegisterRepository.upsert(job, {
+      conflictPaths: ['name'],
+      skipUpdateIfNoValuesChanged: true,
+    });
+    if (rs.raw) {
+      console.log(rs);
     }
   }
 
@@ -250,16 +258,5 @@ export class PaymentService {
         `UserPackage was changed, id: ${userPackage.id}`,
       );
     }
-  }
-
-  async isReSyncOnProcess() {
-    const jobKey = generateRedisKey(this.reSyncJobRedisKey);
-
-    const rs = await this.redis.set(jobKey, 1, 'EX', 300, 'NX');
-    return rs !== 'OK';
-  }
-
-  pureJobReSyncOnRedis() {
-    return this.redis.del(generateRedisKey(this.reSyncJobRedisKey));
   }
 }

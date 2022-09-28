@@ -19,11 +19,13 @@ import { Package } from '../../modules/package/entities/package.entity';
 import { WebhookFactory } from '../message-broker/webhook.factory';
 import { RabbitMQServices } from '../message-broker/webhook.types';
 import { HttpModule } from '@nestjs/axios';
+import { JobRegister } from '../../modules/job-register/entities/job-register.entity';
 
 @Module({
   imports: [
     TypeOrmModule.forFeature([
       Order,
+      JobRegister,
       Bill,
       Location,
       LocationHandle,
