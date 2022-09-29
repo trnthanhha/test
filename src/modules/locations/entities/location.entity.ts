@@ -142,6 +142,11 @@ export class Location {
   @DeleteDateColumn({ name: 'deleted_at' })
   deletedAt: Date;
 
+  //@Description: Name of buyer
+  owner: string;
+  //@Description: Name of owner
+  buyer: string;
+
   calculateBounds() {
     Object.assign(
       this,

@@ -94,7 +94,12 @@ export class OrdersCheckoutImplementorCash
     let loc = pOrder.location;
     let userPackage: UserPackage;
     if (pkg) {
-      userPackage = await this.createUserPackage(pkg, this.user, txManager);
+      userPackage = await this.createUserPackage(
+        pkg,
+        this.user.id,
+        createOrderDto.owner_id,
+        txManager,
+      );
     } else if (!loc) {
       loc = await this.locationsService.create(
         Object.assign(new CreateLocationDto(), createOrderDto),
@@ -150,17 +155,19 @@ export class OrdersCheckoutImplementorCash
 
   async createUserPackage(
     pkg: Package,
-    user: User,
+    buyer_id: number,
+    owner_id: number,
     entityManager: EntityManager,
   ): Promise<UserPackage> {
     const userPackage = new UserPackage();
     userPackage.package_id = pkg.id;
-    userPackage.user_id = user.id;
+    userPackage.user_id = owner_id || buyer_id;
     userPackage.package_name = pkg.name;
     userPackage.quantity = pkg.quantity;
     userPackage.remaining_quantity = pkg.quantity;
     userPackage.price = pkg.price;
     userPackage.purchase_status = UPackagePurchaseStatus.UNAUTHORIZED;
+    userPackage.created_by_id = buyer_id;
     return entityManager.getRepository(UserPackage).save(userPackage);
   }
 }
