@@ -42,6 +42,7 @@ export class LocationsService {
   async create(
     createLocationDto: CreateLocationDto,
     user: User,
+    owner_id?: number,
     dbManager?: EntityManager,
   ): Promise<Location> {
     const newLocation = new Location();
@@ -62,7 +63,7 @@ export class LocationsService {
       newLocation.status = LocationStatus.PENDING;
     }
     //sys
-    newLocation.user_id = user.id;
+    newLocation.user_id = owner_id || user.id;
     newLocation.created_by_id = user.id;
     newLocation.user_full_name = `${user.last_name} ${user.first_name}`;
 

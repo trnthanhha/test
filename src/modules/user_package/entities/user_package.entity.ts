@@ -3,10 +3,13 @@ import {
   CreateDateColumn,
   Entity,
   Index,
+  JoinColumn,
+  ManyToOne,
   PrimaryGeneratedColumn,
   UpdateDateColumn,
 } from 'typeorm';
 import { UPackagePurchaseStatus } from '../user_package.constants';
+import { User } from '../../users/entities/user.entity';
 
 @Entity()
 export class UserPackage {
@@ -55,10 +58,16 @@ export class UserPackage {
   @UpdateDateColumn()
   updated_at: Date;
 
-  //@Description: Name of buyer
-  owner: string;
-  //@Description: Name of owner
-  buyer: string;
+  @ManyToOne(() => User)
+  @JoinColumn({ name: 'user_id', referencedColumnName: 'id' })
+  owner?: User | string;
+
+  @ManyToOne(() => User)
+  @JoinColumn({ name: 'created_by_id', referencedColumnName: 'id' })
+  buyer?: User | string;
+
+  owner_id: number;
+  buyer_id: number;
 
   isUsable(): boolean {
     return (

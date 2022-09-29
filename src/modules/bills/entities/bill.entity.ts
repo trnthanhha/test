@@ -3,7 +3,7 @@ import {
   CreateDateColumn,
   Entity,
   JoinColumn,
-  OneToOne,
+  ManyToOne,
   PrimaryGeneratedColumn,
   UpdateDateColumn,
 } from 'typeorm';
@@ -45,7 +45,7 @@ export class Bill {
   updated_at: Date;
 
   // ---------------- Relations
-  @OneToOne(() => Order)
+  @ManyToOne(() => Order)
   @JoinColumn({ name: 'order_id', referencedColumnName: 'id' })
   order?: Order;
 }

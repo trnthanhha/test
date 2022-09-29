@@ -104,6 +104,7 @@ export class OrdersCheckoutImplementorCash
       loc = await this.locationsService.create(
         Object.assign(new CreateLocationDto(), createOrderDto),
         this.user,
+        createOrderDto.owner_id || this.user.id,
         txManager,
       );
       if (loc.status !== LocationStatus.APPROVED) {
@@ -157,7 +158,7 @@ export class OrdersCheckoutImplementorCash
     pkg: Package,
     buyer_id: number,
     owner_id: number,
-    entityManager: EntityManager,
+    txManager: EntityManager,
   ): Promise<UserPackage> {
     const userPackage = new UserPackage();
     userPackage.package_id = pkg.id;
@@ -168,6 +169,6 @@ export class OrdersCheckoutImplementorCash
     userPackage.price = pkg.price;
     userPackage.purchase_status = UPackagePurchaseStatus.UNAUTHORIZED;
     userPackage.created_by_id = buyer_id;
-    return entityManager.getRepository(UserPackage).save(userPackage);
+    return txManager.getRepository(UserPackage).save(userPackage);
   }
 }

@@ -52,7 +52,7 @@ export class UserPackageController {
     type: Number,
     description: 'Filter user package by owner',
   })
-  findAll(
+  async findAll(
     @GetAuthUser() user: User,
     @Query('page') page?: string,
     @Query('limit') limit?: string,
@@ -80,6 +80,23 @@ export class UserPackageController {
     if (name) {
       where.package_name = ILike(`%${name}%`);
     }
-    return this.userPackageService.findUsablePackages(where, nLimit, nPage);
+    const pagi = await this.userPackageService.findUsablePackages(
+      where,
+      nLimit,
+      nPage,
+    );
+    pagi.data.forEach((item) => {
+      if (item.owner instanceof User) {
+        item.owner_id = item.owner?.id;
+        item.owner = `${item.owner?.last_name} ${item.owner?.first_name}`;
+      }
+
+      if (item.buyer instanceof User) {
+        item.buyer_id = item.buyer?.id;
+        item.buyer = `${item.buyer?.last_name} ${item.buyer?.first_name}`;
+      }
+    });
+
+    return pagi;
   }
 }

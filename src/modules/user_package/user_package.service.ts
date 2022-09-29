@@ -25,6 +25,10 @@ export class UserPackageService {
       where,
       take: limit,
       skip: (page - 1) * limit,
+      relations: {
+        owner: true,
+        buyer: true,
+      },
     });
 
     return new PaginationResult<UserPackage>(list, total, limit);

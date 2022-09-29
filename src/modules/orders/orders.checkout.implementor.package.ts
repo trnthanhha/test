@@ -91,6 +91,7 @@ export class OrdersCheckoutImplementorPackage
       loc = await this.locationsService.create(
         Object.assign(new CreateLocationDto(), createOrderDto),
         this.user,
+        createOrderDto.owner_id || this.user.id,
         txManager,
       );
       if (loc.status !== LocationStatus.APPROVED) {

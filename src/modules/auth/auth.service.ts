@@ -21,6 +21,7 @@ import { LocaMosEndpoint } from './auth.constants';
 import { lastValueFrom, map } from 'rxjs';
 import FormData from 'form-data';
 import { LocamosLinkageService } from '../../services/locamos-linkage/user.service';
+import { hashPassword } from '../../utils/password';
 
 @Injectable()
 export class AuthService {
@@ -103,19 +104,23 @@ export class AuthService {
       }
       return this.access3rd(correctUsername, password, lang);
     }
-    // const isValidPassword = user.password === hashPassword(password);
-    // if (!isValidPassword) {
-    //   const message: string = await this.i18n.t('auth.password.wrong', {
-    //     lang,
-    //   });
-    //
-    //   throw new BadRequestException(message);
-    // }
-    user.locamos_access_token = await this.loginLocaMosGetAccessToken(
-      correctUsername,
-      password,
-      lang,
-    );
+    if (process.env.BY_PASS_LOCAMOS === 'true') {
+      const isValidPassword = user.password === hashPassword(password);
+      if (!isValidPassword) {
+        const message: string = await this.i18n.t('auth.password.wrong', {
+          lang,
+        });
+
+        throw new BadRequestException(message);
+      }
+    } else {
+      user.locamos_access_token = await this.loginLocaMosGetAccessToken(
+        correctUsername,
+        password,
+        lang,
+      );
+    }
+
     return await this.generateToken(user);
   }
 
