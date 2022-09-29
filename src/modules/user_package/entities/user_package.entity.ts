@@ -46,7 +46,7 @@ export class UserPackage {
   @Column({ default: 1 })
   version: number;
 
-  @Column()
+  @Column({ nullable: true })
   created_by_id: number;
 
   @CreateDateColumn()
