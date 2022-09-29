@@ -24,15 +24,25 @@ export default class WebhookController {
 
   @Get('vnpay')
   async storeVNPayMessage(@Req() req) {
-    const response = PaymentGatewayFactory.Build().decodeResponse(req);
+    let response;
+    try {
+      response = PaymentGatewayFactory.Build().decodeResponse(req);
+    } catch (_) {
+      return {
+        RspCode: '99',
+        Message: 'Unknown error',
+      };
+    }
     if (!response.success) {
       return {
-        RspCode:
-          (['00', '99'].includes(response.status_code) && '00') ||
-          response.status_code,
-        Message: ['00', '99'].includes(response.status_code)
-          ? 'Confirm Success'
-          : 'Confirmed',
+        RspCode: response.status_code,
+        Message: 'Confirmed',
+      };
+    }
+    if (!response.ref_uid) {
+      return {
+        RspCode: '99',
+        Message: 'Unknown error',
       };
     }
     const bill = await this.billsService.findOneByRefID(response.ref_uid);
@@ -58,8 +68,8 @@ export default class WebhookController {
     }
     this.publisher.emit('vnpay', req.query);
     return {
-      RspCode: response.status_code,
-      Message: response.status_code === '00' ? 'Confirm Success' : 'Confirmed',
+      RspCode: response.success ? '00' : response.status_code,
+      Message: response.success ? 'Confirm Success' : 'Confirmed',
     };
   }
 }
