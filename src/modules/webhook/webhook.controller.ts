@@ -27,12 +27,8 @@ export default class WebhookController {
     const response = PaymentGatewayFactory.Build().decodeResponse(req);
     if (!response.success) {
       return {
-        RspCode:
-          (['00', '99'].includes(response.status_code) && '00') ||
-          response.status_code,
-        Message: ['00', '99'].includes(response.status_code)
-          ? 'Confirm Success'
-          : 'Confirmed',
+        RspCode: response.status_code,
+        Message: 'Confirmed',
       };
     }
     const bill = await this.billsService.findOneByRefID(response.ref_uid);
@@ -58,8 +54,8 @@ export default class WebhookController {
     }
     this.publisher.emit('vnpay', req.query);
     return {
-      RspCode: response.status_code,
-      Message: response.status_code === '00' ? 'Confirm Success' : 'Confirmed',
+      RspCode: response.success ? '00' : response.status_code,
+      Message: response.success ? 'Confirm Success' : 'Confirmed',
     };
   }
 }
