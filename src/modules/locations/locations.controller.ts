@@ -147,6 +147,14 @@ export class LocationsController {
     return this.locationsService.getOverallLocationInfo();
   }
 
+  @Get('/landing-page/:handle')
+  @UseInterceptors(ClassSerializerInterceptor)
+  async findOneByHandle(@Param('handle') handle: string) {
+    return this.locationRepository.findOneBy({
+      handle: handle.trim().toLowerCase(),
+    });
+  }
+
   @Get(':id')
   @UseInterceptors(ClassSerializerInterceptor)
   async findOne(@Param('id') id: string, @GetAuthUser() user: User) {
