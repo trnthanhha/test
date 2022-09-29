@@ -16,7 +16,7 @@ export class CreateOrderDto {
   )
   @ApiProperty({
     required: true,
-    example: 123,
+    example: 'ID địa điểm muốn chọn mua',
   })
   location_id: number;
 
@@ -66,13 +66,14 @@ export class CreateOrderDto {
   )
   @ApiProperty({
     required: true,
-    example: 123,
+    example: 'ID của combo muốn mua',
   })
   package_id: number;
 
   @ApiProperty({
     required: true,
-    example: 'cash | point | package',
+    example:
+      'cash | point | package, tương ứng với thanh toán bằng tiền mặt (VNPay), điểm, combo',
   })
   @IsEnum(PaymentType, {
     message: i18nValidationMessage('validation.IsEnumPaymentType', {
@@ -93,7 +94,21 @@ export class CreateOrderDto {
   )
   @ApiProperty({
     required: true,
-    example: 123,
+    example: 'ID của combo khi chọn mua địa điểm',
   })
   user_package_id: number;
+
+  @IsOptional()
+  @IsNumber(
+    {},
+    {
+      message: i18nValidationMessage('validation.isNumber', {
+        name: 'owner_id',
+      }),
+    },
+  )
+  @ApiProperty({
+    example: 'ID của người dc mua hộ',
+  })
+  owner_id: number;
 }

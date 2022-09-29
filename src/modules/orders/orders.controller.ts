@@ -4,6 +4,7 @@ import {
   Controller,
   Delete,
   Get,
+  HttpException,
   HttpStatus,
   Inject,
   InternalServerErrorException,
@@ -64,32 +65,24 @@ export class OrdersController {
     @Body() createOrderDto: CreateOrderDto,
     @Req() req,
     @GetAuthUser() authUser,
-    @Res() response,
   ) {
     const user = await this.usersService.findByID(authUser.id);
     if (
       createOrderDto.type === PaymentType.POINT &&
       (await this.isOtherOrderOnProcess(user.id))
     ) {
-      return response
-        .status(HttpStatus.TOO_MANY_REQUESTS)
-        .send({ message: 'Other order is on processing' });
+      throw new HttpException(
+        {
+          statusCode: HttpStatus.TOO_MANY_REQUESTS,
+          error: 'Too Many Requests',
+          message: 'Other order is on processing',
+        },
+        429,
+      );
     }
 
     return this.ordersService
       .checkout(createOrderDto, req, user)
-      .then((rs) => {
-        response.status(HttpStatus.OK).send(rs);
-        return rs;
-      })
-      .catch((ex) => {
-        if (ex instanceof BadRequestException) {
-          response.status(HttpStatus.BAD_REQUEST).send(ex);
-          throw ex;
-        }
-        response.status(HttpStatus.INTERNAL_SERVER_ERROR).send(ex);
-        throw ex;
-      })
       .finally(() => {
         if (createOrderDto.type === PaymentType.POINT) {
           this.clearProcessing(user.id);

@@ -46,11 +46,19 @@ export class UserPackage {
   @Column({ default: 1 })
   version: number;
 
+  @Column()
+  created_by_id: number;
+
   @CreateDateColumn()
   created_at: Date;
 
   @UpdateDateColumn()
   updated_at: Date;
+
+  //@Description: Name of buyer
+  owner: string;
+  //@Description: Name of owner
+  buyer: string;
 
   isUsable(): boolean {
     return (
