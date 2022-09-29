@@ -58,3 +58,5 @@ jobs:
         if: always()
         with:
           webhook: ${{ secrets.DISCORD_URL }}
+          title: "Merge into master and auto deploy"
+          description: "Check swagger updated: http://34.124.202.224:4000/api"
