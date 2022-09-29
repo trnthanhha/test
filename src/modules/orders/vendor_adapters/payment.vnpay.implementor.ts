@@ -157,8 +157,9 @@ export class PaymentVNPayImplementor implements PaymentVendorAdapters {
           'Giao dịch không thành công do: KH nhập sai mật khẩu thanh toán quá số lần quy định. Xin quý khách vui lòng thực hiện lại giao dịch';
         break;
       case '99':
-        dto.message = 'Các lỗi khác (lỗi còn lại, không có trong danh sách mã lỗi đã liệt kê)'
-            break
+        dto.message =
+          'Các lỗi khác (lỗi còn lại, không có trong danh sách mã lỗi đã liệt kê)';
+        break;
       default:
         dto.message = 'GD không xác định';
     }
