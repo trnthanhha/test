@@ -159,6 +159,7 @@ export class PaymentVNPayImplementor implements PaymentVendorAdapters {
       case '99':
         dto.message =
           'Các lỗi khác (lỗi còn lại, không có trong danh sách mã lỗi đã liệt kê)';
+        dto.success = true;
         break;
       default:
         dto.message = 'GD không xác định';
