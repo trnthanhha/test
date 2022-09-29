@@ -105,11 +105,6 @@ describe('Order controller', () => {
       dto,
       { headers: {}, socket: {}, connection: { remoteAddress: 'localhost' } },
       new User(),
-      {
-        status: () => ({
-          send: () => ({}),
-        }),
-      },
     );
     expect(rs.success).toEqual(true);
     expect(rs.location_name).toEqual('my bought location name');
@@ -178,11 +173,6 @@ describe('Order controller', () => {
       dto,
       { headers: {}, socket: {}, connection: { remoteAddress: 'localhost' } },
       new User(),
-      {
-        status: () => ({
-          send: () => ({}),
-        }),
-      },
     );
     expect(rs.success).toEqual(true);
     expect(rs.location_name).toEqual('my new custom location');
@@ -216,6 +206,7 @@ describe('Order controller', () => {
             save: (item: UserPackage) => {
               expect(item).toEqual(
                 Object.assign(new UserPackage(), {
+                  created_by_id: -1,
                   package_id: 2,
                   user_id: -1,
                   package_name: 'Premium combo x5',
@@ -262,11 +253,6 @@ describe('Order controller', () => {
       dto,
       { headers: {}, socket: {}, connection: { remoteAddress: 'localhost' } },
       new User(),
-      {
-        status: () => ({
-          send: () => ({}),
-        }),
-      },
     );
     expect(rs.success).toEqual(true);
     expect(rs.package_name).toEqual('Premium combo x5');
@@ -309,11 +295,6 @@ describe('Order controller', () => {
         dto,
         { headers: {}, socket: {}, connection: { remoteAddress: 'localhost' } },
         new User(),
-        {
-          status: () => ({
-            send: () => ({}),
-          }),
-        },
       ),
     ).rejects.toEqual(
       new BadRequestException(
@@ -360,11 +341,6 @@ describe('Order controller', () => {
         dto,
         { headers: {}, socket: {}, connection: { remoteAddress: 'localhost' } },
         new User(),
-        {
-          status: () => ({
-            send: () => ({}),
-          }),
-        },
       ),
     ).rejects.toEqual(
       new BadRequestException(
@@ -411,11 +387,6 @@ describe('Order controller', () => {
         dto,
         { headers: {}, socket: {}, connection: { remoteAddress: 'localhost' } },
         new User(),
-        {
-          status: () => ({
-            send: () => ({}),
-          }),
-        },
       ),
     ).rejects.toThrowError(
       new BadRequestException(
@@ -468,11 +439,6 @@ describe('Order controller', () => {
         dto,
         { headers: {}, socket: {}, connection: { remoteAddress: 'localhost' } },
         new User(),
-        {
-          status: () => ({
-            send: () => ({}),
-          }),
-        },
       ),
     ).rejects.toThrowError(
       new BadRequestException('Location is unable to purchase'),
@@ -570,11 +536,6 @@ describe('Order controller', () => {
       dto,
       { headers: {}, socket: {}, connection: { remoteAddress: 'localhost' } },
       new User(),
-      {
-        status: () => ({
-          send: () => ({}),
-        }),
-      },
     );
     expect(rs.success).toEqual(true);
     expect(rs.location_name).toEqual('my bought location name');
