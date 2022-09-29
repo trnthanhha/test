@@ -16,8 +16,7 @@ export class LocationHandleService {
     }
 
     name = this.convertViToEn(name);
-    name = name.replace(new RegExp(' ', 'g'), '-');
-    name = name.match(/[0-9a-zA-Z-_]/g)?.join('');
+    name = this.replaceToURLPath(name);
 
     let total = 1;
     const existed = await txManager.findOneBy(LocationHandle, { name });
@@ -57,5 +56,10 @@ export class LocationHandleService {
     str = str.replace(/\u02C6|\u0306|\u031B/g, ''); // Â, Ê, Ă, Ơ, Ư
 
     return toUpperCase ? str.toUpperCase() : str;
+  }
+
+  replaceToURLPath(name: string): string {
+    name = name.replace(new RegExp(' ', 'g'), '-');
+    return name.match(/[0-9a-zA-Z-_]/g)?.join('');
   }
 }

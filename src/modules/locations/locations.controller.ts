@@ -129,9 +129,9 @@ export class LocationsController {
     }
 
     if (name) {
-      const handle = this.locationHandleService
-        .convertViToEn(name)
-        .replace(new RegExp(' ', 'g'), '-');
+      const handle = this.locationHandleService.replaceToURLPath(
+        this.locationHandleService.convertViToEn(name),
+      );
       whereCondition.handle = Like(`%${handle}%`);
     }
 
