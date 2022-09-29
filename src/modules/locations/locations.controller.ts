@@ -101,8 +101,8 @@ export class LocationsController {
     @Query('owned') owned?: boolean,
   ): Promise<PaginationResult<Location>> {
     let nLimit = +limit;
-    if (!nLimit || nLimit > 500) {
-      nLimit = 50;
+    if (!nLimit || nLimit > 5000) {
+      nLimit = 500;
     }
 
     let nPage = +page;
