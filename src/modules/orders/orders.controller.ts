@@ -140,11 +140,15 @@ export class OrdersController {
       return response;
     }
 
-    const bill = await this.billsService.findOneByRefID(response.ref_uid);
+    const bill = await this.billsService.findOneByRefID(
+      response.ref_uid,
+      false,
+    );
     if (!bill) {
       throw new InternalServerErrorException('not found bill');
     }
-    return Object.assign(response, bill.order);
+    const order = await this.ordersService.findOne(bill.order_id); // get detail order for relations
+    return Object.assign(response, order);
   }
 
   @Auth()

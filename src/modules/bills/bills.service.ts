@@ -1,7 +1,12 @@
 import { Injectable, InternalServerErrorException } from '@nestjs/common';
 import { Bill } from './entities/bill.entity';
 import { InjectRepository } from '@nestjs/typeorm';
-import { EntityManager, Repository, UpdateResult } from 'typeorm';
+import {
+  EntityManager,
+  FindOneOptions,
+  Repository,
+  UpdateResult,
+} from 'typeorm';
 
 @Injectable()
 export class BillsService {
@@ -36,14 +41,18 @@ export class BillsService {
     return `This action returns all bills`;
   }
 
-  async findOneByRefID(ref_id: string): Promise<Bill> {
-    return await this.billRepository.findOne({
+  async findOneByRefID(ref_id: string, withRelation = true): Promise<Bill> {
+    const options: FindOneOptions<Bill> = {
       where: {
         ref_id,
       },
-      relations: {
+    };
+
+    if (withRelation) {
+      options.relations = {
         order: true,
-      },
-    });
+      };
+    }
+    return await this.billRepository.findOne(options);
   }
 }
