@@ -15,6 +15,7 @@ import { DefaultMaxLimit } from '../../constants/db';
 import { CreateUserDto } from './dto/create-user.dto';
 import { UpdateUserDto } from './dto/update-user.dto';
 import { QueryDeepPartialEntity } from 'typeorm/query-builder/QueryPartialEntity';
+import { IsPhoneOrEmailConstraint } from '../auth/auth.validator.decorator';
 
 @Injectable()
 export class UsersService {
@@ -93,6 +94,9 @@ export class UsersService {
     const nUser: User = new User();
 
     const hashedPwd = hashPassword(password);
+    if (IsPhoneOrEmailConstraint.isValidPhone(username)) {
+      nUser.phone_number = username;
+    }
     nUser.username = username;
     nUser.full_name = full_name;
     nUser.password = hashedPwd;

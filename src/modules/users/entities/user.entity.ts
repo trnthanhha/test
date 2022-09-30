@@ -8,7 +8,7 @@ import {
 } from 'typeorm';
 import { UserType } from '../users.constants';
 import { Exclude } from 'class-transformer';
-import { StandardPriceHistory } from '../../../modules/standard-price/entities/standard-price-history.entity';
+import { StandardPriceHistory } from '../../standard-price/entities/standard-price-history.entity';
 
 @Entity()
 export class User {
@@ -17,6 +17,9 @@ export class User {
 
   @Column({ unique: true })
   username: string;
+
+  @Column({ unique: true, nullable: true })
+  phone_number: string;
 
   @Column({ nullable: true })
   full_name: string;

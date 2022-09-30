@@ -162,6 +162,7 @@ export class OrdersCheckoutImplementorCash
   ): Promise<UserPackage> {
     const userPackage = new UserPackage();
     userPackage.package_id = pkg.id;
+    userPackage.ref_id = pkg.ref_id;
     userPackage.user_id = owner_id || buyer_id;
     userPackage.package_name = pkg.name;
     userPackage.quantity = pkg.quantity;

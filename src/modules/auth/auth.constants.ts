@@ -7,4 +7,5 @@ export const jwtConstants = {
 export const LocaMosEndpoint = {
   Login: '/login',
   Profile: '/me',
+  BuyPackage: '/bid/buy/package',
 };
