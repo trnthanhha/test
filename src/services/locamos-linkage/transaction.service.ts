@@ -7,7 +7,7 @@ import {
   InternalServerErrorException,
   UnauthorizedException,
 } from '@nestjs/common';
-import { SkipError } from '../../errors/types';
+import { PrepareError, SkipError } from '../../errors/types';
 
 export type PackageTransactionInfo = {
   seq_id: string;
@@ -39,6 +39,13 @@ export class TransactionLinkageService {
     if (!response) {
       throw new BadRequestException();
     }
+    if (
+      response.message ===
+      'Hệ thống đang nâng cấp.Vui lòng thử lại sau ít phút.'
+    ) {
+      throw new PrepareError(response, response.message);
+    }
+
     if (
       response.code === 400 &&
       response.message === 'Giao dịch này đã được xử lý'
