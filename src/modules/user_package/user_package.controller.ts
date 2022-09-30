@@ -7,7 +7,7 @@ import {
   UseInterceptors,
 } from '@nestjs/common';
 import { UserPackageService } from './user_package.service';
-import { ApiOperation, ApiTags } from '@nestjs/swagger';
+import { ApiOkResponse, ApiOperation, ApiTags } from '@nestjs/swagger';
 import { ApiImplicitQuery } from '@nestjs/swagger/dist/decorators/api-implicit-query.decorator';
 import { GetAuthUser } from '../../decorators/user.decorator';
 import { User } from '../users/entities/user.entity';
@@ -16,6 +16,7 @@ import { UserType } from '../users/users.constants';
 import { Auth } from '../../decorators/roles.decorator';
 import { UserPackage } from './entities/user_package.entity';
 import { PaginationResult } from '../../utils/pagination';
+import { RemainNftResponse } from './dto/remain-nft-response.dto';
 
 @ApiTags('combo/package')
 @Controller('user-package')
@@ -98,5 +99,13 @@ export class UserPackageController {
     });
 
     return pagi;
+  }
+
+  @Auth()
+  @Get('/remaining-nft')
+  @ApiOperation({ summary: 'Lấy các điểm nft chưa được chọn của user' })
+  @ApiOkResponse({ type: RemainNftResponse })
+  getRemainingNft(@GetAuthUser() user: User) {
+    return this.userPackageService.getRamainingNft(user);
   }
 }

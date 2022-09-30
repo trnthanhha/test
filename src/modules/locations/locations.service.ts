@@ -29,6 +29,8 @@ import { LocationHandleService } from '../location-handle/location-handle.servic
 import { CreateLocationDto } from './dto/create-location.dto';
 import { User } from '../users/entities/user.entity';
 import { PaginationResult } from '../../utils/pagination';
+import { GetAuthUser } from 'src/decorators/user.decorator';
+import { UserPackage } from '../user_package/entities/user_package.entity';
 
 @Injectable()
 export class LocationsService {
