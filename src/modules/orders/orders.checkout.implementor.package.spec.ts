@@ -9,6 +9,7 @@ import {
 } from '../locations/locations.contants';
 import { UserPackage } from '../user_package/entities/user_package.entity';
 import { UPackagePurchaseStatus } from '../user_package/user_package.constants';
+import { User } from '../users/entities/user.entity';
 
 describe('Checkout by package', () => {
   it('preValidate - undefined user_package_id', () => {
@@ -176,7 +177,13 @@ describe('Checkout by package', () => {
 });
 
 function getEmptyFlowInstance(): OrdersCheckoutImplementorPackage {
-  return new OrdersCheckoutImplementorPackage(null, null, null, null, null);
+  return new OrdersCheckoutImplementorPackage(
+    null,
+    Object.assign(new User(), { id: 99 }),
+    null,
+    null,
+    null,
+  );
 }
 function validUserPackage(): UserPackage {
   return Object.assign(new UserPackage(), {
@@ -188,5 +195,6 @@ function validUserPackage(): UserPackage {
     quantity: 5,
     price: 500,
     purchase_status: UPackagePurchaseStatus.PAID,
+    user_id: 99,
   } as UserPackage);
 }

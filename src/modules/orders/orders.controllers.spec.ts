@@ -39,7 +39,7 @@ import { FindOptionsWhere } from 'typeorm/find-options/FindOptionsWhere';
 import { UserPackage } from '../user_package/entities/user_package.entity';
 import { Repository } from 'typeorm/repository/Repository';
 import { UPackagePurchaseStatus } from '../user_package/user_package.constants';
-import { BadRequestException } from '@nestjs/common';
+import { BadRequestException, ForbiddenException } from '@nestjs/common';
 import { RabbitMQServices } from '../../services/message-broker/webhook.types';
 import { HttpModule } from '@nestjs/axios';
 
@@ -104,7 +104,7 @@ describe('Order controller', () => {
     const rs = await controller.create(
       dto,
       { headers: {}, socket: {}, connection: { remoteAddress: 'localhost' } },
-      new User(),
+      Object.assign(new User(), { id: 99 }),
     );
     expect(rs.success).toEqual(true);
     expect(rs.location_name).toEqual('my bought location name');
@@ -172,7 +172,7 @@ describe('Order controller', () => {
     const rs = await controller.create(
       dto,
       { headers: {}, socket: {}, connection: { remoteAddress: 'localhost' } },
-      new User(),
+      Object.assign(new User(), { id: 99 }),
     );
     expect(rs.success).toEqual(true);
     expect(rs.location_name).toEqual('my new custom location');
@@ -206,9 +206,9 @@ describe('Order controller', () => {
             save: (item: UserPackage) => {
               expect(item).toEqual(
                 Object.assign(new UserPackage(), {
-                  created_by_id: -1,
+                  created_by_id: 99,
                   package_id: 2,
-                  user_id: -1,
+                  user_id: 99,
                   package_name: 'Premium combo x5',
                   quantity: 5,
                   remaining_quantity: 5,
@@ -252,7 +252,7 @@ describe('Order controller', () => {
     const rs = await controller.create(
       dto,
       { headers: {}, socket: {}, connection: { remoteAddress: 'localhost' } },
-      new User(),
+      Object.assign(new User(), { id: 99 }),
     );
     expect(rs.success).toEqual(true);
     expect(rs.package_name).toEqual('Premium combo x5');
@@ -294,7 +294,7 @@ describe('Order controller', () => {
       controller.create(
         dto,
         { headers: {}, socket: {}, connection: { remoteAddress: 'localhost' } },
-        new User(),
+        Object.assign(new User(), { id: 99 }),
       ),
     ).rejects.toEqual(
       new BadRequestException(
@@ -340,7 +340,7 @@ describe('Order controller', () => {
       controller.create(
         dto,
         { headers: {}, socket: {}, connection: { remoteAddress: 'localhost' } },
-        new User(),
+        Object.assign(new User(), { id: 99 }),
       ),
     ).rejects.toEqual(
       new BadRequestException(
@@ -386,7 +386,7 @@ describe('Order controller', () => {
       controller.create(
         dto,
         { headers: {}, socket: {}, connection: { remoteAddress: 'localhost' } },
-        new User(),
+        Object.assign(new User(), { id: 99 }),
       ),
     ).rejects.toThrowError(
       new BadRequestException(
@@ -396,6 +396,57 @@ describe('Order controller', () => {
   });
 
   it('Checkout: buy existed location by package -- failed by location cant purchase', async () => {
+    const updated = new UpdateResult();
+    updated.affected = 1;
+    // -- Custom mock repository
+    mockManager.getRepository = (e): Repository<any> => {
+      switch (e) {
+        case Location:
+          return {
+            findOneBy: ({ id }) => {
+              expect(id).toEqual(1);
+              const loc = new Location();
+              loc.id = 1;
+              loc.name = 'my bought location name';
+              loc.purchase_status = LocationPurchaseStatus.UNAUTHORIZED;
+              loc.version = 3;
+
+              return loc;
+            },
+          } as unknown as Repository<any>;
+        case UserPackage:
+          return {
+            findOneBy: ({ id }) => {
+              expect(id).toEqual(4);
+              return Object.assign(new UserPackage(), {
+                id: 4,
+                package_name: 'Premium combo x5',
+                version: 2,
+                package_id: 2,
+                quantity: 5,
+                remaining_quantity: 4,
+                purchase_status: UPackagePurchaseStatus.PAID,
+                user_id: 99,
+              } as UserPackage);
+            },
+          } as unknown as Repository<any>;
+      }
+    };
+
+    // --- Processing
+    const { controller, dto } = await initParamTestBuyByPackage();
+    await expect(
+      controller.create(
+        dto,
+        { headers: {}, socket: {}, connection: { remoteAddress: 'localhost' } },
+        Object.assign(new User(), { id: 99 }),
+      ),
+    ).rejects.toThrowError(
+      new BadRequestException('Location is unable to purchase'),
+    );
+  });
+
+  it('Checkout: buy existed location by package -- failed by package is not belonged to current buyer', async () => {
     const updated = new UpdateResult();
     updated.affected = 1;
     // -- Custom mock repository
@@ -438,10 +489,10 @@ describe('Order controller', () => {
       controller.create(
         dto,
         { headers: {}, socket: {}, connection: { remoteAddress: 'localhost' } },
-        new User(),
+        Object.assign(new User(), { id: 99 }),
       ),
     ).rejects.toThrowError(
-      new BadRequestException('Location is unable to purchase'),
+      new ForbiddenException('UserPackage is not belonged to current user'),
     );
   });
 
@@ -535,7 +586,7 @@ describe('Order controller', () => {
     const rs = await controller.create(
       dto,
       { headers: {}, socket: {}, connection: { remoteAddress: 'localhost' } },
-      new User(),
+      Object.assign(new User(), { id: 99 }),
     );
     expect(rs.success).toEqual(true);
     expect(rs.location_name).toEqual('my bought location name');
@@ -576,8 +627,8 @@ const mockManager = {
           country: 'VN',
           status: LocationStatus.APPROVED,
           approved_by_id: -1,
-          user_id: -1,
-          created_by_id: -1,
+          user_id: 99,
+          created_by_id: 99,
           user_full_name: undefined,
           handle: 'my-new-custom-location-2',
         } as Location),
@@ -810,9 +861,10 @@ async function getTestingUsersService(): Promise<UsersService> {
       {
         provide: getRepositoryToken(User),
         useFactory: jest.fn(() => ({
-          findOneBy: () => {
+          findOneBy: ({ id }) => {
+            expect(id).toEqual(99);
             const u = new User();
-            u.id = -1;
+            u.id = 99;
 
             return u;
           },
@@ -858,5 +910,6 @@ function validUserPackage(): UserPackage {
     quantity: 5,
     price: 500,
     purchase_status: UPackagePurchaseStatus.PAID,
+    user_id: 99,
   } as UserPackage;
 }

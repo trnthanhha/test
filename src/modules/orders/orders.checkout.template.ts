@@ -65,6 +65,7 @@ export class OrderCheckoutFlowAbstraction {
     // -- Custom validate by flow
     flow.preValidate(dto);
     const preparedData = await flow.prepareData(dto);
+
     await flow.validateData(preparedData);
     // -- Business logic
     const order = await flow.processBusiness(preparedData);
