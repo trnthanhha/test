@@ -80,7 +80,6 @@ export class Location {
   @Column({ default: false })
   is_blacklist: boolean;
 
-  @Exclude()
   @Column({ type: 'int' })
   block_radius: number;
 
