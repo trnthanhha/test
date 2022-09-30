@@ -287,8 +287,7 @@ async function getControllerWithMockUserBlacklist(
           findOneBy: () => {
             const user = new User();
             user.id = 1;
-            user.first_name = 'Admin';
-            user.last_name = 'System';
+            user.full_name = 'System Admin';
             return user;
           },
         })),

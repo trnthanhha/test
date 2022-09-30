@@ -88,12 +88,12 @@ export class UserPackageController {
     pagi.data.forEach((item) => {
       if (item.owner instanceof User) {
         item.owner_id = item.owner?.id;
-        item.owner = `${item.owner?.last_name} ${item.owner?.first_name}`;
+        item.owner = item.owner.full_name;
       }
 
       if (item.buyer instanceof User) {
         item.buyer_id = item.buyer?.id;
-        item.buyer = `${item.buyer?.last_name} ${item.buyer?.first_name}`;
+        item.buyer = item.buyer.full_name;
       }
     });
 

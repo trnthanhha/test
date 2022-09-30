@@ -18,11 +18,8 @@ export class User {
   @Column({ unique: true })
   username: string;
 
-  @Column()
-  first_name: string;
-
   @Column({ nullable: true })
-  last_name: string;
+  full_name: string;
 
   @Exclude()
   @Column()

@@ -220,7 +220,7 @@ export class AuthService {
     dto.username = correctUsername;
     dto.password = password;
     dto.password_confirm = password;
-    dto.first_name = profile.info.name;
+    dto.full_name = profile.info.name;
     dto.locamos_access_token = accessToken;
 
     return this.register(dto, lang);

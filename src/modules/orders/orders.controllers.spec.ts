@@ -578,7 +578,7 @@ const mockManager = {
           approved_by_id: -1,
           user_id: -1,
           created_by_id: -1,
-          user_full_name: 'undefined undefined',
+          user_full_name: undefined,
           handle: 'my-new-custom-location-2',
         } as Location),
       );

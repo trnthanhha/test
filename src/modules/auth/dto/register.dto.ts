@@ -11,30 +11,16 @@ export class RegisterDto {
   @MaxLength(256)
   @IsString({
     message: i18nValidationMessage('validation.isString', {
-      name: 'first_name',
+      name: 'full_name',
     }),
   })
   @IsNotEmpty({
     message: i18nValidationMessage('validation.isRequired', {
-      name: 'first_name',
+      name: 'full_name',
     }),
   })
-  @ApiProperty({ required: true, example: 'A' })
-  first_name: string;
-
-  @MaxLength(256)
-  @IsString({
-    message: i18nValidationMessage('validation.isString', {
-      name: 'last_name',
-    }),
-  })
-  @IsNotEmpty({
-    message: i18nValidationMessage('validation.isRequired', {
-      name: 'last_name',
-    }),
-  })
-  @ApiProperty({ required: true, example: 'Nguyen Van' })
-  last_name: string;
+  @ApiProperty({ required: true, example: 'Jane La Luaga' })
+  full_name: string;
 
   @MinLength(8)
   @MaxLength(32)
