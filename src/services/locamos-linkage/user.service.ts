@@ -1,6 +1,9 @@
 import { LocaMosEndpoint } from '../../modules/auth/auth.constants';
 import { lastValueFrom, map } from 'rxjs';
-import { InternalServerErrorException } from '@nestjs/common';
+import {
+  InternalServerErrorException,
+  UnauthorizedException,
+} from '@nestjs/common';
 import { HttpService } from '@nestjs/axios';
 
 export class LocamosLinkageService {
@@ -17,10 +20,17 @@ export class LocamosLinkageService {
       })
       .pipe(map((res) => res.data));
 
-    const response = await lastValueFrom(obs);
-    if (!response?.data.info || !response?.data.wallet) {
-      throw new InternalServerErrorException('Unauthorized. Please re-login');
+    try {
+      const response = await lastValueFrom(obs);
+      if (!response?.data.info || !response?.data.wallet) {
+        throw new InternalServerErrorException('Invalida data');
+      }
+      return response.data;
+    } catch (ex) {
+      if (ex?.message === 'Request failed with status code 401') {
+        throw new UnauthorizedException('Unauthorized. Please re-login');
+      }
+      throw ex;
     }
-    return response.data;
   }
 }
