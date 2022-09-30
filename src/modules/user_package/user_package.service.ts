@@ -4,6 +4,7 @@ import { FindOptionsWhere, MoreThan, Repository } from 'typeorm';
 import { UserPackage } from './entities/user_package.entity';
 import { UPackagePurchaseStatus } from './user_package.constants';
 import { PaginationResult } from '../../utils/pagination';
+import { User } from '../users/entities/user.entity';
 
 @Injectable()
 export class UserPackageService {
@@ -32,5 +33,20 @@ export class UserPackageService {
     });
 
     return new PaginationResult<UserPackage>(list, total, limit);
+  }
+
+  async getRamainingNft(user: User) {
+    const userPackages = await this.repository.find({
+      where: {
+        user_id: user.id,
+        remaining_quantity: MoreThan(0),
+      },
+    });
+
+    const totalRemainingNft = userPackages
+      .map((up) => up.remaining_quantity)
+      .reduce((prev, curr) => prev + curr, 0);
+
+    return { total_remain_nft: totalRemainingNft };
   }
 }
