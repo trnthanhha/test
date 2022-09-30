@@ -21,6 +21,7 @@ import { PackageService } from '../package/package.service';
 import { Package } from '../package/entities/package.entity';
 import { HttpModule } from '@nestjs/axios';
 import { JobRegister } from '../job-register/entities/job-register.entity';
+import { UserPackage } from '../user_package/entities/user_package.entity';
 
 @Module({
   imports: [
@@ -30,6 +31,7 @@ import { JobRegister } from '../job-register/entities/job-register.entity';
       Location,
       LocationHandle,
       Package,
+      UserPackage,
       StandardPrice,
       StandardPriceHistory,
       JobRegister,

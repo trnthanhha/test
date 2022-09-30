@@ -15,6 +15,7 @@ import { DefaultMaxLimit } from '../../constants/db';
 import { CreateUserDto } from './dto/create-user.dto';
 import { UpdateUserDto } from './dto/update-user.dto';
 import { QueryDeepPartialEntity } from 'typeorm/query-builder/QueryPartialEntity';
+import { IsPhoneOrEmailConstraint } from '../auth/auth.validator.decorator';
 
 @Injectable()
 export class UsersService {
@@ -76,8 +77,7 @@ export class UsersService {
   }
 
   async createBySignUp(registerDto: RegisterDto, lang: string): Promise<User> {
-    const { password, first_name, last_name, locamos_access_token } =
-      registerDto;
+    const { password, full_name, locamos_access_token } = registerDto;
     const username: string = registerDto.username.replace('+', '');
 
     const findUserByPhone: User = await this.userRepository.findOne({
@@ -94,9 +94,11 @@ export class UsersService {
     const nUser: User = new User();
 
     const hashedPwd = hashPassword(password);
+    if (IsPhoneOrEmailConstraint.isValidPhone(username)) {
+      nUser.phone_number = username;
+    }
     nUser.username = username;
-    nUser.first_name = first_name;
-    nUser.last_name = last_name;
+    nUser.full_name = full_name;
     nUser.password = hashedPwd;
     nUser.locamos_access_token = locamos_access_token;
     nUser.type = UserType.CUSTOMER;
@@ -158,15 +160,12 @@ export class UsersService {
   }
 
   async createUser(data: CreateUserDto) {
-    const user = await this.userRepository.save({
+    return await this.userRepository.save({
       username: data.username,
-      first_name: data.first_name,
-      last_name: data.last_name,
+      full_name: data.full_name,
       password: hashPassword(data.password),
       type: UserType.ADMIN,
     } as User);
-
-    return user;
   }
 
   async updateUser(id: number, data: UpdateUserDto) {

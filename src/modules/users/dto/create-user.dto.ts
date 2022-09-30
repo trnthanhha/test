@@ -7,15 +7,9 @@ export class CreateUserDto {
   @IsString()
   username?: string;
 
-  @IsOptional()
-  @ApiProperty({ name: 'last_name' })
+  @ApiProperty({ name: 'full_name' })
   @IsString()
-  last_name: string;
-
-  @IsOptional()
-  @ApiProperty({ name: 'first_name' })
-  @IsString()
-  first_name: string;
+  full_name: string;
 
   @IsOptional()
   @ApiProperty({ name: 'password' })

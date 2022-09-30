@@ -65,7 +65,7 @@ export class LocationsService {
     //sys
     newLocation.user_id = owner_id || user.id;
     newLocation.created_by_id = user.id;
-    newLocation.user_full_name = `${user.last_name} ${user.first_name}`;
+    newLocation.user_full_name = user.full_name;
 
     dbManager = dbManager || this.locationRepository.manager;
     return dbManager.transaction(async (txManager): Promise<Location> => {

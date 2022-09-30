@@ -11,6 +11,9 @@ export class Package {
   @PrimaryGeneratedColumn()
   id: number;
 
+  @Column({ unique: true, nullable: true })
+  ref_id: string;
+
   @Column()
   name: string;
 

@@ -19,7 +19,7 @@ export class LocamosLinkageService {
 
     const response = await lastValueFrom(obs);
     if (!response?.data.info || !response?.data.wallet) {
-      throw new InternalServerErrorException();
+      throw new InternalServerErrorException('Unauthorized. Please re-login');
     }
     return response.data;
   }

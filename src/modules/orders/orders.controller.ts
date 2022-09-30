@@ -136,7 +136,7 @@ export class OrdersController {
   @Get('/status')
   async validateStatus(@Req() req): Promise<OrderStatusDto> {
     const response = PaymentGatewayFactory.Build().decodeResponse(req);
-    if (!response.success) {
+    if (!response.ref_uid) {
       return response;
     }
 
@@ -144,8 +144,7 @@ export class OrdersController {
     if (!bill) {
       throw new InternalServerErrorException('not found bill');
     }
-    const order = await this.ordersService.findOne(bill.order_id);
-    return Object.assign(response, order);
+    return Object.assign(response, bill.order);
   }
 
   @Auth()

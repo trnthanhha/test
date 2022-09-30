@@ -10,8 +10,10 @@ export class CheckoutDto {
     rs.redirect_url = redirect_url;
     rs.success = true;
     if (newItem instanceof Location) {
+      rs.location = newItem;
       rs.location_name = newItem.name;
     } else {
+      rs.user_package = newItem;
       rs.package_name = newItem?.package_name;
     }
 
@@ -33,4 +35,6 @@ export class CheckoutDto {
   redirect_url?: string;
   location_name?: string;
   package_name?: string;
+  location?: Location;
+  user_package?: UserPackage;
 }

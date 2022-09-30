@@ -28,7 +28,11 @@ export class PackageService {
     if (!stdPrice || !stdPrice.price) {
       throw new Error('standard price is not configured');
     }
-    const packages = await this.packageRepository.find();
+    const packages = await this.packageRepository.find({
+      order: {
+        id: 'ASC',
+      },
+    });
     packages.forEach((pkg) => {
       pkg.price = stdPrice.price * pkg.quantity;
     });

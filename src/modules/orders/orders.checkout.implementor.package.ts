@@ -12,6 +12,7 @@ import { Location } from '../locations/entities/location.entity';
 import { UserPackage } from '../user_package/entities/user_package.entity';
 import {
   BadRequestException,
+  ForbiddenException,
   InternalServerErrorException,
 } from '@nestjs/common';
 import { PaymentStatus, PaymentType } from './orders.constants';
@@ -43,6 +44,11 @@ export class OrdersCheckoutImplementorPackage
       );
     }
 
+    if (userPkg.user_id !== this.user.id) {
+      throw new ForbiddenException(
+        'UserPackage is not belonged to current user',
+      );
+    }
     if (location && !location.canPurchased()) {
       throw new BadRequestException('Location is unable to purchase');
     }
