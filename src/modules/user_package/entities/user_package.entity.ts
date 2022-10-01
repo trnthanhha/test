@@ -16,7 +16,7 @@ export class UserPackage {
   @PrimaryGeneratedColumn()
   id: number;
 
-  @Column({ unique: true })
+  @Column()
   ref_id: string;
 
   @Column()

@@ -21,6 +21,7 @@ import { RabbitMQServices } from '../message-broker/webhook.types';
 import { HttpModule } from '@nestjs/axios';
 import { JobRegister } from '../../modules/job-register/entities/job-register.entity';
 import { Repository } from 'typeorm';
+import { PaymentLog } from '../../modules/payment_log/entities/payment_log.entity';
 
 @Module({
   imports: [
@@ -33,6 +34,7 @@ import { Repository } from 'typeorm';
       Package,
       StandardPrice,
       StandardPriceHistory,
+      PaymentLog,
     ]),
     RedisModule,
     HttpModule,
@@ -55,13 +57,25 @@ export class PaymentModule implements OnModuleInit {
     private jobRegisterRepository: Repository<JobRegister>,
   ) {}
   public async onModuleInit(): Promise<void> {
-    await this.jobRegisterRepository
-      .save(
-        Object.assign(new JobRegister(), {
-          name: PaymentService.reSyncJobKey,
-          is_process: false,
-        } as JobRegister),
-      )
-      .catch(() => ({}));
+    await Promise.all([
+      this.jobRegisterRepository
+        .save(
+          Object.assign(new JobRegister(), {
+            name: PaymentService.reSyncJobKey,
+            is_process: false,
+          } as JobRegister),
+        )
+        .catch((ex) => {
+          console.log(ex);
+        }),
+      this.jobRegisterRepository
+        .save(
+          Object.assign(new JobRegister(), {
+            name: PaymentService.clearPaymentLogJobKey,
+            is_process: false,
+          } as JobRegister),
+        )
+        .catch(() => ({})),
+    ]);
   }
 }
