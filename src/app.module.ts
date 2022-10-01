@@ -24,6 +24,7 @@ import { PackageModule } from './modules/package/package.module';
 import { UserPackageModule } from './modules/user_package/user_package.module';
 import { WebhookModule } from './modules/webhook/webhook.module';
 import { ConsumersModule } from './modules/consumers/consumers.module';
+import { PaymentLogModule } from './modules/payment_log/payment_log.module';
 
 @Module({
   imports: [
@@ -79,6 +80,8 @@ import { ConsumersModule } from './modules/consumers/consumers.module';
 
     //3rd modules
     PaymentModule,
+
+    PaymentLogModule,
   ],
   controllers: [AppController],
   providers: [AppService],

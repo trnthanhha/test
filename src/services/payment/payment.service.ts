@@ -12,7 +12,13 @@ import { Bill } from '../../modules/bills/entities/bill.entity';
 import { Order } from '../../modules/orders/entities/order.entity';
 import { BillStatus } from '../../modules/bills/bills.constants';
 import { InjectRepository } from '@nestjs/typeorm';
-import { EntityManager, MoreThan, LessThanOrEqual, Repository } from 'typeorm';
+import {
+  EntityManager,
+  MoreThan,
+  LessThanOrEqual,
+  Repository,
+  LessThan,
+} from 'typeorm';
 import { BillsService } from '../../modules/bills/bills.service';
 import { PrepareError } from '../../errors/types';
 import { UserPackage } from '../../modules/user_package/entities/user_package.entity';
@@ -23,11 +29,13 @@ import { PaymentResult } from './payment.types';
 import { REDIS_CLIENT_PROVIDER } from '../../modules/redis/redis.constants';
 import Redis from 'ioredis';
 import { JobRegister } from '../../modules/job-register/entities/job-register.entity';
+import { PaymentLog } from '../../modules/payment_log/entities/payment_log.entity';
 
 @Injectable()
 export class PaymentService {
   private readonly logger = new Logger(PaymentService.name);
   public static readonly reSyncJobKey = `${PaymentService.name}-reSync`;
+  public static readonly clearPaymentLogJobKey = `${PaymentService.name}-clearPaymentLog`;
 
   constructor(
     private readonly ordersService: OrdersService,
@@ -36,6 +44,8 @@ export class PaymentService {
     private orderRepository: Repository<Order>,
     @InjectRepository(JobRegister)
     private jobRegisterRepository: Repository<JobRegister>,
+    @InjectRepository(PaymentLog)
+    private paymentLogRepository: Repository<PaymentLog>,
     @Inject(REDIS_CLIENT_PROVIDER) private readonly redis: Redis,
   ) {}
 
@@ -50,6 +60,28 @@ export class PaymentService {
     this.runReSync().finally(() => {
       this.markJobDone(PaymentService.reSyncJobKey);
     });
+  }
+
+  @Cron('0 42 21 * * *')
+  async jobClearPaymentLog() {
+    const onProcess = await this.markJobProcessing(
+      PaymentService.clearPaymentLogJobKey,
+    );
+    if (onProcess) {
+      return;
+    }
+    console.log('clear payment log each 24 hours');
+    // 90 days before
+    const dateAt60DaysBefore = new Date(
+      new Date().setDate(new Date().getDate() - 90),
+    );
+    return this.paymentLogRepository
+      .delete({
+        created_at: LessThan(dateAt60DaysBefore),
+      })
+      .finally(() => {
+        this.markJobDone(PaymentService.clearPaymentLogJobKey);
+      });
   }
 
   async runReSync() {

@@ -12,6 +12,9 @@ import { HttpExceptionFilter } from './utils/https.exception.filter';
 import { ConfigService } from '@nestjs/config';
 
 async function bootstrap() {
+  if (!process.env.APP_ENV) {
+    throw new Error('APP ENV is not configured');
+  }
   const app = await NestFactory.create<NestExpressApplication>(AppModule);
   // --- PREPARE Micro serivices
   await Promise.all([initRedis(app), initRabbitMQ(app)]);
