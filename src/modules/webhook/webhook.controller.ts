@@ -26,18 +26,12 @@ export default class WebhookController {
 
   @Get('vnpay')
   async storeVNPayMessage(@Req() req) {
-    console.log('check remote address: ', req.remoteAddr, req.RemoteAddr);
     console.log(
-      'other: ',
+      'check remote address: ',
       req.headers?.['x-forwarded-for'],
-      req.connection?.remoteAddress,
-      req.socket?.remoteAddress,
-    );
-    console.log(
-      'in headers: ',
-      req.headers['X-Forwarded-For'], // capitalisation
-      req.headers['x-forwarded-for'], // doesn't
-      req.headers['X-FORWARDED-FOR'],
+      req.headers?.['X-Forwarded-For'],
+      req.headers?.['X-Real-IP'],
+      req.headers?.['x-real-ip'],
     );
     let response;
     try {
