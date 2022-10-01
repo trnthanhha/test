@@ -29,10 +29,9 @@ export default class WebhookController {
     console.log('check remote address: ', req.remoteAddr, req.RemoteAddr);
     console.log(
       'other: ',
-      req.headers['x-forwarded-for'],
-      req.connection.remoteAddress,
-      req.socket.remoteAddress,
-      req.connection.socket.remoteAddress,
+      req.headers?.['x-forwarded-for'],
+      req.connection?.remoteAddress,
+      req.socket?.remoteAddress,
     );
     console.log(
       'in headers: ',
