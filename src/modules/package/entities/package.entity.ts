@@ -11,7 +11,7 @@ export class Package {
   @PrimaryGeneratedColumn()
   id: number;
 
-  @Column({ unique: true, nullable: true })
+  @Column({ unique: true })
   ref_id: string;
 
   @Column()
