@@ -10,3 +10,8 @@ export enum PaymentType {
   POINT = 'point',
   PACKAGE = 'package',
 }
+
+export enum PaymentTarget {
+  LOCATION = 'location',
+  PACKAGE = 'package',
+}

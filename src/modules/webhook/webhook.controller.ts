@@ -12,6 +12,8 @@ import { PaymentGatewayFactory } from '../orders/vendor_adapters/payment.vendor.
 import { ApiTags } from '@nestjs/swagger';
 import { BillsService } from '../bills/bills.service';
 import { BillStatus } from '../bills/bills.constants';
+import { PaymentTarget } from '../orders/orders.constants';
+import { VNPayExtendData } from '../../services/payment/payment.types';
 
 @ApiTags('webhook')
 @Controller('webhook')
@@ -24,6 +26,20 @@ export default class WebhookController {
 
   @Get('vnpay')
   async storeVNPayMessage(@Req() req) {
+    console.log('check remote address: ', req.remoteAddr, req.RemoteAddr);
+    console.log(
+      'other: ',
+      req.headers['x-forwarded-for'],
+      req.connection.remoteAddress,
+      req.socket.remoteAddress,
+      req.connection.socket.remoteAddress,
+    );
+    console.log(
+      'in headers: ',
+      req.headers['X-Forwarded-For'], // capitalisation
+      req.headers['x-forwarded-for'], // doesn't
+      req.headers['X-FORWARDED-FOR'],
+    );
     let response;
     try {
       response = PaymentGatewayFactory.Build().decodeResponse(req);
@@ -66,7 +82,17 @@ export default class WebhookController {
           Message: 'Order already confirmed',
         };
     }
-    this.publisher.emit('vnpay', req.query);
+    this.publisher.emit('vnpay', {
+      raw: req.query,
+      extend: {
+        target:
+          bill.order?.location_id > 0
+            ? PaymentTarget.LOCATION
+            : bill.order?.user_package_id > 0
+            ? PaymentTarget.PACKAGE
+            : undefined,
+      } as VNPayExtendData,
+    });
     return {
       RspCode: response.success ? '00' : response.status_code,
       Message: response.success ? 'Confirm Success' : 'Confirmed',
