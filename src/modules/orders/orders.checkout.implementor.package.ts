@@ -131,7 +131,11 @@ export class OrdersCheckoutImplementorPackage
     return loc;
   }
 
-  responseResult(req: any, info: TransactionInfo, newItem: any) {
+  async responseResult(
+    req: any,
+    info: TransactionInfo,
+    newItem: any,
+  ): Promise<any> {
     this.publisher.emit('locamos', {
       info,
       type: PaymentType.PACKAGE,
