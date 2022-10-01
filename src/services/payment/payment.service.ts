@@ -63,7 +63,7 @@ export class PaymentService {
     });
   }
 
-  @Cron('0 42 21 * * *')
+  @Cron('0 0 17 * * *')
   async jobClearPaymentLog() {
     const onProcess = await this.markJobProcessing(
       PaymentService.clearPaymentLogJobKey,
