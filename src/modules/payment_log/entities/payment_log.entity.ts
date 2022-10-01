@@ -21,7 +21,7 @@ export class PaymentLog {
   @Column()
   query: string;
 
-  @Column()
+  @Column({ nullable: true })
   body: string;
 
   @Column()

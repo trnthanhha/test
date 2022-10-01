@@ -24,7 +24,7 @@ export class OrdersCheckoutImplementorPoint
   constructor(
     private readonly httpService: HttpService,
     private readonly publisher: ClientProxy,
-    private readonly dbManager: EntityManager,
+    dbManager: EntityManager,
     user: User,
     billsService: BillsService,
     locationsService: LocationsService,
@@ -33,6 +33,7 @@ export class OrdersCheckoutImplementorPoint
   ) {
     super(
       user,
+      dbManager,
       billsService,
       locationsService,
       packageServices,
@@ -81,7 +82,11 @@ export class OrdersCheckoutImplementorPoint
     return this.initOrder(pOrder.pkg.price_usd);
   }
 
-  responseResult(req: any, info: TransactionInfo, newItem: any) {
+  async responseResult(
+    req: any,
+    info: TransactionInfo,
+    newItem: any,
+  ): Promise<any> {
     this.publisher.emit('locamos', {
       info,
       type: PaymentType.POINT,

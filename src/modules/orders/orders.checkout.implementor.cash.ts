@@ -22,12 +22,18 @@ import { BillsService } from '../bills/bills.service';
 import { PaymentGatewayFactory } from './vendor_adapters/payment.vendor.adapters';
 import { TransactionInfo } from './vendor_adapters/payment.types';
 import { UPackagePurchaseStatus } from '../user_package/user_package.constants';
+import { PaymentLog } from '../payment_log/entities/payment_log.entity';
+import {
+  PaymentLogTopic,
+  PaymentLogType,
+} from '../payment_log/payment_log.type';
 
 export class OrdersCheckoutImplementorCash
   implements OrdersCheckoutFlowInterface
 {
   constructor(
     protected readonly user: User,
+    protected readonly dbManager: EntityManager,
     protected readonly billsService: BillsService,
     protected readonly locationsService: LocationsService,
     protected readonly packageServices: PackageService,
@@ -127,20 +133,27 @@ export class OrdersCheckoutImplementorCash
     return loc || userPackage;
   }
 
-  responseResult(
+  async responseResult(
     req: any,
     info: TransactionInfo,
     newItem: Location | UserPackage,
-  ) {
+  ): Promise<any> {
     const pmGateway = PaymentGatewayFactory.Build();
 
-    const ipAddr =
-      req.headers['x-forwarded-for'] ||
-      req.connection.remoteAddress ||
-      req.socket.remoteAddress ||
-      req.connection.socket.remoteAddress;
+    const ipAddr = process.env.PUBLIC_IP
 
     const redirectUrl = pmGateway.generateURLRedirect(info, ipAddr);
+    await this.dbManager
+      .getRepository(PaymentLog)
+      .save(
+        Object.assign(new PaymentLog(), {
+          ip: ipAddr,
+          query: redirectUrl,
+          topic: PaymentLogTopic.VNPAY,
+          type: PaymentLogType.REQUEST,
+        } as PaymentLog),
+      )
+      .catch(() => ({}));
     return CheckoutDto.success(redirectUrl, newItem);
   }
 

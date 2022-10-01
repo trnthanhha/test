@@ -30,6 +30,7 @@ import { REDIS_CLIENT_PROVIDER } from '../../modules/redis/redis.constants';
 import Redis from 'ioredis';
 import { JobRegister } from '../../modules/job-register/entities/job-register.entity';
 import { PaymentLog } from '../../modules/payment_log/entities/payment_log.entity';
+import { PaymentLogTopic } from '../../modules/payment_log/payment_log.type';
 
 @Injectable()
 export class PaymentService {
@@ -78,6 +79,7 @@ export class PaymentService {
     return this.paymentLogRepository
       .delete({
         created_at: LessThan(dateAt60DaysBefore),
+        topic: PaymentLogTopic.VNPAY,
       })
       .finally(() => {
         this.markJobDone(PaymentService.clearPaymentLogJobKey);

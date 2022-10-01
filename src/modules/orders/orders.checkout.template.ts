@@ -32,7 +32,7 @@ export interface OrdersCheckoutFlowInterface {
     createOrderDto: CreateOrderDto,
     pOrder: PrepareOrder,
   ): Promise<any>;
-  responseResult(req: any, info: TransactionInfo, newItem: any);
+  responseResult(req: any, info: TransactionInfo, newItem: any): Promise<any>;
 }
 
 export class OrderCheckoutFlowAbstraction {
@@ -105,6 +105,7 @@ export class OrderCheckoutFlowAbstraction {
       case PaymentType.CASH:
         return new OrdersCheckoutImplementorCash(
           this.user,
+          this.dbManager,
           this.billsService,
           this.locationsService,
           this.packageServices,
