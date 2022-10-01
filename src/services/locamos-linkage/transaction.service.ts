@@ -8,31 +8,43 @@ import {
   UnauthorizedException,
 } from '@nestjs/common';
 import { PrepareError, SkipError } from '../../errors/types';
+import { PaymentType } from '../../modules/orders/orders.constants';
 
 export type PackageTransactionInfo = {
   seq_id: string;
   package_id: string;
   nft_address: string[];
+  type: PaymentType;
 };
 
 export class TransactionLinkageService {
   constructor(private readonly httpService: HttpService) {}
 
-  async notifyBuyPackage(accessToken: string, data: PackageTransactionInfo) {
+  async notifyBuyPackage(
+    accessToken: string,
+    data: PackageTransactionInfo,
+    pmType: PaymentType,
+  ) {
+    let endpoint;
+    switch (pmType) {
+      case PaymentType.CASH:
+        endpoint = LocaMosEndpoint.BuyPackageByOther;
+        break;
+      case PaymentType.POINT:
+        endpoint = LocaMosEndpoint.BuyPackageByPoint;
+        break;
+    }
+
     const obs = this.httpService
-      .post(
-        `${process.env.LOCAMOS_BASE_URL}${LocaMosEndpoint.BuyPackage}`,
+      .post(`${process.env.LOCAMOS_BASE_URL}${endpoint}`, data, {
+        headers: {
+          authorization: `Bearer ${accessToken}`,
+          'X-NIP-3rd-secret': process.env.LOCAMOS_3RD_SECRET,
+          client_id: process.env.LOCAMOS_CLIENT_ID,
+          client_secret: process.env.LOCAMOS_CLIENT_SECRET,
+        },
         data,
-        {
-          headers: {
-            authorization: `Bearer ${accessToken}`,
-            'X-NIP-3rd-secret': process.env.LOCAMOS_3RD_SECRET,
-            client_id: process.env.LOCAMOS_CLIENT_ID,
-            client_secret: process.env.LOCAMOS_CLIENT_SECRET,
-          },
-          data,
-        } as AxiosRequestConfig,
-      )
+      } as AxiosRequestConfig)
       .pipe(map((res) => res.data));
 
     const response = await lastValueFrom(obs);
