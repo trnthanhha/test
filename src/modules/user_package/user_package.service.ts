@@ -1,4 +1,4 @@
-import { Injectable } from '@nestjs/common';
+import { Injectable, InternalServerErrorException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { FindOptionsWhere, MoreThan, Repository } from 'typeorm';
 import { UserPackage } from './entities/user_package.entity';
@@ -35,18 +35,23 @@ export class UserPackageService {
     return new PaginationResult<UserPackage>(list, total, limit);
   }
 
-  async getRamainingNft(user: User) {
-    const userPackages = await this.repository.find({
-      where: {
+  async getRemainingNft(user: User) {
+    const rs = await this.repository
+      .createQueryBuilder()
+      .select('SUM(remaining_quantity) as total_remain_nft')
+      .where({
+        purchase_status: UPackagePurchaseStatus.PAID,
         user_id: user.id,
         remaining_quantity: MoreThan(0),
-      },
-    });
+      })
+      .limit(1)
+      .execute();
+    if (!rs?.length) {
+      throw new InternalServerErrorException(
+        'Get remaining quantity failed, undefined response',
+      );
+    }
 
-    const totalRemainingNft = userPackages
-      .map((up) => up.remaining_quantity)
-      .reduce((prev, curr) => prev + curr, 0);
-
-    return { total_remain_nft: totalRemainingNft };
+    return { total_remain_nft: +rs[0].total_remain_nft };
   }
 }
