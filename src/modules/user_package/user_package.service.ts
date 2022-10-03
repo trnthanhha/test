@@ -17,11 +17,18 @@ export class UserPackageService {
     where: FindOptionsWhere<UserPackage>,
     limit: number,
     page: number,
+    status: string,
   ): Promise<PaginationResult<UserPackage>> {
     Object.assign(where, {
       remaining_quantity: MoreThan(0),
-      purchase_status: UPackagePurchaseStatus.PAID,
     });
+    switch (status) {
+      case 'all':
+        break;
+      case UPackagePurchaseStatus.PAID:
+      default:
+        where.purchase_status = UPackagePurchaseStatus.PAID;
+    }
     const [list, total] = await this.repository.findAndCount({
       where,
       take: limit,

@@ -48,6 +48,13 @@ export class UserPackageController {
     description: 'Combo name',
   })
   @ApiImplicitQuery({
+    name: 'status',
+    required: false,
+    type: String,
+    description:
+      'all | paid | failed | unauthorized | cancelled. Default = paid',
+  })
+  @ApiImplicitQuery({
     name: 'user_id',
     required: true,
     type: Number,
@@ -55,10 +62,11 @@ export class UserPackageController {
   })
   async findAll(
     @GetAuthUser() user: User,
+    @Query('user_id') user_id: number,
     @Query('page') page?: string,
     @Query('limit') limit?: string,
     @Query('name') name?: string,
-    @Query('user_id') user_id?: number,
+    @Query('status') status?: string,
   ): Promise<PaginationResult<UserPackage>> {
     let nLimit = +limit;
     if (!nLimit || nLimit > 500) {
@@ -85,6 +93,7 @@ export class UserPackageController {
       where,
       nLimit,
       nPage,
+      status,
     );
     pagi.data.forEach((item) => {
       if (item.owner instanceof User) {
