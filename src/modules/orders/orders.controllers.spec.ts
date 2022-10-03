@@ -42,8 +42,11 @@ import { UPackagePurchaseStatus } from '../user_package/user_package.constants';
 import { BadRequestException, ForbiddenException } from '@nestjs/common';
 import { RabbitMQServices } from '../../services/message-broker/webhook.types';
 import { HttpModule } from '@nestjs/axios';
-import {PaymentLog} from "../payment_log/entities/payment_log.entity";
-import {PaymentLogTopic, PaymentLogType} from "../payment_log/payment_log.type";
+import { PaymentLog } from '../payment_log/entities/payment_log.entity';
+import {
+  PaymentLogTopic,
+  PaymentLogType,
+} from '../payment_log/payment_log.type';
 
 describe('Order controller', () => {
   beforeEach(() => {
@@ -52,7 +55,7 @@ describe('Order controller', () => {
     process.env.VNP_HashSecret = 'TEST_SECRET';
     process.env.VNP_Url = 'https://sandbox.vnpayment.vn/paymentv2/vpcpay.html';
     process.env.VNP_ReturnRoute = 'orders/status';
-    process.env.PUBLIC_IP = '171.224.179.43'
+    process.env.PUBLIC_IP = '171.224.179.43';
   });
 
   it('Checkout: buy existed location by cash', async () => {
@@ -925,13 +928,13 @@ function validUserPackage(): UserPackage {
 
 const mockPaymentLogSave = {
   save: (pmLog: PaymentLog) => {
-    expect(pmLog.ip).toEqual(process.env.PUBLIC_IP)
-    expect(pmLog.type).toEqual(PaymentLogType.REQUEST)
-    expect(pmLog.topic).toEqual(PaymentLogTopic.VNPAY)
+    expect(pmLog.ip).toEqual(process.env.PUBLIC_IP);
+    expect(pmLog.type).toEqual(PaymentLogType.REQUEST);
+    expect(pmLog.topic).toEqual(PaymentLogTopic.VNPAY);
 
     pmLog.id = 1;
     return Object.assign(pmLog, {
-      catch: () => ({})
+      catch: () => ({}),
     });
-  }
-} as unknown as Repository<any>
+  },
+} as unknown as Repository<any>;
