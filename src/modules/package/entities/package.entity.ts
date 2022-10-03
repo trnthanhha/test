@@ -35,6 +35,9 @@ export class Package {
   @Column({ nullable: true })
   price_loca: number;
 
+  @Column({ nullable: true })
+  is_favorite: boolean;
+
   @CreateDateColumn()
   created_at: Date;
 
