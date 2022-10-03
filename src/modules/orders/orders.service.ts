@@ -20,6 +20,7 @@ import { RabbitMQServices } from '../../services/message-broker/webhook.types';
 import { ClientProxy } from '@nestjs/microservices';
 import { HttpService } from '@nestjs/axios';
 import { PaginationResult } from '../../utils/pagination';
+import { CheckoutBillAddress } from './dto/checkout-dto';
 
 @Injectable()
 export class OrdersService {
@@ -120,6 +121,7 @@ export class OrdersService {
 
   // Business
   async checkout(createOrderDto: CreateOrderDto, req: any, user: User) {
+    this.reSyncUserInfo(createOrderDto, user);
     const checkoutFlow = new OrderCheckoutFlowAbstraction(
       this.httpService,
       this.publisher,
@@ -132,5 +134,31 @@ export class OrdersService {
     );
 
     return checkoutFlow.checkout(createOrderDto, req);
+  }
+
+  reSyncUserInfo(createOrderDto: CreateOrderDto, user: User) {
+    const phone_number: string = createOrderDto.phone_number.replace('+', '');
+    const prevObject = new CheckoutBillAddress(user);
+    const nextObject = new CheckoutBillAddress(createOrderDto);
+    const prevValue = JSON.stringify(prevObject);
+    const nextValue = JSON.stringify(nextObject);
+    console.log(prevValue === nextValue);
+
+    return this.orderRepository.manager.getRepository(User).update(
+      {
+        id: user.id,
+      },
+      {
+        phone_number,
+        identification_number: createOrderDto.identification_number,
+        identification_created_from: createOrderDto.identification_created_from,
+        identification_created_at: new Date(
+          createOrderDto.identification_created_at,
+        ),
+        province: createOrderDto.province,
+        district: createOrderDto.district,
+        address: createOrderDto.address,
+      },
+    );
   }
 }

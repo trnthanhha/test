@@ -1,4 +1,11 @@
-import { IsEnum, IsNumber, IsOptional, Min } from 'class-validator';
+import {
+  IsEnum,
+  IsNumber,
+  IsOptional,
+  IsPhoneNumber,
+  IsString,
+  Min,
+} from 'class-validator';
 import { i18nValidationMessage } from 'nestjs-i18n';
 import { ApiProperty } from '@nestjs/swagger';
 import { PaymentType } from '../orders.constants';
@@ -111,4 +118,77 @@ export class CreateOrderDto {
     example: 'ID của người dc mua hộ',
   })
   owner_id: number;
+
+  @IsOptional()
+  @IsString({
+    message: i18nValidationMessage('validation.isString', {
+      name: 'identification_number',
+    }),
+  })
+  @ApiProperty({
+    example: 'CMTND/CCCD',
+  })
+  identification_number: string;
+
+  @IsOptional()
+  @IsString({
+    message: i18nValidationMessage('validation.isString', {
+      name: 'identification_created_from',
+    }),
+  })
+  @ApiProperty({
+    example: 'Nơi cấp',
+  })
+  identification_created_from: string;
+
+  @IsOptional()
+  @IsString({
+    message: i18nValidationMessage('validation.isString', {
+      name: 'identification_created_at',
+    }),
+  })
+  @ApiProperty({
+    example: 'Ngày cấp',
+  })
+  identification_created_at: string;
+
+  @IsOptional()
+  @IsString({
+    message: i18nValidationMessage('validation.isString', {
+      name: 'province',
+    }),
+  })
+  @ApiProperty({
+    example: 'Tỉnh/Thành phố',
+  })
+  province: string;
+
+  @IsOptional()
+  @IsString({
+    message: i18nValidationMessage('validation.isString', {
+      name: 'district',
+    }),
+  })
+  @ApiProperty({
+    example: 'Quận/Huyện',
+  })
+  district: string;
+
+  @IsOptional()
+  @IsString({
+    message: i18nValidationMessage('validation.isString', {
+      name: 'address',
+    }),
+  })
+  @ApiProperty({
+    example: 'Địa chỉ nhà',
+  })
+  address: string;
+
+  @IsOptional()
+  @IsPhoneNumber('VN')
+  @ApiProperty({
+    example: 'Số điện thoại',
+  })
+  phone_number: string;
 }
