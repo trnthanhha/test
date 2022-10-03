@@ -140,7 +140,7 @@ export class OrdersCheckoutImplementorCash
   ): Promise<any> {
     const pmGateway = PaymentGatewayFactory.Build();
 
-    const ipAddr = process.env.PUBLIC_IP
+    const ipAddr = process.env.PUBLIC_IP;
 
     const redirectUrl = pmGateway.generateURLRedirect(info, ipAddr);
     await this.dbManager

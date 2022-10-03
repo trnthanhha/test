@@ -37,6 +37,19 @@ export class User {
   identification_created_at: Date;
 
   @Exclude()
+  @Column({ nullable: true })
+  identification_created_from: string;
+
+  @Column({ nullable: true })
+  province: string;
+
+  @Column({ nullable: true })
+  district: string;
+
+  @Column({ nullable: true })
+  address: string;
+
+  @Exclude()
   @Column({ type: 'enum', enum: UserType })
   type: UserType;
 

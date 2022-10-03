@@ -1,6 +1,45 @@
 import { Location } from '../../locations/entities/location.entity';
 import { UserPackage } from '../../user_package/entities/user_package.entity';
 
+export class CheckoutBillAddress {
+  phone_number: string;
+  identification_number: string;
+  identification_created_at: Date;
+  identification_created_from: string;
+  province: string;
+  district: string;
+  address: string;
+
+  constructor(obj: any) {
+    this.phone_number = obj.phone_number;
+    this.identification_number = obj.identification_number;
+    if (typeof obj.identification_created_at === 'string') {
+      this.identification_created_at = new Date(obj.identification_created_at);
+    } else {
+      this.identification_created_at = obj.identification_created_at;
+    }
+    this.identification_created_from = obj.identification_created_from;
+    this.province = obj.province;
+    this.district = obj.district;
+    this.address = obj.address;
+  }
+
+  static isEmpty(obj: any) {
+    return (
+      !obj.phone_number &&
+      !obj.identification_number &&
+      !obj.identification_created_at &&
+      !obj.identification_created_from &&
+      !obj.province &&
+      !obj.district &&
+      !obj.address
+    );
+  }
+  isEqualTo(dest: CheckoutBillAddress): boolean {
+    return JSON.stringify(this) === JSON.stringify(dest);
+  }
+}
+
 export class CheckoutDto {
   public static success = (
     redirect_url?: string,

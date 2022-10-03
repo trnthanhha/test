@@ -122,6 +122,7 @@ export class UsersController {
     const filtered = getObjectExcludedFields(customer, [
       'identification_number',
       'identification_created_at',
+      'identification_created_from',
     ]);
 
     const profile = await this.authService.getProfile(

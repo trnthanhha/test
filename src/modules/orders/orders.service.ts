@@ -20,6 +20,7 @@ import { RabbitMQServices } from '../../services/message-broker/webhook.types';
 import { ClientProxy } from '@nestjs/microservices';
 import { HttpService } from '@nestjs/axios';
 import { PaginationResult } from '../../utils/pagination';
+import { CheckoutBillAddress } from './dto/checkout-dto';
 
 @Injectable()
 export class OrdersService {
@@ -120,6 +121,7 @@ export class OrdersService {
 
   // Business
   async checkout(createOrderDto: CreateOrderDto, req: any, user: User) {
+    this.reSyncUserInfo(createOrderDto, user);
     const checkoutFlow = new OrderCheckoutFlowAbstraction(
       this.httpService,
       this.publisher,
@@ -132,5 +134,27 @@ export class OrdersService {
     );
 
     return checkoutFlow.checkout(createOrderDto, req);
+  }
+
+  reSyncUserInfo(createOrderDto: CreateOrderDto, user: User) {
+    createOrderDto.phone_number = createOrderDto.phone_number?.replace?.(
+      '+',
+      '',
+    );
+    const prevObject = new CheckoutBillAddress(user);
+    const nextObject = new CheckoutBillAddress(createOrderDto);
+    if (
+      CheckoutBillAddress.isEmpty(createOrderDto) ||
+      prevObject.isEqualTo(nextObject)
+    ) {
+      return;
+    }
+
+    return this.orderRepository.manager.getRepository(User).update(
+      {
+        id: user.id,
+      },
+      nextObject,
+    );
   }
 }
