@@ -106,6 +106,6 @@ export class UserPackageController {
   @ApiOperation({ summary: 'Lấy các điểm nft chưa được chọn của user' })
   @ApiOkResponse({ type: RemainNftResponse })
   getRemainingNft(@GetAuthUser() user: User) {
-    return this.userPackageService.getRamainingNft(user);
+    return this.userPackageService.getRemainingNft(user);
   }
 }

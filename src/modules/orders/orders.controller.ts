@@ -34,6 +34,7 @@ import { REDIS_CLIENT_PROVIDER } from '../redis/redis.constants';
 import Redis from 'ioredis';
 import { PaymentType } from './orders.constants';
 import { generateRedisKey } from '../redis/redis.keys.pattern';
+import { User } from '../users/entities/user.entity';
 
 @ApiTags('orders')
 @Controller('orders')
@@ -86,6 +87,37 @@ export class OrdersController {
           this.clearProcessing(user.id);
         }
       });
+  }
+
+  @Auth()
+  @Get('/point-history')
+  @ApiOperation({
+    summary: 'Find all orders use point',
+  })
+  @ApiOkResponse({
+    type: ListOrderDto,
+    status: 200,
+    isArray: false,
+  })
+  @ApiNotFoundResponse()
+  @ApiImplicitQuery({
+    name: 'page',
+    description: 'The page want to query',
+    example: 5,
+    required: false,
+  })
+  @ApiImplicitQuery({
+    name: 'limit',
+    description: 'The limit of records in page',
+    example: 10,
+    required: false,
+  })
+  findAllOrderPointHistory(
+    @GetAuthUser() user: User,
+    @Query('page') page?: string,
+    @Query('limit') limit?: string,
+  ) {
+    return this.ordersService.findAllOrderPointHistory({ limit, page }, user);
   }
 
   @Auth()

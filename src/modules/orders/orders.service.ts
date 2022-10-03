@@ -8,7 +8,7 @@ import {
   MoreThan,
   Repository,
 } from 'typeorm';
-import { PaymentStatus } from './orders.constants';
+import { PaymentStatus, PaymentType } from './orders.constants';
 import { CreateOrderDto } from './dto/create-order.dto';
 import { LocationsService } from '../locations/locations.service';
 import { StandardPriceService } from '../standard-price/standard-price.service';
@@ -35,6 +35,29 @@ export class OrdersService {
     private readonly locationsService: LocationsService,
     private readonly standardPriceService: StandardPriceService,
   ) {}
+
+  async findAllOrderPointHistory(
+    pagination: {
+      page?: string;
+      limit?: string;
+    },
+    user: User,
+  ) {
+    const page = +pagination.page || 1;
+    const limit = +pagination.limit || 20;
+
+    const options: FindManyOptions<Order> = {
+      where: {
+        payment_type: PaymentType.POINT,
+        created_by_id: user.id,
+      },
+      skip: (page - 1) * limit,
+      take: limit,
+    };
+
+    const [orders, total] = await this.orderRepository.findAndCount(options);
+    return new PaginationResult<Order>(orders, total, limit);
+  }
 
   async findAll(query: {
     page?: string;
