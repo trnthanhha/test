@@ -53,6 +53,9 @@ export class OrdersService {
       },
       skip: (page - 1) * limit,
       take: limit,
+      relations: {
+        user_package: true,
+      },
     };
 
     const [orders, total] = await this.orderRepository.findAndCount(options);
