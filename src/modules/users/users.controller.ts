@@ -13,20 +13,20 @@ import {
   UnauthorizedException,
   UseInterceptors,
 } from '@nestjs/common';
-import { UsersService } from './users.service';
-import { ApiOkResponse, ApiOperation, ApiTags } from '@nestjs/swagger';
-import { Auth } from '../../decorators/roles.decorator';
-import { ApiImplicitQuery } from '@nestjs/swagger/dist/decorators/api-implicit-query.decorator';
-import { getObjectExcludedFields } from '../../utils/response_wrapper';
-import { GetAuthUser } from '../../decorators/user.decorator';
-import { User } from './entities/user.entity';
-import { LimitSearchProfilePerMin, UserType } from './users.constants';
+import {UsersService} from './users.service';
+import {ApiOkResponse, ApiOperation, ApiTags} from '@nestjs/swagger';
+import {Auth} from '../../decorators/roles.decorator';
+import {ApiImplicitQuery} from '@nestjs/swagger/dist/decorators/api-implicit-query.decorator';
+import {getObjectExcludedFields} from '../../utils/response_wrapper';
+import {GetAuthUser} from '../../decorators/user.decorator';
+import {User} from './entities/user.entity';
+import {LimitSearchProfilePerMin, UserType} from './users.constants';
 import Redis from 'ioredis';
-import { REDIS_CLIENT_PROVIDER } from '../redis/redis.constants';
-import { generateRedisKey } from '../redis/redis.keys.pattern';
-import { CreateUserDto } from './dto/create-user.dto';
-import { UpdateUserDto } from './dto/update-user.dto';
-import { AuthService } from '../auth/auth.service';
+import {REDIS_CLIENT_PROVIDER} from '../redis/redis.constants';
+import {generateRedisKey} from '../redis/redis.keys.pattern';
+import {CreateUserDto} from './dto/create-user.dto';
+import {UpdateUserDto} from './dto/update-user.dto';
+import {AuthService} from '../auth/auth.service';
 
 @ApiTags('users')
 @Controller('users')
@@ -111,12 +111,8 @@ export class UsersController {
       return;
     }
 
-    if (user.type === UserType.CUSTOMER) {
-      // block data if;
-      switch (true) {
-        case customer.type === UserType.ADMIN:
-          throw new NotFoundException();
-      }
+    if (user.type === UserType.CUSTOMER && customer.type === UserType.ADMIN) {// auth by customer cannot access data of admin
+      throw new NotFoundException();
     }
 
     const filtered = getObjectExcludedFields(customer, [
@@ -124,6 +120,10 @@ export class UsersController {
       'identification_created_at',
       'identification_created_from',
     ]);
+
+    if (customer.type === UserType.ADMIN) {
+      return filtered;
+    }
 
     const profile = await this.authService.getProfile(
       customer.locamos_access_token,
