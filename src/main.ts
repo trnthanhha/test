@@ -21,7 +21,11 @@ async function bootstrap() {
   await app.startAllMicroservices();
 
   // --- PREPARE API
-  app.enableCors({ origin: process.env.APP_URL || '*' });
+  let origins: string | string[] = process.env.APP_URL;
+  if (origins?.length) {
+    origins = origins.split(',');
+  }
+  app.enableCors({ origin: origins || '*' });
   app.useGlobalPipes(
     new ValidationPipe({
       exceptionFactory: i18nValidationErrorFactory,
