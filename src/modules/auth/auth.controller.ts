@@ -29,6 +29,15 @@ export class AuthController {
     return this.authService.login(loginDto, i18n.lang);
   }
 
+  @ApiOperation({ summary: 'Admin users login to service' })
+  @Post('admin/login')
+  adminLogin(
+    @Body() loginDto: LoginDto,
+    @I18n() i18n: I18nContext,
+  ): Promise<LoginResponse> {
+    return this.authService.login(loginDto, i18n.lang, true);
+  }
+
   @ApiOperation({ summary: 'Refresh token to service' })
   @Post('refreshToken')
   refreshToken(

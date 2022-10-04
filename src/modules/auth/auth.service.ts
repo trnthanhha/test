@@ -90,6 +90,7 @@ export class AuthService {
   async login(
     { password, username }: LoginDto,
     lang: string,
+    isAdmin?: boolean,
   ): Promise<LoginResponse> {
     const correctUsername: string = username.replace('+', '');
     let user: User;
@@ -99,12 +100,12 @@ export class AuthService {
         lang,
       );
     } catch (ex) {
-      if (!(ex instanceof NotFoundException)) {
+      if (!(ex instanceof NotFoundException) || isAdmin) {
         throw ex;
       }
       return this.access3rd(correctUsername, password, lang);
     }
-    if (process.env.BY_PASS_LOCAMOS === 'true') {
+    if (isAdmin) {
       const isValidPassword = user.password === hashPassword(password);
       if (!isValidPassword) {
         const message: string = await this.i18n.t('auth.password.wrong', {
