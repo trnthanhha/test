@@ -181,6 +181,7 @@ export class OrdersCheckoutImplementorCash
     userPackage.quantity = pkg.quantity;
     userPackage.remaining_quantity = pkg.quantity;
     userPackage.price = pkg.price;
+    userPackage.price_usd = pkg.price_usd;
     userPackage.purchase_status = UPackagePurchaseStatus.UNAUTHORIZED;
     userPackage.created_by_id = buyer_id;
     return txManager.getRepository(UserPackage).save(userPackage);

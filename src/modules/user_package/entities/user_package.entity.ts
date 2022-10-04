@@ -39,6 +39,9 @@ export class UserPackage {
   price: number;
 
   @Column({ nullable: true })
+  price_usd: number;
+
+  @Column({ nullable: true })
   paid_at: Date;
 
   @Index()
