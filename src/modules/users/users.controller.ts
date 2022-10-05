@@ -4,6 +4,8 @@ import {
   Controller,
   Delete,
   Get,
+  HttpException,
+  HttpStatus,
   Inject,
   NotFoundException,
   Param,
@@ -13,20 +15,20 @@ import {
   UnauthorizedException,
   UseInterceptors,
 } from '@nestjs/common';
-import {UsersService} from './users.service';
-import {ApiOkResponse, ApiOperation, ApiTags} from '@nestjs/swagger';
-import {Auth} from '../../decorators/roles.decorator';
-import {ApiImplicitQuery} from '@nestjs/swagger/dist/decorators/api-implicit-query.decorator';
-import {getObjectExcludedFields} from '../../utils/response_wrapper';
-import {GetAuthUser} from '../../decorators/user.decorator';
-import {User} from './entities/user.entity';
-import {LimitSearchProfilePerMin, UserType} from './users.constants';
+import { UsersService } from './users.service';
+import { ApiOkResponse, ApiOperation, ApiTags } from '@nestjs/swagger';
+import { Auth } from '../../decorators/roles.decorator';
+import { ApiImplicitQuery } from '@nestjs/swagger/dist/decorators/api-implicit-query.decorator';
+import { getObjectExcludedFields } from '../../utils/response_wrapper';
+import { GetAuthUser } from '../../decorators/user.decorator';
+import { User } from './entities/user.entity';
+import { LimitSearchProfilePerMin, UserType } from './users.constants';
 import Redis from 'ioredis';
-import {REDIS_CLIENT_PROVIDER} from '../redis/redis.constants';
-import {generateRedisKey} from '../redis/redis.keys.pattern';
-import {CreateUserDto} from './dto/create-user.dto';
-import {UpdateUserDto} from './dto/update-user.dto';
-import {AuthService} from '../auth/auth.service';
+import { REDIS_CLIENT_PROVIDER } from '../redis/redis.constants';
+import { generateRedisKey } from '../redis/redis.keys.pattern';
+import { CreateUserDto } from './dto/create-user.dto';
+import { UpdateUserDto } from './dto/update-user.dto';
+import { AuthService } from '../auth/auth.service';
 
 @ApiTags('users')
 @Controller('users')
@@ -102,6 +104,32 @@ export class UsersController {
   }
 
   @Auth()
+  @ApiOperation({ summary: 'admin get user ' })
+  @Get('/get-user-detail/:id')
+  async getUserDetail(@Param('id') id: number, @GetAuthUser() authUser: User) {
+    try {
+      if (authUser.type !== UserType.ADMIN)
+        throw new HttpException({}, HttpStatus.FORBIDDEN);
+
+      const user = await this.usersService.findByID(+id);
+
+      if (!user) {
+        return;
+      }
+
+      const filtered = getObjectExcludedFields(user, [
+        'identification_number',
+        'identification_created_at',
+        'identification_created_from',
+      ]);
+
+      return filtered;
+    } catch (error) {
+      throw error;
+    }
+  }
+
+  @Auth()
   @Get(':id')
   async getProfile(@Param('id') id: string, @GetAuthUser() user: User) {
     await checkRateLimit(this.redis, user);
@@ -111,7 +139,8 @@ export class UsersController {
       return;
     }
 
-    if (user.type === UserType.CUSTOMER && customer.type === UserType.ADMIN) {// auth by customer cannot access data of admin
+    if (user.type === UserType.CUSTOMER && customer.type === UserType.ADMIN) {
+      // auth by customer cannot access data of admin
       throw new NotFoundException();
     }
 
