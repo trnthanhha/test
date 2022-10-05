@@ -101,7 +101,7 @@ export class LocationsController {
   @ApiImplicitQuery({
     name: 'user_id',
     required: false,
-    type: Boolean,
+    type: Number,
     description: 'user_id',
   })
   findAll(
