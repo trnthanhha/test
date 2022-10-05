@@ -13,6 +13,39 @@ export class UserPackageService {
     private readonly repository: Repository<UserPackage>,
   ) {}
 
+  async findUsableChoices(
+    limit: number,
+    page: number,
+    user: User,
+  ): Promise<PaginationResult<UserPackage>> {
+    const list = await this.repository.find({
+      where: {
+        remaining_quantity: MoreThan(0),
+        purchase_status: UPackagePurchaseStatus.PAID,
+        user_id: user.id,
+      },
+      order: {
+        id: 'ASC',
+      },
+    });
+    let total = 0;
+    const flatten = [];
+    if (list?.length) {
+      list.forEach((item) => {
+        total += item.remaining_quantity;
+        for (let i = 1; i <= item.remaining_quantity; i++) {
+          flatten.push(Object.assign({}, item, { remaining_quantity: 1 }));
+        }
+      });
+    }
+
+    return new PaginationResult<UserPackage>(
+      flatten.slice((page - 1) * limit, page * limit),
+      total,
+      limit,
+    );
+  }
+
   async findUsablePackages(
     where: FindOptionsWhere<UserPackage>,
     limit: number,
@@ -36,6 +69,9 @@ export class UserPackageService {
       relations: {
         owner: true,
         buyer: true,
+      },
+      order: {
+        id: 'ASC',
       },
     });
 
