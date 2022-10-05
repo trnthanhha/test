@@ -17,6 +17,28 @@ import { ENUM_REQUEST_STATUS_CODE_ERROR } from '../request.constant';
 import { PermissionListValidation } from 'src/modules/permission/validation/permission.list.validation';
 import { RoleListValidation } from 'src/modules/role/validation/role.list.validation';
 import { UserListValidation } from 'src/modules/user/validation/user.list.validation';
+import { ChangePasswordValidation, ForgetPasswordValidation } from 'src/modules/forgetPassword/validation/forgetPassword.validate';
+import { AppointmentCreateValidation } from 'src/modules/appointment/validation/appointment.create.validate';
+import { AppointmentUpdateValidation } from 'src/modules/appointment/validation/appointment.update.validate';
+import { PatientCreateValidation } from 'src/modules/patient/validation/patient.create.validation';
+import { PatientCheckExitValidation } from 'src/modules/patient/validation/patient.checkExit.validation';
+import { ExamRecordCreateValidation } from 'src/modules/examRecord/validation/examRecord.create';
+import { DoctorCreateValidation } from 'src/modules/doctor/validation/doctor.create.validation';
+import { AppointmentListValidation } from 'src/modules/appointment/validation/appointment.list.validate';
+import { CreateMedicalHistoryDto } from 'src/modules/medical-history/validation/create-medical-history.validation';
+import { ExamplaceCreateValidation } from 'src/modules/examplace/validation/examplace.create.validation';
+import { ExamplaceUpdateValidation } from 'src/modules/examplace/validation/examplace.update.validation';
+import { TypeBaseUpdateValidation } from 'src/modules/typebase/validation/typebase.update.validation';
+import { TypeBaseCreateValidation } from 'src/modules/typebase/validation/typebase.create.validation';
+import { DepartmentCreateValidation } from 'src/modules/department/validation/department.create.validation';
+import { DepartmentUpdateValidation } from 'src/modules/department/validation/department.update.validation';
+import { EducationCreateValidation } from 'src/modules/education/validation/education.create.validation';
+import { EducationUpdateValidation } from 'src/modules/education/validation/education.update.validation';
+import { PointLadderCreateValidation } from 'src/modules/pointladder/validation/pointladder.create.validate';
+import { DoctorUpdateActiveAndUnActiveValidation } from 'src/modules/doctor/validation/doctor.updateActiveAndUnActive.validation';
+import { DoctorListValidation } from 'src/modules/doctor/validation/doctor.list.validation';
+import { DoctorUpdateProfileValidation } from 'src/modules/doctor/validation/doctor.updateProfile.validation';
+import { QueryByIdValidation } from '../validation/request.query-by-id.validation';
 
 export class RequestValidationPipe implements PipeTransform {
     constructor(
@@ -72,7 +94,30 @@ export class RequestValidationPipe implements PipeTransform {
             AuthLoginValidation,
             PermissionListValidation,
             RoleListValidation,
-            UserListValidation
+            UserListValidation,
+            ForgetPasswordValidation,
+            ChangePasswordValidation,
+            AppointmentCreateValidation,
+            AppointmentUpdateValidation,
+            PatientCreateValidation,
+            PatientCheckExitValidation,
+            ExamRecordCreateValidation,
+            DoctorCreateValidation,
+            AppointmentListValidation,
+            CreateMedicalHistoryDto,
+            ExamplaceCreateValidation,
+            ExamplaceUpdateValidation,
+            TypeBaseUpdateValidation,
+            TypeBaseCreateValidation,
+            DepartmentCreateValidation,
+            DepartmentUpdateValidation,
+            EducationCreateValidation,
+            EducationUpdateValidation,
+            PointLadderCreateValidation,
+            DoctorUpdateActiveAndUnActiveValidation,
+            DoctorListValidation,
+            DoctorUpdateProfileValidation,
+            QueryByIdValidation
         ];
         return types.includes(metatype);
     }

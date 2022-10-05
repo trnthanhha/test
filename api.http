@@ -1,0 +1,476 @@
+### LOGIN
+POST https://parkinson-dev-api.medstore.com.vn/api/auth/login
+Content-Type: application/json
+
+{
+    "email":"nhp2132@gmail.com",
+    "password":"123456"
+}
+
+### CREATE USER
+POST http://localhost:3000/api/user/create
+Content-Type: application/json
+
+{
+    "email": "",
+    "lastName": "phu",
+    "firstName": "Nguyen",
+    "role": "61b9946bf328bd353022efb7",
+    "password": "123456",
+    "phone": "0369202024"
+}
+### UPDATE USER
+PUT http://localhost:3000/api/user/update/61c35eb73a0ba4374cafcc8c
+Content-Type: application/json
+
+{
+    "lastName": "phu",
+    "firstName": "Nguyen tesst",
+    "phone": "0865452090"
+}
+### UPDATE PASSWORD
+PUT http://localhost:3000/api/user/update-password/61c2b5f79f4d3a31f81bb095
+Content-Type: application/json
+
+{
+    "password": "123456789",
+    "passwordNew": "123456789"
+}
+#### GET PATIENT BY ID
+GET http://localhost:3000/api/patient/61c2b5f79f4d3a31f81bb095
+
+
+#### CREATE PATIENT
+POST https://parkinson-dev-api.medstore.com.vn/api/patient/create
+Content-Type: application/json
+
+{
+    "name": "Nguyen Huu Phu",
+    "email": "nhp2132@gmail.com",
+    "address": "Ha Noi",
+    "phone": "09876543212",
+    "message": "test message",
+    "job": "doctor"
+}
+#### UPDATE PATIENT
+PUT https://parkinson-dev-api.medstore.com.vn/api/patient/update/61c45066339d1aea9ae0ccd9
+Content-Type: application/json
+
+{
+    "phone": "036920204",
+    "email": "nhp2132+2@gmail.com",
+    "education": "Bac",
+    "nationality": "VN"
+}
+
+### CREATE, UPDATE SYMPTOMS
+# param patientId
+POST http://localhost:3000/api/symptoms/61c45066339d1aea9ae0ccd9
+Content-Type: application/json
+Authorization: Basic eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJfaWQiOiI2MWMzNWViNzNhMGJhNDM3NGNhZmNjOGMiLCJpc0FjdGl2ZSI6dHJ1ZSwiYXZhdGFyIjpudWxsLCJlbWFpbCI6Im5ocDIxMzIxMkBnbWFpbC5jb20iLCJwaG9uZSI6IjA5ODc2NTQzMjExMiIsInJvbGUiOnsibmFtZSI6ImFkbWluIiwicGVybWlzc2lvbnMiOlsiUEVSTUlTU0lPTl9SRUFEIiwiUFJPRklMRV9SRUFEIiwiUFJPRklMRV9VUERBVEUiLCJST0xFX0NSRUFURSIsIlJPTEVfREVMRVRFIiwiUk9MRV9SRUFEIiwiUk9MRV9VUERBVEUiLCJVU0VSX0NSRUFURSIsIlVTRVJfREVMRVRFIiwiVVNFUl9SRUFEIiwiVVNFUl9VUERBVEUiXX0sInJlbWVtYmVyTWUiOmZhbHNlLCJpYXQiOjE2NDAyNTQ4ODUsIm5iZiI6MTY0MDI1NDg4NSwiZXhwIjoxNjQwMzQxMjg1fQ.GMHcdf36v31i2u49J53fPIlHvaTif1ffSkDJg2iSiOE
+
+{
+    "symptoms":[
+        {
+            "symptom": "Co giật",
+            "decrpition":" run tay"
+        },
+        {
+            "symptom": "Co giật1",
+            "decrpition":" run tay2"
+        },
+        {
+            "symptom": "Co giật3",
+            "decrpition":" run tay3"
+        },
+        {
+            "symptom": "Co giật5",
+            "decrpition":" run tay5"
+        }
+        
+    ]
+}
+
+
+################################ +++++++++++++++++++++++++++++ ################################ THANH-HÀ
+###LOGIN
+POST http://localhost:3000/api/auth/login
+Content-Type: application/json
+
+{
+    "email": "tranthanhha@gmail.com",
+    "password": "123456"
+}
+###
+#REGISTER DOCTOR
+POST http://localhost:3000/api/auth/register
+Content-Type: application/json
+
+{
+    "email":"tranthanhha3@gmail.com",
+    "name":"xxx",
+    "password":"123456",
+    "type_base":"61d5ae7dd6c8b37560bec7a8",
+    "exam_place":"61d5ad7917b2d17f0476b94a",
+    "education":"61d5bd17d1d33f5830786de7",
+    "department":"61d5bc8cd1d33f5830786de5"
+}
+
+################################ +++++++++++++++++++++++++++++ ################################ THANH-HÀ
+#FORGET PASSWORD
+POST http://localhost:3000/api/forgetpassword
+Content-Type: application/json
+
+{
+    "exam_place": "61d472ddfdfaac6f4cceec68",
+    "email": "xxxx@gmail.com",
+    "url":"http://localhost:3000/changepass"
+}
+###
+#UPDATE PASSWORD
+PUT http://localhost:3000/api/forgetpassword
+Content-Type: application/json
+Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJfaWQiOiI2MWJiMjY2Y2U5NTgyNTM5MDBjZjY5NGQiLCJpc0FjdGl2ZSI6dHJ1ZSwiZW1haWwiOiJkMTdkY2NuMTk1QGdtYWlsLmNvbSIsInBob25lIjoiMDgxMTExMTExMTEiLCJyb2xlIjp7Im5hbWUiOiJhZG1pbiIsInBlcm1pc3Npb25zIjpbIlBFUk1JU1NJT05fUkVBRCIsIlBST0ZJTEVfUkVBRCIsIlBST0ZJTEVfVVBEQVRFIiwiUk9MRV9DUkVBVEUiLCJST0xFX0RFTEVURSIsIlJPTEVfUkVBRCIsIlJPTEVfVVBEQVRFIiwiVVNFUl9DUkVBVEUiLCJVU0VSX0RFTEVURSIsIlVTRVJfUkVBRCIsIlVTRVJfVVBEQVRFIl19LCJyZW1lbWJlck1lIjpmYWxzZSwiaWF0IjoxNjQwMDI3NzA4LCJuYmYiOjE2NDAwMjc3MDgsImV4cCI6MTY0MDExNDEwOH0.YIpPvGiPeV0nuouAcGvI5_jvnlrNiaDwWzNQTiTRXio
+
+{
+    "password": "1234567"
+}
+
+################################ +++++++++++++++++++++++++++++ ################################ THANH-HÀ
+#CREATE PATIENT
+POST http://localhost:3000/api/patient/create 
+Content-Type: application/json
+
+{
+    "name":"xxxxxxxx",
+    "address":"xxxxxxxxxxx",
+    "phone":"0987536024",
+    "email":"0987536021",
+    "job":"0987536021",
+    "relative_name":"0987536021",
+    "numberProfile": "X-12",
+    "preferredHand": "tay trái",
+    "nation": "kinh",
+    "birthday": "1998-13-04",
+    "gender": true,
+    "education": "ptit",
+    "nationality": "viet nam",
+    "relative_patient": "bố",
+    "relative_name": "xxx",
+    "relative_phone": "0987536021"
+}
+###
+#FIND PROFILE PATIENT BY PHONE
+POST http://localhost:3000/api/patient/findprofile
+Content-Type: application/json
+
+{
+    "phone":"0987536021"
+}
+
+################################ +++++++++++++++++++++++++++++ ################################ THANH-HÀ
+#CREATE APPOITMENT
+POST http://localhost:3000/api/appointment/create
+Content-Type: application/json
+
+{
+    "name": "x",
+    "desc": "xxx",
+    "date": "2021-12-24T00:00:00.000Z",
+    "exam_place_id": "61d5ad7917b2d17f0476b94a",
+    "doctor_id": "61c200a6054a2a1cd4ad953c",
+    "patient_id": "61c5259140d38446a421d6f5",
+    "type": "KHÁM MỚI"
+}
+###
+#UPDATE APPOITMENT
+PUT http://localhost:3000/api/appointment/update/61c5267340d38446a421d6fa
+Content-Type: application/json
+
+{
+    "name":"x"
+}
+###
+#DELETE APPOITMENT
+DELETE http://localhost:3000/api/appointment/delete/61becf1ba336c20498ed3d48
+Content-Type: application/json
+###
+#GET LIST APPOITMENT, SEARCH (NAME, PHONE, EMAIL) OF PATIENT, SORT ALL FILED, PAGINATION
+GET http://localhost:3000/api/appointment/list?sort=name@desc&perPage=20&page=1&search=09
+Content-Type: application/json
+
+################################ +++++++++++++++++++++++++++++ ################################ THANH-HÀ
+### LIST EXAMPLACE
+GET http://localhost:3000/api/examplace/list
+
+### CREATE EXAMPLACE
+POST http://localhost:3000/api/examplace/create
+Content-Type: application/json
+
+{
+    "name": "hà",
+    "type": "HOSPITAL",
+    "address": "hà nội"
+}
+
+### GET DETAIL EXAMPLACE
+GET http://localhost:3000/api/examplace/detail/61d6623efc318e5358250c2f
+
+### UPDATE EXAMPLACE
+PUT  http://localhost:3000/api/examplace/update/61d6623efc318e5358250c2f
+Content-Type: application/json
+
+{
+    "name": "hà",
+    "type": "HOSPITAL",
+    "address": "hà nội"
+}
+
+### DELETE EXAMPLACE
+DELETE  http://localhost:3000/api/examplace/delete/61d6623efc318e5358250c2f
+
+################################ +++++++++++++++++++++++++++++ ################################ THANH-HÀ
+### LIST EDUCATION
+GET http://localhost:3000/api/education/list
+
+### CREATE EDUCATION
+POST http://localhost:3000/api/education/create
+Content-Type: application/json
+
+{
+    "name": "ĐH HN"
+}
+
+### GET DETAIL EDUCATION
+GET http://localhost:3000/api/education/detail/61d6623efc318e5358250c2f
+
+### UPDATE EDUCATION
+PUT  http://localhost:3000/api/education/update/61d6623efc318e5358250c2f
+Content-Type: application/json
+
+{
+    "name": "PTIT"
+}
+
+### DELETE EDUCATION
+DELETE  http://localhost:3000/api/education/delete/61d6623efc318e5358250c2f
+
+################################ +++++++++++++++++++++++++++++ ################################ THANH-HÀ
+### LIST TYPEBASE
+GET http://localhost:3000/api/typebase/list
+
+### CREATE TYPEBASE
+POST http://localhost:3000/api/typebase/create
+Content-Type: application/json
+
+{
+    "name": "ĐH HN"
+}
+
+### GET DETAIL TYPEBASE
+GET http://localhost:3000/api/typebase/detail/61d6623efc318e5358250c2f
+
+### UPDATE TYPEBASE
+PUT  http://localhost:3000/api/typebase/update/61d6623efc318e5358250c2f
+Content-Type: application/json
+
+{
+    "name": "PTIT"
+}
+
+### DELETE TYPEBASE
+DELETE  http://localhost:3000/api/typebase/delete/61d6623efc318e5358250c2f
+
+################################ +++++++++++++++++++++++++++++ ################################ THANH-HÀ
+### LIST DEPARTMENT
+GET http://localhost:3000/api/department/list
+
+### CREATE DEPARTMENT
+POST http://localhost:3000/api/department/create
+Content-Type: application/json
+
+{
+    "name": "CNTT"
+}
+
+### GET DETAIL DEPARTMENT
+GET http://localhost:3000/api/department/detail/61d6623efc318e5358250c2f
+
+### UPDATE DEPARTMENT
+PUT  http://localhost:3000/api/department/update/61d6623efc318e5358250c2f
+Content-Type: application/json
+
+{
+    "name": "DĐT"
+}
+
+### DELETE DEPARTMENT
+DELETE  http://localhost:3000/api/department/delete/61d6623efc318e5358250c2f
+
+################################ +++++++++++++++++++++++++++++ ################################ THANH-HÀ
+#GET LIST DOCTOR, SEARCH (NAME, EMAIL) OF DOCTOR, SORT ALL FILED, PAGINATION
+GET http://localhost:3000/api/doctor/list?sort=name@desc&perPage=20&page=1&search=xxx
+Content-Type: application/json
+Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJfaWQiOiI2MWJiMjY2Y2U5NTgyNTM5MDBjZjY5NGQiLCJpc0FjdGl2ZSI6dHJ1ZSwiZW1haWwiOiJkMTdkY2NuMTk2QGdtYWlsLmNvbSIsInBob25lIjoiMDgxMTExMTExMTEiLCJyb2xlIjp7Im5hbWUiOiJhZG1pbiIsInBlcm1pc3Npb25zIjpbIlBFUk1JU1NJT05fUkVBRCIsIlBST0ZJTEVfUkVBRCIsIlBST0ZJTEVfVVBEQVRFIiwiUk9MRV9DUkVBVEUiLCJST0xFX0RFTEVURSIsIlJPTEVfUkVBRCIsIlJPTEVfVVBEQVRFIiwiVVNFUl9DUkVBVEUiLCJVU0VSX0RFTEVURSIsIlVTRVJfUkVBRCIsIlVTRVJfVVBEQVRFIl19LCJyZW1lbWJlck1lIjpmYWxzZSwiaWF0IjoxNjQyMzk0MDcyLCJuYmYiOjE2NDIzOTQwNzIsImV4cCI6MTY0MjQ4MDQ3Mn0.hLV-4AUByeU8XM8yTvsdkMSJfbUsXcQF13joN76Izpk
+
+###PUT ACTIVE DOCTOR
+PUT http://localhost:3000/api/doctor/updatestatus/61d5c1320693c0696c75cf62
+Content-Type: application/json
+Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJfaWQiOiI2MWJiMjY2Y2U5NTgyNTM5MDBjZjY5NGQiLCJpc0FjdGl2ZSI6dHJ1ZSwiZW1haWwiOiJkMTdkY2NuMTk2QGdtYWlsLmNvbSIsInBob25lIjoiMDgxMTExMTExMTEiLCJyb2xlIjp7Im5hbWUiOiJhZG1pbiIsInBlcm1pc3Npb25zIjpbIlBFUk1JU1NJT05fUkVBRCIsIlBST0ZJTEVfUkVBRCIsIlBST0ZJTEVfVVBEQVRFIiwiUk9MRV9DUkVBVEUiLCJST0xFX0RFTEVURSIsIlJPTEVfUkVBRCIsIlJPTEVfVVBEQVRFIiwiVVNFUl9DUkVBVEUiLCJVU0VSX0RFTEVURSIsIlVTRVJfUkVBRCIsIlVTRVJfVVBEQVRFIl19LCJyZW1lbWJlck1lIjpmYWxzZSwiaWF0IjoxNjQyMzk0MDcyLCJuYmYiOjE2NDIzOTQwNzIsImV4cCI6MTY0MjQ4MDQ3Mn0.hLV-4AUByeU8XM8yTvsdkMSJfbUsXcQF13joN76Izpk
+### từ chối thì ko cần gửi filed "isActive" lên hoặc "isActive": false 
+### field conten để gửi nội dung qua mail báo cho doctor
+{
+    "isActive":true, 
+    "conten":"thành công" 
+}
+################################ +++++++++++++++++++++++++++++ ################################ THANH-HÀ
+### UPDATE PASSWORD
+PUT http://localhost:3000/api/doctor/updateprofile
+Content-Type: application/json
+Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJfaWQiOiI2MWQ1YzEzMjA2OTNjMDY5NmM3NWNmNjIiLCJpc0FjdGl2ZSI6dHJ1ZSwiZW1haWwiOiJkMTdkY2NuMTk1QGdtYWlsLmNvbSIsIm5hbWUiOiJnw6wgxJHDsyIsInBhc3N3b3JkIjoiJDJiJDA4JFhTUFdOUXBjR001ODhCLjEuUmloVk8vMFZNTDNHbGF6QjljMzhXaS5OUGxxODdKSTc4bmptIiwidHlwZV9iYXNlIjoiNjFkNWFlN2RkNmM4YjM3NTYwYmVjN2E4IiwiZXhhbV9wbGFjZSI6IjYxZDVhZDc5MTdiMmQxN2YwNDc2Yjk0YSIsImVkdWNhdGlvbiI6IjYxZDViZDE3ZDFkMzNmNTgzMDc4NmRlNyIsImRlcGFydG1lbnQiOiI2MWQ1YmM4Y2QxZDMzZjU4MzA3ODZkZTUiLCJjcmVhdGVkQXQiOiIyMDIyLTAxLTA1VDE2OjAyOjU4LjQ2MFoiLCJ1cGRhdGVkQXQiOiIyMDIyLTAxLTE3VDA1OjE1OjAxLjc1N1oiLCJpYXQiOjE2NDI0Mzg4NTUsIm5iZiI6MTY0MjQzODg1NSwiZXhwIjoxNjQyNTI1MjU1fQ.M_hZj09nDKZ8W6htuIjKjfQF-Y32_NcO-8lKHwoaYPo
+
+{
+    "password": "123456"
+}
+
+### UPDATE PROFILE
+PUT http://localhost:3000/api/doctor/updateprofile
+Content-Type: application/json
+Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJfaWQiOiI2MWQ1YzEzMjA2OTNjMDY5NmM3NWNmNjIiLCJpc0FjdGl2ZSI6dHJ1ZSwiZW1haWwiOiJkMTdkY2NuMTk1QGdtYWlsLmNvbSIsIm5hbWUiOiJnw6wgxJHDsyIsInBhc3N3b3JkIjoiJDJiJDA4JFhTUFdOUXBjR001ODhCLjEuUmloVk8vMFZNTDNHbGF6QjljMzhXaS5OUGxxODdKSTc4bmptIiwidHlwZV9iYXNlIjoiNjFkNWFlN2RkNmM4YjM3NTYwYmVjN2E4IiwiZXhhbV9wbGFjZSI6IjYxZDVhZDc5MTdiMmQxN2YwNDc2Yjk0YSIsImVkdWNhdGlvbiI6IjYxZDViZDE3ZDFkMzNmNTgzMDc4NmRlNyIsImRlcGFydG1lbnQiOiI2MWQ1YmM4Y2QxZDMzZjU4MzA3ODZkZTUiLCJjcmVhdGVkQXQiOiIyMDIyLTAxLTA1VDE2OjAyOjU4LjQ2MFoiLCJ1cGRhdGVkQXQiOiIyMDIyLTAxLTE3VDA1OjE1OjAxLjc1N1oiLCJpYXQiOjE2NDI0Mzg4NTUsIm5iZiI6MTY0MjQzODg1NSwiZXhwIjoxNjQyNTI1MjU1fQ.M_hZj09nDKZ8W6htuIjKjfQF-Y32_NcO-8lKHwoaYPo
+
+{
+    "exam_place": "61d5ad7917b2d17f0476b94a",
+    "education": "61d5ad7917b2d17f0476b94a",
+    "type_base": "61d5ad7917b2d17f0476b94a",
+    "department": "61d5ad7917b2d17f0476b94a",
+    "name": "hà"
+}
+### DELETE SYMPTOMS 
+# param "patientId"
+DELETE  http://localhost:3000/api/symptoms/61c45066339d1aea9ae0ccd9?symptom=Co giật5
+
+#### CREATE, UPDATE
+## param "patientId"
+POST http://localhost:3000/api/prehistoric/61c35529512eff465c241486
+Content-Type: application/json
+Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJfaWQiOiI2MWMzNWViNzNhMGJhNDM3NGNhZmNjOGMiLCJpc0FjdGl2ZSI6dHJ1ZSwiYXZhdGFyIjpudWxsLCJlbWFpbCI6Im5ocDIxMzIxMkBnbWFpbC5jb20iLCJwaG9uZSI6IjA5ODc2NTQzMjExMiIsInJvbGUiOnsibmFtZSI6ImFkbWluIiwicGVybWlzc2lvbnMiOlsiUEVSTUlTU0lPTl9SRUFEIiwiUFJPRklMRV9SRUFEIiwiUFJPRklMRV9VUERBVEUiLCJST0xFX0NSRUFURSIsIlJPTEVfREVMRVRFIiwiUk9MRV9SRUFEIiwiUk9MRV9VUERBVEUiLCJVU0VSX0NSRUFURSIsIlVTRVJfREVMRVRFIiwiVVNFUl9SRUFEIiwiVVNFUl9VUERBVEUiXX0sInJlbWVtYmVyTWUiOmZhbHNlLCJpYXQiOjE2NDAyNTQ4ODUsIm5iZiI6MTY0MDI1NDg4NSwiZXhwIjoxNjQwMzQxMjg1fQ.GMHcdf36v31i2u49J53fPIlHvaTif1ffSkDJg2iSiOE
+
+{
+    "use_medicine":[
+        {
+            "type": "Loại 1",
+            "time_start": "08-08-2020",
+            "total_time": "3",
+            "decrpition": "Lorem ipsum dolor sit amet, consectetur adipiscing elit.Lorem ipsum dol" 
+        }
+    ],
+    "disabilities":[
+       {
+            "type": "Loại 1",
+            "decrpition": "Lorem ipsum dolor sit amet, consectetur adipiscing elit.Lorem ipsum dol" 
+       }
+    ],
+    "surgerys":[
+        {
+            "type": "Loại undefined",
+            "date": "08-08-2020",
+            "decrpition": "Lorem ipsum dolor sit amet, consectetur adipiscing elit.Lorem ipsum dol" 
+        }
+    ],
+    "allergys":[
+        {
+            "type": "Loại 1",
+            "time": "08-08-2020",
+            "decrpition": "Lorem ipsum dolor sit amet, consectetur adipiscing elit.Lorem ipsum dol" 
+        }
+    ],
+    "diseases":[
+        {
+            "type": "Loại 1",
+            "time_start": "08-08-2020",
+            "status": "Lorem ipsum",
+            "Stage": 1,
+            "decrpition": "Lorem ipsum dolor sit amet, consectetur adipiscing elit.Lorem ipsum dol 1" 
+        }
+    ],
+    "prehistoric": false
+}
+
+### CREATE UPDATE TAB3 BỆNH SỬ
+POST http://localhost:3000/api/medical-history/61c5259140d38446a421d6f5
+Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJfaWQiOiI2MWMzNWViNzNhMGJhNDM3NGNhZmNjOGMiLCJpc0FjdGl2ZSI6dHJ1ZSwiYXZhdGFyIjpudWxsLCJlbWFpbCI6Im5ocDIxMzIxMkBnbWFpbC5jb20iLCJwaG9uZSI6IjA5ODc2NTQzMjExMiIsInJvbGUiOnsibmFtZSI6ImFkbWluIiwicGVybWlzc2lvbnMiOlsiUEVSTUlTU0lPTl9SRUFEIiwiUFJPRklMRV9SRUFEIiwiUFJPRklMRV9VUERBVEUiLCJST0xFX0NSRUFURSIsIlJPTEVfREVMRVRFIiwiUk9MRV9SRUFEIiwiUk9MRV9VUERBVEUiLCJVU0VSX0NSRUFURSIsIlVTRVJfREVMRVRFIiwiVVNFUl9SRUFEIiwiVVNFUl9VUERBVEUiXX0sInJlbWVtYmVyTWUiOmZhbHNlLCJpYXQiOjE2NDAyNTQ4ODUsIm5iZiI6MTY0MDI1NDg4NSwiZXhwIjoxNjQwMzQxMjg1fQ.GMHcdf36v31i2u49J53fPIlHvaTif1ffSkDJg2iSiOE
+Content-Type: application/json
+
+{
+    "symptoms":[
+        {
+            "time_start": "23/12/2021 - 1",
+            "symptom": "Lúc thức 1",
+            "age": 31,
+            "situation": "Lúc thức", 
+            "descrpition": "Lorem ipsum dolor sit amet, consectetur adipiscing elit.Lorem ipsum dol"
+        },
+         {
+            "time_start": "23/12/2021",
+            "symptom": "Lúc thức 2",
+            "age": 31,
+            "situation": "Lúc thức", 
+            "descrpition": "Lorem ipsum dolor sit amet, consectetur adipiscing elit.Lorem ipsum dol"
+        }
+    ],
+    "regions": [
+        {
+            "region": "Tay -1",
+            "descrpition": "run"
+        }
+    ],
+    "types": [
+        {
+            "type": "Ngồi run - 1",
+            "descrpition": "Ngồi chơi cũng run"
+        }
+    ],
+    "distributions": [
+        {
+            "distribution": "khuỷu tay trở xuống -1 ",
+            "descrpition": "Ngồi chơi cũng run"
+        }
+    ],
+    "symmetrys":[
+         {
+            "symmetry": "không -1",
+            "descrpition": "Ngồi chơi cũng run"
+        }
+    ],
+    "evolveds":[
+         {
+            "symmetry": "symmetry -1",
+            "descrpition": "descrpition"
+        }
+    ],
+    "others":{
+        "heavy_factor":"Yếu tố làm nặng - 2",
+        "factors_light": "Yếu tố làm nhẹ",
+        "drugs_and_treatment":[
+             {
+                "type": "Loại thuốc - 2",
+                "response_to_treatment": "Kết quả điều trị",
+                "side_effects": "tác dụng phụ"
+            }
+        ],
+        "related_dopaminergic": [
+            {
+                "type": "Loại thuốc -2",
+                "descrpition": "Mô tả"
+            }
+        ],
+        "impact_on_daily_work": "Ảnh hưởng đến công việc hàng ngày",
+        "impact_on_daily_life": "Ảnh hưởng sinh hoạt hằng ngày",
+        "others":[
+            {
+                "symptom": "Triệu chứng",
+                "descrpition": "Mô tả 1"
+            }
+        ]
+    }
+}

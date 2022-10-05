@@ -7,7 +7,7 @@ import {
     NotFoundException,
     BadRequestException,
     UnauthorizedException,
-    ForbiddenException
+    ForbiddenException,
 } from '@nestjs/common';
 import { AuthService } from 'src/modules/auth/auth.service';
 import { UserService } from 'src/modules/user/user.service';
@@ -18,8 +18,12 @@ import { classToPlain } from 'class-transformer';
 import { RequestValidationPipe } from 'src/request/pipe/request.validation.pipe';
 import { AuthLoginValidation } from './validation/auth.login.validation';
 import { LoggerService } from 'src/logger/logger.service';
-import { ENUM_LOGGER_ACTION } from 'src/logger/logger.constant';
-import { AuthJwtRefreshGuard, User } from './auth.decorator';
+import {
+    AuthJwtBasicGuard,
+    AuthJwtRefreshGuard,
+    Token,
+    User
+} from './auth.decorator';
 import { Response } from 'src/response/response.decorator';
 import { IResponse } from 'src/response/response.interface';
 import { UserLoginTransformer } from 'src/modules/user/transformer/user.login.transformer';
@@ -29,6 +33,11 @@ import {
 } from './auth.constant';
 import { ENUM_USER_STATUS_CODE_ERROR } from 'src/modules/user/user.constant';
 import { ENUM_ROLE_STATUS_CODE_ERROR } from 'src/modules/role/role.constant';
+import { DoctorCreateValidation } from '../doctor/validation/doctor.create.validation';
+import { IErrors } from 'src/error/error.interface';
+import { DoctorService } from '../doctor/doctor.service';
+import { ENUM_DOCTOR_STATUS_CODE_ERROR } from '../doctor/doctor.constant';
+import { IDoctorDocument } from '../doctor/doctor.interface';
 
 @Controller('/auth')
 export class AuthController {
@@ -36,6 +45,7 @@ export class AuthController {
         @Debugger() private readonly debuggerService: DebuggerService,
         private readonly authService: AuthService,
         private readonly userService: UserService,
+        private readonly doctorService: DoctorService,
         private readonly loggerService: LoggerService
     ) {}
 
@@ -54,27 +64,67 @@ export class AuthController {
         );
 
         if (!user) {
-            this.debuggerService.error('Authorized error user not found', {
-                class: 'AuthController',
-                function: 'login'
+            const doctor: IDoctorDocument = await this.doctorService.findOne<IDoctorDocument>(
+                {
+                    email: data.email,
+                    exam_place: data.exam_place
+                }
+            );
+
+            if (!doctor) {
+                throw new NotFoundException({
+                    statusCode:
+                        ENUM_AUTH_STATUS_CODE_ERROR.AUTH_USER_NOT_FOUND_ERROR,
+                    message: 'auth.error.userNotFound'
+                });
+            } else if (!doctor.isActive) {
+                throw new UnauthorizedException({
+                    statusCode: ENUM_USER_STATUS_CODE_ERROR.USER_IS_INACTIVE,
+                    message: 'http.clientError.unauthorized'
+                });
+            }
+
+            const validate: boolean = await this.authService.validateUser(
+                data.password,
+                doctor.password
+            );
+
+            if (!validate) {
+                throw new BadRequestException({
+                    statusCode:
+                        ENUM_AUTH_STATUS_CODE_ERROR.AUTH_PASSWORD_NOT_MATCH_ERROR,
+                    message: 'auth.error.passwordNotMatch'
+                });
+            }
+
+            const accessToken: string = await this.authService.createAccessToken(
+                doctor,
+                rememberMe
+            );
+
+            const refreshToken: string = await this.authService.createRefreshToken(
+                doctor,
+                rememberMe
+            );
+
+            await this.authService.createRefreshTokenBD({
+                id_user: doctor._id,
+                refresh_token: refreshToken
             });
 
-            throw new NotFoundException({
-                statusCode:
-                    ENUM_AUTH_STATUS_CODE_ERROR.AUTH_USER_NOT_FOUND_ERROR,
-                message: 'auth.error.userNotFound'
-            });
+            delete doctor.password;
+
+            return {
+                accessToken,
+                refreshToken,
+                user: doctor
+            };
         } else if (!user.isActive) {
-            this.debuggerService.error('Auth Block', {
-                class: 'AuthController',
-                function: 'refresh'
-            });
-
             throw new UnauthorizedException({
                 statusCode: ENUM_USER_STATUS_CODE_ERROR.USER_IS_INACTIVE,
                 message: 'http.clientError.unauthorized'
             });
-        } else if (!user.role.isActive) {
+        } else if (!user.role || (user.role && !user.role.isActive)) {
             throw new ForbiddenException({
                 statusCode: ENUM_ROLE_STATUS_CODE_ERROR.ROLE_IS_INACTIVE,
                 message: 'http.clientError.forbidden'
@@ -87,11 +137,6 @@ export class AuthController {
         );
 
         if (!validate) {
-            this.debuggerService.error('Authorized error', {
-                class: 'AuthController',
-                function: 'login'
-            });
-
             throw new BadRequestException({
                 statusCode:
                     ENUM_AUTH_STATUS_CODE_ERROR.AUTH_PASSWORD_NOT_MATCH_ERROR,
@@ -116,16 +161,18 @@ export class AuthController {
             rememberMe
         );
 
-        await this.loggerService.info(
-            ENUM_LOGGER_ACTION.LOGIN,
-            `${user._id} do login`,
-            user._id,
-            ['login', 'withEmail']
-        );
+        await this.authService.createRefreshTokenBD({
+            id_user: user._id,
+            refresh_token: refreshToken
+        });
+
+        delete user.password;
+        delete user.role;
 
         return {
             accessToken,
-            refreshToken
+            refreshToken,
+            user
         };
     }
 
@@ -133,24 +180,73 @@ export class AuthController {
     @AuthJwtRefreshGuard()
     @HttpCode(HttpStatus.OK)
     @Post('/refresh')
-    async refresh(@User() payload: Record<string, any>): Promise<IResponse> {
+    async refresh(
+        @User() payload: Record<string, any>,
+        @Token() token: string
+    ): Promise<IResponse> {
         const { _id, rememberMe } = payload;
         const user: IUserDocument = await this.userService.findOneById<IUserDocument>(
             _id,
             { populate: true }
         );
 
-        if (!user.isActive) {
-            this.debuggerService.error('Auth Block', {
-                class: 'AuthController',
-                function: 'refresh'
+        if (!user) {
+            const doctor: IDoctorDocument = await this.doctorService.findOne<IDoctorDocument>(
+                { _id }
+            );
+
+            if (!doctor) {
+                throw new NotFoundException({
+                    statusCode:
+                        ENUM_AUTH_STATUS_CODE_ERROR.AUTH_USER_NOT_FOUND_ERROR,
+                    message: 'auth.error.userNotFound'
+                });
+            } else if (!doctor.isActive) {
+                throw new UnauthorizedException({
+                    statusCode: ENUM_USER_STATUS_CODE_ERROR.USER_IS_INACTIVE,
+                    message: 'http.clientError.unauthorized'
+                });
+            }
+
+            const checkRefreshTokenExit = await this.authService.checkRefeshTokenExit(
+                token
+            );
+
+            if (!checkRefreshTokenExit) {
+                throw new UnauthorizedException({
+                    statusCode: ENUM_USER_STATUS_CODE_ERROR.USER_IS_INACTIVE,
+                    message: 'http.clientError.unauthorized'
+                });
+            }
+
+            const accessToken: string = await this.authService.createAccessToken(
+                doctor,
+                rememberMe
+            );
+
+            const refreshToken: string = await this.authService.createRefreshToken(
+                doctor,
+                rememberMe
+            );
+
+            await this.authService.createRefreshTokenBD({
+                id_user: doctor._id,
+                refresh_token: refreshToken
             });
 
+            delete doctor.password;
+
+            return {
+                accessToken,
+                refreshToken,
+                user: doctor
+            };
+        } else if (!user.isActive) {
             throw new UnauthorizedException({
                 statusCode: ENUM_USER_STATUS_CODE_ERROR.USER_IS_INACTIVE,
                 message: 'http.clientError.unauthorized'
             });
-        } else if (!user.role.isActive) {
+        } else if (!user.role || (user.role && !user.role.isActive)) {
             throw new ForbiddenException({
                 statusCode: ENUM_ROLE_STATUS_CODE_ERROR.ROLE_IS_INACTIVE,
                 message: 'http.clientError.forbidden'
@@ -175,9 +271,48 @@ export class AuthController {
             rememberMe
         );
 
+        await this.authService.createRefreshTokenBD({
+            id_user: user._id,
+            refresh_token: refreshToken
+        });
+
         return {
             accessToken,
             refreshToken
         };
+    }
+
+    @Response('auth.register')
+    @Post('/register')
+    async register(
+        @Body(RequestValidationPipe) data: DoctorCreateValidation
+    ): Promise<IResponse> {
+        const errors: IErrors[] = await this.doctorService.checkExist(
+            data.email
+        );
+
+        if (errors.length > 0) {
+            throw new BadRequestException({
+                statusCode: ENUM_DOCTOR_STATUS_CODE_ERROR.DOCTOR_EXIST_ERROR,
+                message: 'doctor.error.createError',
+                errors
+            });
+        }
+
+        const create = await this.doctorService.create(data);
+
+        return {
+            _id: create._id
+        };
+    }
+
+    @Response('auth.logout')
+    @HttpCode(HttpStatus.OK)
+    @AuthJwtBasicGuard()
+    @Post('/logout')
+    async logout(@User() payload: Record<string, any>): Promise<IResponse> {
+        const { _id } = payload;
+        await this.authService.deleteRefreshTokenDB(_id);
+        return;
     }
 }

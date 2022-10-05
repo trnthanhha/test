@@ -1,69 +1,62 @@
 import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose';
 import { Types } from 'mongoose';
+import { DepartmentEntity } from '../department/department.schema';
+import { EducationEntity } from '../education/education.schema';
+import { ExamplaceEntity } from '../examplace/examplace.schema';
+import { TypeBaseEntity } from '../typebase/typebase.schema';
 
 @Schema({ timestamps: true, versionKey: false })
 export class DoctorEntity {
     @Prop({
         required: true,
         index: true,
-        trim: true
-    })
-    firstName: string;
-
-    @Prop({
-        required: true,
-        index: true,
-        trim: true
-    })
-    lastName: string;
-
-    @Prop({
-        required: false
-    })
-    birthday: Date;
-
-    @Prop({
-        required: true
-    })
-    gender: boolean;
-
-    @Prop({
-        required: false
-    })
-    address: string;
-
-    @Prop({
-        required: false
-    })
-    cmt: string;
-
-    @Prop({
-        required: true
-    })
-    phone: number;
-
-    @Prop({
-        required: false
+        trim: true,
+        unique: true
     })
     email: string;
 
     @Prop({
-        required: true
+        required: true,
+        trim: true
     })
-    job_title: string;
+    password: string;
 
     @Prop({
-        required: false
+        required: true,
+        index: true,
     })
-    avatar: string;
+    name: string;
 
     @Prop({
-        required: false
+        required: true,
+        type: Types.ObjectId,
+        ref: TypeBaseEntity.name,
+    })
+    type_base: string;
+
+    @Prop({
+        required: true,
+        type: Types.ObjectId,
+        ref: ExamplaceEntity.name,
+    })
+    exam_place: string;
+
+    @Prop({
+        required: true,
+        type: Types.ObjectId,
+        ref: EducationEntity.name,
     })
     education: string;
 
     @Prop({
-        required: true
+        required: true,
+        type: Types.ObjectId,
+        ref: DepartmentEntity.name,
+    })
+    department: string;
+
+    @Prop({
+        default: false
     })
     isActive: boolean;
 }

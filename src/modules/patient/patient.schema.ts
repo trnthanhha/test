@@ -1,5 +1,4 @@
 import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose';
-import { Types } from 'mongoose';
 
 @Schema({ timestamps: true, versionKey: false })
 export class PatientEntity {
@@ -8,14 +7,23 @@ export class PatientEntity {
         index: true,
         trim: true
     })
-    firstName: string;
+    name: string;
 
     @Prop({
-        required: true,
-        index: true,
-        trim: true
+        required: false,
     })
-    lastName: string;
+    numberProfile: string;
+
+    @Prop({
+        required: false
+    })
+    preferredHand: string;
+
+    @Prop({
+        required: false
+    })
+    nation: string;
+
 
     @Prop({
         required: false
@@ -23,34 +31,32 @@ export class PatientEntity {
     birthday: Date;
 
     @Prop({
-        required: true
+        required: false
     })
     gender: boolean;
 
     @Prop({
-        required: false
+        required: true,
     })
     address: string;
 
     @Prop({
-        required: false
+        unique: true,
+        required: true,
+        trim: true
     })
-    cmt: string;
+    phone: string;
 
     @Prop({
-        required: true
-    })
-    phone: number;
-
-    @Prop({
-        required: false
+        required: true,
+        trim: true
     })
     email: string;
 
     @Prop({
-        required: false
+        required: true
     })
-    avatar: string;
+    job: string;
 
     @Prop({
         required: false
@@ -58,9 +64,24 @@ export class PatientEntity {
     education: string;
 
     @Prop({
-        required: true
+        required: false
     })
-    isActive: boolean;
+    nationality: string;
+
+    @Prop({
+        required: false
+    })
+    relative_patient: string;
+
+    @Prop({
+        required: false
+    })
+    relative_name: string;
+
+    @Prop({
+        required: false
+    })
+    relative_phone: string;
 }
 
 export const PatientDatabaseName = 'patients';

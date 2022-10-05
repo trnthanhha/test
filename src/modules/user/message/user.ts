@@ -5,6 +5,7 @@ export default {
     delete: 'Delete User Success.',
     create: 'Create User Success.',
     update: 'Update User Success.',
+    sendMail: 'Send Mail Success, Please Check Email.',
     error: {
         emailExist: 'Email user used',
         phoneExist: 'Mobile Number user used',

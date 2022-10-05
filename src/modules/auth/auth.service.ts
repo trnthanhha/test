@@ -1,7 +1,11 @@
 import { Injectable } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
+import { InjectModel } from '@nestjs/mongoose';
+import { Model, Types } from 'mongoose';
 import { Helper } from 'src/helper/helper.decorator';
 import { HelperService } from 'src/helper/helper.service';
+import { IRefreshTokenCreate, RefreshTokenDocument } from './auth.interface';
+import { RefreshTokenEntity } from './auth.schema';
 
 @Injectable()
 export class AuthService {
@@ -19,7 +23,9 @@ export class AuthService {
 
     constructor(
         @Helper() private readonly helperService: HelperService,
-        private readonly configService: ConfigService
+        private readonly configService: ConfigService,
+        @InjectModel(RefreshTokenEntity.name)
+        private readonly refreshTokenModel: Model<RefreshTokenDocument>
     ) {
         this.accessTokenSecretToken = this.configService.get<string>(
             'auth.jwt.accessToken.secretKey'
@@ -134,5 +140,29 @@ export class AuthService {
             passwordString,
             passwordHash
         );
+    }
+
+    async createRefreshTokenBD(
+        data: IRefreshTokenCreate
+    ): Promise<RefreshTokenDocument> {
+        const { id_user } = data;
+
+        await this.refreshTokenModel.deleteOne({
+            id_user
+        });
+        const create: RefreshTokenDocument = await new this.refreshTokenModel(
+            data
+        );
+        return create.save();
+    }
+
+    async checkRefeshTokenExit(token: string): Promise<RefreshTokenDocument> {
+        return this.refreshTokenModel.findOne({ refresh_token: token });
+    }
+
+    async deleteRefreshTokenDB(id_user: string): Promise<void> {
+        return await this.refreshTokenModel.deleteOne({
+            id_user: new Types.ObjectId(id_user)
+        });
     }
 }

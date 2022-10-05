@@ -33,6 +33,10 @@ export function AuthJwtRefreshGuard(): IAuthApplyDecorator {
     return applyDecorators(UseGuards(JwtRefreshGuard));
 }
 
+export function AuthJwtBasicGuard(): IAuthApplyDecorator {
+    return applyDecorators(UseGuards(JwtGuard));
+}
+
 export const User = createParamDecorator(
     (data: string, ctx: ExecutionContext): Record<string, any> => {
         const { user } = ctx.switchToHttp().getRequest();

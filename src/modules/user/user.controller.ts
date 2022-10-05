@@ -27,6 +27,8 @@ import { ENUM_STATUS_CODE_ERROR } from 'src/error/error.constant';
 import { IErrors } from 'src/error/error.interface';
 import { ENUM_USER_STATUS_CODE_ERROR } from './user.constant';
 import { UserListValidation } from './validation/user.list.validation';
+import { UserUpdatePasswordValidation } from './validation/user.update-password.validation';
+import { QueryByIdValidation } from 'src/request/validation/request.query-by-id.validation';
 
 @Controller('/user')
 export class UserController {
@@ -116,9 +118,9 @@ export class UserController {
     @Response('user.findOneById')
     @AuthJwtGuard(ENUM_PERMISSIONS.USER_READ)
     @Get('get/:_id')
-    async findOneById(@Param('_id') _id: string): Promise<IResponse> {
+    async findOneById(@Param(RequestValidationPipe) _id: QueryByIdValidation): Promise<IResponse> {
         const user: IUserDocument = await this.userService.findOneById<IUserDocument>(
-            _id,
+            _id as unknown as string,
             {
                 populate: true
             }
@@ -139,7 +141,7 @@ export class UserController {
     }
 
     @Response('user.create')
-    @AuthJwtGuard(ENUM_PERMISSIONS.USER_READ, ENUM_PERMISSIONS.USER_CREATE)
+    // @AuthJwtGuard(ENUM_PERMISSIONS.USER_READ, ENUM_PERMISSIONS.USER_CREATE)
     @Post('/create')
     async create(
         @Body(RequestValidationPipe)
@@ -187,9 +189,9 @@ export class UserController {
     @Response('user.delete')
     @AuthJwtGuard(ENUM_PERMISSIONS.USER_READ, ENUM_PERMISSIONS.USER_DELETE)
     @Delete('/delete/:_id')
-    async delete(@Param('_id') _id: string): Promise<void> {
+    async delete(@Param(RequestValidationPipe) _id: QueryByIdValidation): Promise<void> {
         const check: UserDocument = await this.userService.findOneById<UserDocument>(
-            _id
+            _id as unknown as string
         );
         if (!check) {
             this.debuggerService.error('user Error', {
@@ -204,7 +206,7 @@ export class UserController {
         }
 
         try {
-            await this.userService.deleteOneById(_id);
+            await this.userService.deleteOneById(_id as unknown as string);
             return;
         } catch (err) {
             this.debuggerService.error('delete try catch', {
@@ -220,15 +222,15 @@ export class UserController {
     }
 
     @Response('user.update')
-    @AuthJwtGuard(ENUM_PERMISSIONS.USER_READ, ENUM_PERMISSIONS.USER_UPDATE)
+    // @AuthJwtGuard(ENUM_PERMISSIONS.USER_READ, ENUM_PERMISSIONS.USER_UPDATE)
     @Put('/update/:_id')
     async update(
-        @Param('_id') _id: string,
+        @Param(RequestValidationPipe) _id: QueryByIdValidation,
         @Body(RequestValidationPipe)
         data: UserUpdateValidation
-    ): Promise<IResponse> {
+    )  {
         const check: UserDocument = await this.userService.findOneById<UserDocument>(
-            _id
+            _id as unknown as string
         );
         if (!check) {
             this.debuggerService.error('user Error', {
@@ -241,14 +243,63 @@ export class UserController {
                 message: 'user.error.notFound'
             });
         }
-
+        
         try {
-            await this.userService.updateOneById(_id, data);
+            await this.userService.updateOneById(_id as unknown as string, data);
 
             return {
                 _id
             };
         } catch (err: any) {
+            this.debuggerService.error('update try catch', {
+                class: 'UserController',
+                function: 'update',
+                error: {
+                    ...err
+                }
+            });
+            throw new InternalServerErrorException({
+                statusCode: ENUM_STATUS_CODE_ERROR.UNKNOWN_ERROR,
+                message: 'http.server.internalServerError'
+            });
+        }
+    }
+
+    @Response('user.update')
+    @Put('/update-password/:_id')
+    async updatePassword(
+        @Param(RequestValidationPipe) _id: QueryByIdValidation,
+        @Body(RequestValidationPipe)
+        data: UserUpdatePasswordValidation
+    )  {
+        const check: UserDocument = await this.userService.findOneById<UserDocument>(
+            _id as unknown as string
+        );
+        if (!check) {
+            this.debuggerService.error('user Error', {
+                class: 'UserController',
+                function: 'delete'
+            });
+
+            throw new NotFoundException({
+                statusCode: ENUM_USER_STATUS_CODE_ERROR.USER_NOT_FOUND_ERROR,
+                message: 'user.error.notFound'
+            });
+        }
+        
+        try {
+            await this.userService.updatePasswordOneById(_id as unknown as string, data);
+
+            return {
+                _id
+            };
+        } catch (err: any) {
+            if(err.response.statusCode == 5400){
+                throw new InternalServerErrorException({
+                    statusCode: ENUM_STATUS_CODE_ERROR.UNKNOWN_ERROR,
+                    message: err.response.message
+                });
+            }
             this.debuggerService.error('update try catch', {
                 class: 'UserController',
                 function: 'update',

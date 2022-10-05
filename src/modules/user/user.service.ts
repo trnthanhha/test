@@ -1,4 +1,4 @@
-import { Injectable } from '@nestjs/common';
+import { Injectable, NotFoundException } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
 import { Model } from 'mongoose';
 import { UserEntity } from 'src/modules/user/user.schema';
@@ -6,7 +6,8 @@ import {
     UserDocument,
     IUserDocument,
     IUserCreate,
-    IUserUpdate
+    IUserUpdate,
+    IUserUpdatePassword
 } from 'src/modules/user/user.interface';
 import { MessageService } from 'src/message/message.service';
 import { Message } from 'src/message/message.decorator';
@@ -19,6 +20,7 @@ import { UserLoginTransformer } from './transformer/user.login.transformer';
 import { Helper } from 'src/helper/helper.decorator';
 import { HelperService } from 'src/helper/helper.service';
 import { IErrors } from 'src/error/error.interface';
+import { ENUM_USER_STATUS_CODE_ERROR } from './user.constant';
 
 @Injectable()
 export class UserService {
@@ -117,7 +119,7 @@ export class UserService {
         password,
         email,
         phone,
-        role
+        role,
     }: IUserCreate): Promise<UserDocument> {
         const salt: string = await this.helperService.randomSalt();
         const passwordHash = await this.helperService.bcryptHashPassword(
@@ -131,7 +133,8 @@ export class UserService {
             phone: phone,
             password: passwordHash,
             role: new Types.ObjectId(role),
-            isActive: true
+            isActive: true,
+            avatar: null
         };
 
         if (lastName) {
@@ -155,7 +158,7 @@ export class UserService {
 
     async updateOneById(
         _id: string,
-        { firstName, lastName }: IUserUpdate
+        { firstName, lastName, phone }: IUserUpdate
     ): Promise<UserDocument> {
         return this.userModel.updateOne(
             {
@@ -166,6 +169,44 @@ export class UserService {
                 lastName: lastName.toLowerCase()
             }
         );
+    }
+
+    async updatePasswordOneById(
+        _id: string,
+        { password, passwordNew }: IUserUpdatePassword
+    ): Promise<UserDocument>{
+        const user = this.getUserById(_id);
+        const passwordUser = (await user).password
+        const passwordHash = await this.helperService.bcryptComparePassword(
+            password,
+            passwordUser
+        );
+
+        if(passwordHash){
+            const salt: string = await this.helperService.randomSalt();
+            const passwordUpdateHash = await this.helperService.bcryptHashPassword(
+                passwordNew,
+                salt
+            );
+            return this.userModel.updateOne(
+                {
+                    _id: new Types.ObjectId(_id)
+                },
+                {
+                    password: passwordUpdateHash
+                }
+            );
+        }else{
+            throw new NotFoundException({
+                statusCode: ENUM_USER_STATUS_CODE_ERROR.USER_NOT_FOUND_ERROR,
+                message: 'Password current incorrect'
+            });
+        }
+       
+    }
+
+    async getUserById(_id: string):Promise<UserDocument> {
+        return this.userModel.findOne({_id});
     }
 
     async checkExist(

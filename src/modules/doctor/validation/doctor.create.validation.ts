@@ -4,19 +4,38 @@ import {
     MaxLength,
     MinLength,
     IsArray,
-    IsMongoId
+    IsMongoId,
+    IsEmail
 } from 'class-validator';
 
 export class DoctorCreateValidation {
-    @IsString()
+    @IsEmail()
     @IsNotEmpty()
-    @MinLength(3)
-    @MaxLength(30)
-    readonly firstName: string;
+    readonly email: string;
 
     @IsString()
     @IsNotEmpty()
-    @MinLength(3)
+    @MinLength(6)
     @MaxLength(30)
-    readonly lastName: string;
+    readonly password: string;
+
+    @IsString()
+    @IsNotEmpty()
+    readonly name: string;
+
+    @IsString()
+    @IsMongoId()
+    readonly type_base: string;
+
+    @IsString()
+    @IsMongoId()
+    readonly exam_place: string;
+
+    @IsString()
+    @IsMongoId()
+    readonly education: string;
+
+    @IsString()
+    @IsMongoId()
+    readonly department: string;
 }
