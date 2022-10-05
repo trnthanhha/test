@@ -34,7 +34,15 @@ export class UserPackageService {
       list.forEach((item) => {
         total += item.remaining_quantity;
         for (let i = 1; i <= item.remaining_quantity; i++) {
-          flatten.push(Object.assign({}, item, { remaining_quantity: 1 }));
+          flatten.push({
+            id: item.id,
+            ref_id: item.ref_id,
+            remaining_quantity: 1,
+            package_id: item.package_id,
+            package_name: item.package_name,
+            price: item.price,
+            price_usd: item.price_usd,
+          } as UserPackage);
         }
       });
     }
