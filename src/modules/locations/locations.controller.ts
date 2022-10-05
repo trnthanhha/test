@@ -29,7 +29,14 @@ import { UserType } from '../users/users.constants';
 import { Auth } from '../../decorators/roles.decorator';
 import { CreateLocationDto } from './dto/create-location.dto';
 import { LocationHandleService } from '../location-handle/location-handle.service';
-import { FindOptionsWhere, IsNull, Like, MoreThan, Repository } from 'typeorm';
+import {
+  FindOptionsWhere,
+  In,
+  IsNull,
+  Like,
+  MoreThan,
+  Repository,
+} from 'typeorm';
 import { ValidateDistanceDto } from './dto/validate-distance-dto';
 import { UpdateLocationDto } from './dto/update-location.dto';
 import { UsersService } from '../users/users.service';
@@ -111,12 +118,20 @@ export class LocationsController {
     }
 
     const whereCondition: FindOptionsWhere<Location> = {};
-    if (status && user) {
-      whereCondition.status = status as LocationStatus;
-      if (user.type === UserType.CUSTOMER) {
-        whereCondition.user_id = user.id;
-      }
+
+    if (user && user.type === UserType.CUSTOMER) {
+      whereCondition.user_id = user.id;
     }
+
+    if (status) {
+      whereCondition.status = status as LocationStatus;
+    } else {
+      whereCondition.status = In([
+        LocationStatus.APPROVED,
+        LocationStatus.PENDING,
+      ]);
+    }
+
     if (owned && user) {
       if (user.type === UserType.CUSTOMER) {
         whereCondition.user_id = user.id;
