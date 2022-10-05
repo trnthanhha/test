@@ -22,6 +22,42 @@ import { RemainNftResponse } from './dto/remain-nft-response.dto';
 @Controller('user-package')
 export class UserPackageController {
   constructor(private readonly userPackageService: UserPackageService) {}
+  @Get('/choices')
+  @Auth()
+  @ApiOperation({
+    summary: 'Danh sách quyền chọn mua NFT địa điểm',
+  })
+  @UseInterceptors(ClassSerializerInterceptor)
+  @ApiImplicitQuery({
+    name: 'page',
+    required: false,
+    type: String,
+    description: 'Page number, from 1 to n',
+  })
+  @ApiImplicitQuery({
+    name: 'limit',
+    required: false,
+    type: String,
+    description: 'Page size | Limit per page',
+  })
+  async getChoices(
+    @GetAuthUser() user: User,
+    @Query('page') page?: string,
+    @Query('limit') limit?: string,
+  ): Promise<PaginationResult<UserPackage>> {
+    let nLimit = +limit;
+    if (!nLimit || nLimit > 500) {
+      nLimit = 50;
+    }
+
+    let nPage = +page;
+    if (!nPage || nPage <= 0) {
+      nPage = 1;
+    }
+
+    return this.userPackageService.findUsableChoices(nLimit, nPage, user);
+  }
+
   @Get()
   @Auth()
   @ApiOperation({
