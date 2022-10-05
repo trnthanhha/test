@@ -98,6 +98,12 @@ export class LocationsController {
     type: Boolean,
     description: 'Filter locations which are being owned by someone',
   })
+  @ApiImplicitQuery({
+    name: 'user_id',
+    required: false,
+    type: Boolean,
+    description: 'user_id',
+  })
   findAll(
     @GetAuthUser() user: User,
     @Query('page') page?: string,
@@ -106,6 +112,7 @@ export class LocationsController {
     @Query('status') status?: string,
     @Query('blacklist') blacklist?: boolean,
     @Query('owned') owned?: boolean,
+    @Query('user_id') user_id?: number,
   ): Promise<PaginationResult<Location>> {
     let nLimit = +limit;
     if (!nLimit || nLimit > 5000) {
@@ -119,7 +126,7 @@ export class LocationsController {
 
     const whereCondition: FindOptionsWhere<Location> = {};
 
-    if (user && user.type === UserType.CUSTOMER) {
+    if (user && user.type === UserType.CUSTOMER && user.id === user_id) {
       whereCondition.user_id = user.id;
     }
 
