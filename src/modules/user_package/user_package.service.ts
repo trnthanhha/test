@@ -42,6 +42,7 @@ export class UserPackageService {
             package_name: item.package_name,
             price: item.price,
             price_usd: item.price_usd,
+            created_at: item.created_at
           } as UserPackage);
         }
       });
